@@ -1,10 +1,7 @@
 import request from 'supertest-as-promised';
 import httpStatus from 'http-status';
-import chai from 'chai';
 import { expect } from 'chai';
 import app from '../../index';
-
-chai.config.includeStack = true;
 
 describe('## User APIs', () => {
   let user = {
@@ -23,7 +20,8 @@ describe('## User APIs', () => {
           expect(res.body.mobileNumber).to.equal(user.mobileNumber);
           user = res.body;
           done();
-        });
+        })
+        .catch(done);
     });
   });
 
@@ -36,7 +34,8 @@ describe('## User APIs', () => {
           expect(res.body.username).to.equal(user.username);
           expect(res.body.mobileNumber).to.equal(user.mobileNumber);
           done();
-        });
+        })
+        .catch(done);
     });
 
     it('should report error with message - Not found, when user does not exists', (done) => {
@@ -46,7 +45,8 @@ describe('## User APIs', () => {
         .then(res => {
           expect(res.body.message).to.equal('Not Found');
           done();
-        });
+        })
+        .catch(done);
     });
   });
 
@@ -61,7 +61,8 @@ describe('## User APIs', () => {
           expect(res.body.username).to.equal('KK');
           expect(res.body.mobileNumber).to.equal(user.mobileNumber);
           done();
-        });
+        })
+        .catch(done);
     });
   });
 
@@ -73,7 +74,8 @@ describe('## User APIs', () => {
         .then(res => {
           expect(res.body).to.be.an('array');
           done();
-        });
+        })
+        .catch(done);
     });
   });
 
@@ -86,7 +88,8 @@ describe('## User APIs', () => {
           expect(res.body.username).to.equal('KK');
           expect(res.body.mobileNumber).to.equal(user.mobileNumber);
           done();
-        });
+        })
+        .catch(done);
     });
   });
 });
