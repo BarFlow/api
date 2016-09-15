@@ -29,6 +29,7 @@ function login(req, res, next) {
 
           // Create and return token
           return jwt.sign({
+            _id: user._id,
             email: user.email,
             admin: user.admin
           }, config.jwtSecret, { expiresIn: '7d' });
