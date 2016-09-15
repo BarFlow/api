@@ -23,7 +23,8 @@ function login(req, res, next) {
   if (req.body.username === user.username && req.body.password === user.password) {
     const token = jwt.sign({
       username: user.username
-    }, config.jwtSecret);
+    }, config.jwtSecret, { expiresIn: '7d' });
+
     return res.json({
       token,
       username: user.username

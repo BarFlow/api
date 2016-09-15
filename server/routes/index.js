@@ -1,6 +1,6 @@
 import express from 'express';
 import userRoutes from './user';
-import authRoutes from './auth';
+import authRoutes from './auth/auth';
 
 const router = express.Router();	// eslint-disable-line new-cap
 
