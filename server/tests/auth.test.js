@@ -4,10 +4,26 @@ import { expect } from 'chai';
 import app from '../../index';
 
 describe('## Auth APIs', () => {
-  let user = {
-    username: 'react',
-    password: 'express'
+  const user = {
+    name: 'BarFlow User',
+    email: `${new Date().getTime()}-user@barflow.com`,
+    password: 'barflow'
   };
+
+  describe('# POST /auth/signup', () => {
+    it('should register a user and return a jwt token', (done) => {
+      request(app)
+        .post('/auth/signup')
+        .send(user)
+        .expect(httpStatus.CREATED)
+        .then(res => {
+          expect(res.body.user.email).to.equal(user.email);
+          expect(res.body.token).to.be.a('string');
+          done();
+        })
+        .catch(done);
+    });
+  });
 
   describe('# POST /auth/login', () => {
     it('should log in a user and return a jwt token', (done) => {
@@ -16,24 +32,39 @@ describe('## Auth APIs', () => {
         .send(user)
         .expect(httpStatus.OK)
         .then(res => {
-          expect(res.body.username).to.equal(user.username);
+          expect(res.body.user._id).to.be.a('string');
+          expect(res.body.user.email).to.equal(user.email);
           expect(res.body.token).to.be.a('string');
-          user = res.body;
           done();
         })
         .catch(done);
     });
   });
 
-  describe('# GET /auth/random-number', () => {
-    it('should return a random number', (done) => {
+  describe('# POST /auth/login', () => {
+    it('should not log in with wrong password', (done) => {
+      const payload = Object.assign({}, user, { password: 'foo' });
+
       request(app)
-        .get('/auth/random-number')
-        .set('Authorization', `Bearer ${user.token}`)
-        .expect(httpStatus.OK)
-        .then(res => {
-          expect(res.body.user.username).to.equal(user.username);
-          expect(res.body.num).to.be.a('number');
+        .post('/auth/login')
+        .send(payload)
+        .expect(httpStatus.UNAUTHORIZED)
+        .then(() => {
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+  describe('# POST /auth/login', () => {
+    it('should not log in with wrong email', (done) => {
+      const payload = Object.assign({}, user, { email: 'foo@bar.com' });
+
+      request(app)
+        .post('/auth/login')
+        .send(payload)
+        .expect(httpStatus.UNAUTHORIZED)
+        .then(() => {
           done();
         })
         .catch(done);

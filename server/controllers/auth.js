@@ -1,14 +1,10 @@
 import jwt from 'jsonwebtoken';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
+import User from '../models/user';
+import Promise from 'bluebird';
 
 const config = require('../../config/env');
-
-// sample user, used for authentication
-const user = {
-  username: 'react',
-  password: 'express'
-};
 
 /**
  * Returns jwt token if valid username and password is provided
@@ -18,35 +14,69 @@ const user = {
  * @returns {*}
  */
 function login(req, res, next) {
-  // Ideally you'll fetch this from the db
-  // Idea here was to show how jwt works with simplicity
-  if (req.body.username === user.username && req.body.password === user.password) {
-    const token = jwt.sign({
-      username: user.username
-    }, config.jwtSecret, { expiresIn: '7d' });
-
-    return res.json({
-      token,
-      username: user.username
-    });
-  }
-
   const err = new APIError('Authentication error', httpStatus.UNAUTHORIZED);
-  return next(err);
+  // Find user by email adderss
+  User.findOne({ email: req.body.email })
+    .then((user) => {
+      // If user not found return error
+      if (!user) return next(err);
+
+      // Compare given password with the model
+      return user.comparePassword(req.body.password)
+        .then((match) => {
+          // If password dosen't match return error
+          if (!match) return Promise.reject(err);
+
+          // Create and return token
+          return jwt.sign({
+            email: user.email,
+            admin: user.admin
+          }, config.jwtSecret, { expiresIn: '7d' });
+        })
+        .then((token) => {
+          // Successful login, sending response bact to client
+          res.json({
+            token,
+            user: user.toJSON()
+          });
+        });
+    })
+    .catch((e) => next(e));
 }
 
 /**
- * This is a protected route. Will return random number only if jwt token is provided in header.
- * @param req
- * @param res
- * @returns {*}
+ * Create new user
+ * @property {string} req.body.name - The name of user.
+ * @property {string} req.body.email - The email address of user.
+ * @property {string} req.body.password - The password of user.
+ * @returns {User}
  */
-function getRandomNumber(req, res) {
-  // req.user is assigned by jwt middleware if valid token is provided
-  return res.json({
-    user: req.user,
-    num: Math.random() * 100
+function signup(req, res, next) {
+  // Creating new model instance
+  const user = new User({
+    name: req.body.name,
+    email: req.body.email,
+    password: req.body.password
   });
+
+  // Save user to database
+  user.saveAsync()
+    .then((savedUser) => {
+      // Succesfully saved, creating token
+      const token = jwt.sign({
+        email: user.email,
+        admin: user.admin
+      }, config.jwtSecret, { expiresIn: '7d' });
+
+      // Composing response object
+      return {
+        user: savedUser.toJSON(), token
+      };
+    })
+    // Sending response back to client
+    .then((savedUser) => res.status(httpStatus.CREATED).json(savedUser))
+    // If any error happens forward it to middleware
+    .error((e) => next(e));
 }
 
-export default { login, getRandomNumber };
+export default { login, signup };
