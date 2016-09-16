@@ -35,6 +35,10 @@ const UserSchema = new mongoose.Schema({
   created_at: {
     type: Date,
     default: Date.now
+  },
+  updated_at: {
+    type: Date,
+    default: Date.now
   }
 });
 
@@ -43,6 +47,9 @@ const UserSchema = new mongoose.Schema({
  */
 UserSchema.pre('save', function UserModelPreSave(next) {
   const user = this;
+
+  // Set updated_at
+  user.updated_at = new Date();
 
   // only hash the password if it has been modified (or is new)
   if (!user.isModified('password')) return next();

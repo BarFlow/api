@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 import User from '../models/user';
+import Venue from '../models/venue';
 import Promise from 'bluebird';
 
 const config = require('../../config/env');
@@ -17,28 +18,38 @@ function login(req, res, next) {
   const err = new APIError('Authentication error', httpStatus.UNAUTHORIZED);
   // Find user by email adderss
   User.findOne({ email: req.body.email })
-    .then((user) => {
+    .then(user => {
       // If user not found return error
       if (!user) return next(err);
 
       // Compare given password with the model
       return user.comparePassword(req.body.password)
-        .then((match) => {
+        .then(match => {
           // If password dosen't match return error
           if (!match) return Promise.reject(err);
 
-          // Create and return token
+          // Get list of venues for user
+          return Venue.list(user._id);
+        })
+        .then(venues => {
+          // Pluck venue data
+          const roles = venues.reduce((normalized, venue)  => { // eslint-disable-line
+            normalized[venue.id] = venue.role; // eslint-disable-line
+            return normalized;
+          }, {});
+
+          // Create JWT
           return jwt.sign({
             _id: user._id,
-            email: user.email,
-            admin: user.admin
+            admin: user.admin,
+            roles: roles || []
           }, config.jwtSecret, { expiresIn: '7d' });
         })
         .then((token) => {
-          // Successful login, sending response bact to client
+          // Successful login, sending response back to client
           res.json({
             token,
-            user: user.toJSON()
+            user
           });
         });
     })
@@ -65,13 +76,16 @@ function signup(req, res, next) {
     .then((savedUser) => {
       // Succesfully saved, creating token
       const token = jwt.sign({
+        _id: user._id,
         email: user.email,
-        admin: user.admin
+        admin: user.admin,
+        roles: []
       }, config.jwtSecret, { expiresIn: '7d' });
 
       // Composing response object
       return {
-        user: savedUser.toJSON(), token
+        user: savedUser,
+        token
       };
     })
     // Sending response back to client
