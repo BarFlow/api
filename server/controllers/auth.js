@@ -79,7 +79,7 @@ function signup(req, res, next) {
         _id: user._id,
         email: user.email,
         admin: user.admin,
-        roles: []
+        roles: {}
       }, config.jwtSecret, { expiresIn: '7d' });
 
       // Composing response object

@@ -28,6 +28,11 @@ const authorize = (role) =>
     // Let admins do their job
     if (req.user.admin) return next();
 
+    // Set venue id based on request method
+    if (req.method === 'POST') {
+      req.venueId = req.body.venue_id; // eslint-disable-line
+    }
+
     // Set error message based on method
     const err = new APIError(`Resource method: ${req.method} is forbidden`, httpStatus.FORBIDDEN);
 
