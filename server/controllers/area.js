@@ -9,7 +9,6 @@ function load(req, res, next, id) {
   Area.get(id).then((area) => {
     // !!! This is used by auth.authorize this MUST be set for any resource
     req.venueId = area.venue_id; // eslint-disable-line no-param-reassign
-
     req.area = area; // eslint-disable-line no-param-reassign
     return next();
   }).error((e) => next(e));
@@ -25,8 +24,8 @@ function get(req, res) {
 
 /**
  * Create new area
- * @property {string} req.body.areaname - The areaname of area.
- * @property {string} req.body.mobileNumber - The mobileNumber of area.
+ * @property {string} req.body.name - The name of area.
+ * @property {string} req.body.order - The order of area.
  * @returns {Area}
  */
 function create(req, res, next) {
@@ -43,8 +42,8 @@ function create(req, res, next) {
 
 /**
  * Update existing area
- * @property {string} req.body.areaname - The areaname of area.
- * @property {string} req.body.mobileNumber - The mobileNumber of area.
+ * @property {string} req.body.name - The name of area.
+ * @property {string} req.body.order - The order of area.
  * @returns {Area}
  */
 function update(req, res, next) {
@@ -64,8 +63,7 @@ function update(req, res, next) {
 
 /**
  * Bulk update areas
- * @property {string} req.body.areaname - The areaname of area.
- * @property {string} req.body.mobileNumber - The mobileNumber of area.
+ * @property {array} req.body - An array of area objects to be updated.
  * @returns {Area}
  */
 function bulkUpdate(req, res, next) {

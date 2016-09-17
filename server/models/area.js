@@ -32,7 +32,7 @@ const AreaSchema = new mongoose.Schema({
 });
 
 /**
- *  Set updated_at
+ *  Set updated_at before model gets saved.
 */
 AreaSchema.pre('save', function AreaModelPreSave(next) {
   const area = this;
@@ -77,18 +77,29 @@ AreaSchema.statics = {
   },
 
   /**
-   * List areas associated with the current user, in descending order of 'created_at' timestamp.
+   * List areas associated with the current user, in ascending order of "order" attribute.
    * @param {number} skip - Number of areas to be skipped.
    * @param {number} limit - Limit number of areas to be returned.
    * @returns {Promise<Area[]>}
    */
   list(filters) {
+    const skip = parseInt(filters.skip, 10) || 0;
+    delete filters.skip; // eslint-disable-line
+    const limit = parseInt(filters.limit, 10) || 0;
+    delete filters.limit; // eslint-disable-line
     return this.find()
     .where(filters)
     .sort({ order: 1 })
+    .skip(skip)
+    .limit(limit)
     .execAsync();
   },
 
+  /**
+   * Bulk update areas.
+   * @param {array<Area>} areas - List of arrea object to be updated.
+   * @returns {Promise<Response, APIError>}
+   */
   bulkUpdate(areas) {
     return new Promise((resolve, reject) => {
       const bulk = this.collection.initializeOrderedBulkOp();

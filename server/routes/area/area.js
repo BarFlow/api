@@ -4,28 +4,28 @@ import auth from '../../helpers/auth';
 import paramValidation from './param-validation';
 import areaCtrl from '../../controllers/area';
 
-// express-validation array of object BUG https://github.com/AndrewKeig/express-validation/issues/36#event-751224940
+// BUG: express-validation array of object https://github.com/AndrewKeig/express-validation/issues/36#event-751224940
 validate.options({ contextRequest: true });
 
 const router = express.Router();	// eslint-disable-line new-cap
 
-/** GET /areas - Returns associated areas for the user */
 router.route('/')
+  /** GET /areas - Returns areas associated with the user */
   .get(areaCtrl.list)
   /** POST /areas - Creates a new area */
   .post(validate(paramValidation.create), auth.authorize('manager'), areaCtrl.create)
-  /** PUT /areas - Creates a new area */
+  /** PUT /areas - Batch update areas */
   .put(validate(paramValidation.bulkUpdate), auth.authorize('manager'), areaCtrl.bulkUpdate);
 
 router.route('/:area_id')
-  /** GET /areas/:area_id - Returns a area */
+  /** GET /areas/:area_id - Returns an area */
   .get(auth.authorize('staff'), areaCtrl.get)
-  /** PUT /areas/:area_id - Updates a area */
+  /** PUT /areas/:area_id - Updates an area */
   .put(validate(paramValidation.update), auth.authorize('manager'), areaCtrl.update)
-  /** DELETE /areas/:area_id - Removes a area */
+  /** DELETE /areas/:area_id - Removes an area */
   .delete(auth.authorize('owner'), areaCtrl.remove);
 
-// ensure access role for resource
+// Load resource to req object -> req.area
 router.param('area_id', areaCtrl.load);
 
 export default router;
