@@ -25,26 +25,44 @@ const getAuthorityLevel = (role) => {
 
 const authorize = (role) =>
   (req, res, next) => {
+    // Set error message based on method
+    const err = new APIError(
+      `Method: ${req.method} is forbidden for this resource`,
+      httpStatus.FORBIDDEN, true);
+
     // Let admins do their job
     if (req.user.admin) return next();
 
-    // Set venue id based on request method
+    // Sote all venue ids
+    const venueIds = [];
+
+    // Creating new resource
     if (req.method === 'POST') {
-      req.venueId = req.body.venue_id; // eslint-disable-line
+      venueIds.push(req.body.venue_id);
+
+    // Batch update resources
+    } else if ((req.method === 'PUT' || req.method === 'PATCH') && Array.isArray(req.body)) {
+      req.body.forEach(obj => {
+        if (obj.venue_id) {
+          venueIds.push(obj.venue_id);
+        }
+      });
+    // Update or Remove resource
+    } else {
+      venueIds.push(req.venueId);
     }
 
-    // Set error message based on method
-    const err = new APIError(`Resource method: ${req.method} is forbidden`, httpStatus.FORBIDDEN);
+    venueIds.forEach((id) => {
+      // Return error if current user not a member of the venue
+      if (!req.user.roles || !req.user.roles[id]) return next(err);
 
-    // Return error if current user not a member of the venue
-    if (!req.user.roles || !req.user.roles[req.venueId]) return next(err);
+      // Translate roles to numbers
+      const minAuthority = getAuthorityLevel(role);
+      const userAuthority = getAuthorityLevel(req.user.roles[id]);
 
-    // Translate roles to numbers
-    const minAuthority = getAuthorityLevel(role);
-    const userAuthority = getAuthorityLevel(req.user.roles[req.venueId]);
-
-    // If user authority level is too low return error
-    if (userAuthority < minAuthority) return next(err);
+      // If user authority level is too low return error
+      if (userAuthority < minAuthority) return next(err);
+    });
 
     // All is well, let's keep movin'
     next();

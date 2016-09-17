@@ -63,6 +63,25 @@ function update(req, res, next) {
 }
 
 /**
+ * Bulk update areas
+ * @property {string} req.body.areaname - The areaname of area.
+ * @property {string} req.body.mobileNumber - The mobileNumber of area.
+ * @returns {Area}
+ */
+function bulkUpdate(req, res, next) {
+  const areas = req.body.map(area => { // eslint-disable-line
+    return {
+      _id: area._id,
+      order: area.order,
+      name: area.name,
+      venue_id: area.venue_id
+    };
+  });
+  Area.bulkUpdate(areas).then(() =>	res.status(httpStatus.ACCEPTED).send())
+    .error((e) => next(e));
+}
+
+/**
  * Get area list.
  * @property {number} req.query.skip - Number of areas to be skipped.
  * @property {number} req.query.limit - Limit number of areas to be returned.
@@ -73,6 +92,7 @@ function list(req, res, next) {
   if (!req.query.venue_id || venues.indexOf(req.query.venue_id) === -1) {
     req.query.venue_id = { $in: venues }; // eslint-disable-line
   }
+
   Area.list(req.query).then((areas) =>	res.json(areas))
     .error((e) => next(e));
 }
@@ -89,4 +109,4 @@ function remove(req, res, next) {
     .error((e) => next(e));
 }
 
-export default { load, get, create, update, list, remove };
+export default { load, get, create, update, bulkUpdate, list, remove };

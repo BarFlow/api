@@ -141,6 +141,38 @@ describe('## Area APIs', () => {
     });
   });
 
+  describe('# PUT /areas/', () => {
+    it('should batch update areas', (done) => {
+      area.name = 'Patio Bar Batch';
+      request(app)
+        .put('/areas/')
+        .set(headers)
+        .send([area])
+        .expect(httpStatus.ACCEPTED)
+        .then(() => {
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+  describe('# GET /areas/:area_id', () => {
+    it('should get the area with new name from batch update', (done) => {
+      request(app)
+        .get(`/areas/${area._id}`)
+        .set(headers)
+        .send()
+        .expect(httpStatus.OK)
+        .then(res => {
+          expect(res.body._id).to.equal(area._id);
+          expect(res.body.name).to.equal('Patio Bar Batch');
+          expect(res.body.venue_id).to.equal(area.venue_id);
+          done();
+        })
+        .catch(done);
+    });
+  });
+
   describe('# DELETE /areas/:area_id', () => {
     it('should remove the area', (done) => {
       request(app)

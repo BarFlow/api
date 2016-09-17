@@ -14,5 +14,14 @@ export default {
       name: Joi.string().trim(),
       order: Joi.number().integer()
     }
+  },
+  // PUT /
+  bulkUpdate: {
+    body: Joi.array().items(Joi.object({
+      _id: Joi.string().trim().required(),
+      name: Joi.string().trim(),
+      order: Joi.number().integer(),
+      venue_id: Joi.string().trim().required()
+    }))
   }
 };

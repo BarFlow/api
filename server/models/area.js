@@ -85,8 +85,31 @@ AreaSchema.statics = {
   list(filters) {
     return this.find()
     .where(filters)
-    .sort({ created_at: -1 })
+    .sort({ order: 1 })
     .execAsync();
+  },
+
+  bulkUpdate(areas) {
+    return new Promise((resolve, reject) => {
+      const bulk = this.collection.initializeOrderedBulkOp();
+
+      for (let i = 0; i < areas.length; i++) {
+        const id = areas[i]._id;
+        const venueId = areas[i].venue_id;
+        delete areas[i]._id; // eslint-disable-line
+        delete areas[i].venue_id; // eslint-disable-line
+        bulk.find({
+          _id: mongoose.Types.ObjectId(id), // eslint-disable-line
+          venue_id: mongoose.Types.ObjectId(venueId) // eslint-disable-line
+        }).updateOne({
+          $set: areas[i]
+        });
+      }
+      bulk.execute((err, res) => {
+        if (err) return reject(err);
+        resolve(res);
+      });
+    });
   }
 
 };
