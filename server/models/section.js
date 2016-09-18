@@ -4,9 +4,9 @@ import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 
 /**
- * Area Schema
+ * Section Schema
  */
-const AreaSchema = new mongoose.Schema({
+const SectionSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true
@@ -16,6 +16,12 @@ const AreaSchema = new mongoose.Schema({
     index: true,
     required: true,
     ref: 'Venue'
+  },
+  area_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    index: true,
+    required: true,
+    ref: 'Area'
   },
   order: {
     type: Number,
@@ -34,10 +40,10 @@ const AreaSchema = new mongoose.Schema({
 /**
  *  Set updated_at before model gets saved.
 */
-AreaSchema.pre('save', function AreaModelPreSave(next) {
-  const area = this;
+SectionSchema.pre('save', function SectionModelPreSave(next) {
+  const section = this;
 
-  area.updated_at = new Date();
+  section.updated_at = new Date();
 
   return next();
 });
@@ -46,41 +52,42 @@ AreaSchema.pre('save', function AreaModelPreSave(next) {
  * Methods
  */
 // Filter model metadata out of the response
-AreaSchema.methods.toJSON = function AreaModelRemoveHash() {
+SectionSchema.methods.toJSON = function SectionModelRemoveHash() {
   const obj = this.toObject();
   return {
     _id: obj._id,
     name: obj.name,
     order: obj.order,
-    venue_id: obj.venue_id
+    venue_id: obj.venue_id,
+    area_id: obj.area_id
   };
 };
 
 /**
  * Statics
  */
-AreaSchema.statics = {
+SectionSchema.statics = {
   /**
-   * Get area
-   * @param {ObjectId} id - The objectId of area.
-   * @returns {Promise<Area, APIError>}
+   * Get section
+   * @param {ObjectId} id - The objectId of section.
+   * @returns {Promise<Section, APIError>}
    */
   get(id) {
     return this.findById(id)
-      .execAsync().then((area) => {
-        if (area) {
-          return area;
+      .execAsync().then((section) => {
+        if (section) {
+          return section;
         }
-        const err = new APIError('No such area exists!', httpStatus.NOT_FOUND);
+        const err = new APIError('No such section exists!', httpStatus.NOT_FOUND);
         return Promise.reject(err);
       });
   },
 
   /**
-   * List areas associated with the current user, in ascending order of "order" attribute.
-   * @param {number} skip - Number of areas to be skipped.
-   * @param {number} limit - Limit number of areas to be returned.
-   * @returns {Promise<Area[]>}
+   * List sections associated with the current user, in ascending order of "order" attribute.
+   * @param {number} skip - Number of sections to be skipped.
+   * @param {number} limit - Limit number of sections to be returned.
+   * @returns {Promise<Section[]>}
    */
   list(filters) {
     const skip = parseInt(filters.skip, 10) || 0;
@@ -96,28 +103,28 @@ AreaSchema.statics = {
   },
 
   /**
-   * Bulk update areas.
-   * @param {array<Area>} areas - List of arrea object to be updated.
+   * Bulk update sections.
+   * @param {array<Section>} sections - List of arrea object to be updated.
    * @returns {Promise<Response, APIError>}
    */
-  bulkUpdate(areas) {
+  bulkUpdate(sections) {
     return new Promise((resolve, reject) => {
       const bulk = this.collection.initializeOrderedBulkOp();
 
-      for (let i = 0; i < areas.length; i++) {
+      for (let i = 0; i < sections.length; i++) {
         // Model id is only used as filter, not to be updated
-        const id = areas[i]._id;
-        delete areas[i]._id; // eslint-disable-line
+        const id = sections[i]._id;
+        delete sections[i]._id; // eslint-disable-line
 
         // We are using venue_id as a search filter to prevent malicious updates
-        const venueId = areas[i].venue_id;
-        delete areas[i].venue_id; // eslint-disable-line
+        const venueId = sections[i].venue_id;
+        delete sections[i].venue_id; // eslint-disable-line
 
         bulk.find({
           _id: mongoose.Types.ObjectId(id), // eslint-disable-line
           venue_id: mongoose.Types.ObjectId(venueId) // eslint-disable-line
         }).updateOne({
-          $set: areas[i]
+          $set: sections[i]
         });
       }
       bulk.execute((err, res) => {
@@ -130,6 +137,6 @@ AreaSchema.statics = {
 };
 
 /**
- * @typedef Area
+ * @typedef Section
  */
-export default mongoose.model('Area', AreaSchema);
+export default mongoose.model('Section', SectionSchema);

@@ -49,6 +49,7 @@ function create(req, res, next) {
 function update(req, res, next) {
   const area = req.area;
 
+  // White listed params
   const whiteList = {
     name: req.body.name,
     order: req.body.order
@@ -68,6 +69,7 @@ function update(req, res, next) {
  */
 function bulkUpdate(req, res, next) {
   const areas = req.body.map(area => { // eslint-disable-line
+    // White listed params
     return {
       _id: area._id,
       order: area.order,
