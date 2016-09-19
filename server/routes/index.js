@@ -6,6 +6,7 @@ import inventoryRoutes from './inventory/inventory';
 import venueRoutes from './venue/venue';
 import areaRoutes from './area/area';
 import sectionRoutes from './section/section';
+import placementRoutes from './placement/placement';
 
 const router = express.Router();	// eslint-disable-line new-cap
 
@@ -18,12 +19,15 @@ router.use('/auth', authRoutes);
 
 router.use('/products', auth.authenticate, productRoutes);
 
+router.use('/venues', auth.authenticate, venueRoutes);
+
 router.use('/inventory', auth.authenticate, inventoryRoutes);
 
 router.use('/areas', auth.authenticate, areaRoutes);
 
 router.use('/sections', auth.authenticate, sectionRoutes);
 
-router.use('/venues', auth.authenticate, venueRoutes);
+router.use('/placements', auth.authenticate, placementRoutes);
+
 
 export default router;
