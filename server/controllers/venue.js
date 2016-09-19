@@ -56,6 +56,9 @@ function update(req, res, next) {
     profile: req.body.profile
   };
 
+  // Let admins activate/deactivate a venue
+  if (req.user.admin) whiteList.active = req.body.active;
+
   patchModel(venue, Venue, whiteList);
 
   venue.saveAsync()

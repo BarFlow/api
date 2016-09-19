@@ -60,7 +60,9 @@ function update(req, res, next) {
   delete req.body._id; // eslint-disable-line
   delete req.body.venue_id; // eslint-disable-line
   delete req.body.created_at; // eslint-disable-line
-  delete req.body.approved; // eslint-disable-line
+
+  // Let admins approve a product to make it available to all users
+  if (!req.user.admin) delete req.body.approved; // eslint-disable-line
 
   patchModel(product, Product, req.body);
 
