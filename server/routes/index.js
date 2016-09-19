@@ -1,6 +1,7 @@
 import express from 'express';
 import auth from '../helpers/auth';
 import authRoutes from './auth/auth';
+import productRoutes from './product/product';
 import venueRoutes from './venue/venue';
 import areaRoutes from './area/area';
 import sectionRoutes from './section/section';
@@ -14,10 +15,12 @@ router.get('/health-check', (req, res) =>
 
 router.use('/auth', authRoutes);
 
-router.use('/venues', auth.authenticate, venueRoutes);
+router.use('/products', auth.authenticate, productRoutes);
 
 router.use('/areas', auth.authenticate, areaRoutes);
 
 router.use('/sections', auth.authenticate, sectionRoutes);
+
+router.use('/venues', auth.authenticate, venueRoutes);
 
 export default router;
