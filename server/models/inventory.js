@@ -134,6 +134,9 @@ InventorySchema.statics = {
         const venueId = inventoryItems[i].venue_id;
         delete inventoryItems[i].venue_id; // eslint-disable-line
 
+        // Set current time for updated_at
+        inventoryItems[i].updated_at = new Date(); // eslint-disable-line
+
         bulk.find({
           _id: mongoose.Types.ObjectId(id), // eslint-disable-line
           venue_id: mongoose.Types.ObjectId(venueId) // eslint-disable-line

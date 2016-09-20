@@ -113,6 +113,9 @@ AreaSchema.statics = {
         const venueId = areas[i].venue_id;
         delete areas[i].venue_id; // eslint-disable-line
 
+        // Set current time for updated_at
+        areas[i].updated_at = new Date(); // eslint-disable-line
+
         bulk.find({
           _id: mongoose.Types.ObjectId(id), // eslint-disable-line
           venue_id: mongoose.Types.ObjectId(venueId) // eslint-disable-line

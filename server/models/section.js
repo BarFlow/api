@@ -120,6 +120,9 @@ SectionSchema.statics = {
         const venueId = sections[i].venue_id;
         delete sections[i].venue_id; // eslint-disable-line
 
+        // Set current time for updated_at
+        sections[i].updated_at = new Date(); // eslint-disable-line
+
         bulk.find({
           _id: mongoose.Types.ObjectId(id), // eslint-disable-line
           venue_id: mongoose.Types.ObjectId(venueId) // eslint-disable-line
