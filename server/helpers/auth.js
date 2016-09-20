@@ -33,6 +33,9 @@ const authorize = (role) =>
     // Let admins do their job
     if (req.user.admin) return next();
 
+    // Endpoint is only for admins
+    if (role === 'admin' && !req.user.admin) return next(err);
+
     // Sote all venue ids
     const venueIds = [];
 
