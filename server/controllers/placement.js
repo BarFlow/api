@@ -79,14 +79,11 @@ function update(req, res, next) {
  */
 function bulkUpdate(req, res, next) {
   const placements = req.body.map(placement => { // eslint-disable-line
-    // White listed params
-    return {
-      _id: placement._id,
-      order: placement.order,
-      volume: placement.volume,
-      venue_id: placement.venue_id,
-      updated_at: placement.updated_at
-    };
+    // Black listed params
+    delete placement.__v; // eslint-disable-line
+    delete placement.created_at; // eslint-disable-line
+
+    return placement;
   });
   Placement.bulkUpdate(placements).then(() =>	res.status(httpStatus.ACCEPTED).send())
     .error((e) => next(e));

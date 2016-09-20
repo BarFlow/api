@@ -69,13 +69,11 @@ function update(req, res, next) {
  */
 function bulkUpdate(req, res, next) {
   const areas = req.body.map(area => { // eslint-disable-line
-    // White listed params
-    return {
-      _id: area._id,
-      order: area.order,
-      name: area.name,
-      venue_id: area.venue_id
-    };
+    // Black listed params
+    delete area.__v; // eslint-disable-line
+    delete area.created_at; // eslint-disable-line
+
+    return area;
   });
   Area.bulkUpdate(areas).then(() =>	res.status(httpStatus.ACCEPTED).send())
     .error((e) => next(e));

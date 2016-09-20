@@ -71,8 +71,10 @@ function update(req, res, next) {
  */
 function bulkUpdate(req, res, next) {
   const inventoryItems = req.body.map(inventoryItem => { // eslint-disable-line
-    // Balcklisted params
+    // Black listed params
+    delete inventoryItem.__v; // eslint-disable-line
     delete inventoryItem.created_at; // eslint-disable-line
+
     return inventoryItem;
   });
   Inventory.bulkUpdate(inventoryItems).then(() =>	res.status(httpStatus.ACCEPTED).send())
