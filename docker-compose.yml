@@ -1,0 +1,16 @@
+version: '2'
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+    - "3000:3000"
+    links:
+    - mongo
+    environment:
+      - BARFLOW_MONGO_HOST=mongo
+  mongo:
+    image: mongo:3.2
+    volumes:
+    - ./data:/data/db
