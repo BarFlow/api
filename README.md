@@ -59,9 +59,5 @@ Get code coverage summary on executing `npm test`
 
 `npm test` also generates HTML code coverage report in `coverage/` directory. Open `lcov-report/index.html` to view it.
 
-## A Boilerplate-only Option
-
-If you would prefer not to use any of our tooling, delete the following files from the project: `package.json`, `gulpfile.babel.js`, `.eslintrc` and `.travis.yml`. You can now safely use the boilerplate with an alternative build-system or no build-system at all if you choose.
-
 ## Meta
 Project is based on Kunal Kapadia's [@kunalkapadia12](https://twitter.com/KunalKapadia12) [express-mongoose-es6-rest-api](https://github.com/KunalKapadia/express-mongoose-es6-rest-api)

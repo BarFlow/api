@@ -1,0 +1,6 @@
+.git
+config
+coverage
+data
+node_modules
+server
