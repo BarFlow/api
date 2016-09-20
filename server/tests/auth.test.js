@@ -10,6 +10,8 @@ describe('## Auth APIs', () => {
     password: 'barflow'
   };
 
+  const headers = {};
+
   describe('# POST /auth/signup', () => {
     it('should register a user and return a jwt token', (done) => {
       request(app)
@@ -32,6 +34,7 @@ describe('## Auth APIs', () => {
         .send(user)
         .expect(httpStatus.OK)
         .then(res => {
+          headers.Authorization = `Bearer ${res.body.token}`;
           expect(res.body.user._id).to.be.a('string');
           expect(res.body.user.email).to.equal(user.email);
           expect(res.body.token).to.be.a('string');
@@ -65,6 +68,21 @@ describe('## Auth APIs', () => {
         .send(payload)
         .expect(httpStatus.UNAUTHORIZED)
         .then(() => {
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+  describe('# GET /auth/refreshToken', () => {
+    it('should receive a fresh token', (done) => {
+      request(app)
+        .get('/auth/refreshToken')
+        .set(headers)
+        .send(user)
+        .expect(httpStatus.OK)
+        .then((res) => {
+          expect(res.body.token).to.be.a('string');
           done();
         })
         .catch(done);

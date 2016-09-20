@@ -94,4 +94,42 @@ function signup(req, res, next) {
     .error((e) => next(e));
 }
 
-export default { login, signup };
+/**
+ * Returns jwt token if valid username and password is provided
+ * @param req
+ * @param res
+ * @param next
+ * @returns {*}
+ */
+function refreshToken(req, res, next) {
+  const user = req.user;
+  let payload = {};
+  // Get list of venues for user
+  Venue.list(user._id)
+    .then(venues => {
+      // Pluck venue data
+      const roles = venues.reduce((normalized, venue)  => { // eslint-disable-line
+        normalized[venue.id] = venue.role; // eslint-disable-line
+        return normalized;
+      }, {});
+
+      payload = {
+        _id: user._id,
+        admin: user.admin,
+        roles: roles || []
+      };
+
+      // Create JWT
+      return jwt.sign(payload, config.jwtSecret, { expiresIn: '7d' });
+    })
+    .then((token) => {
+      // Successful login, sending response back to client
+      res.json({
+        token,
+        payload
+      });
+    })
+    .catch((e) => next(e));
+}
+
+export default { login, signup, refreshToken };
