@@ -20,7 +20,7 @@ function load(req, res, next, id) {
  * @returns {Venue}
  */
 function get(req, res) {
-  return res.json(req.venue);
+  return res.json(Object.assign({}, req.venue.toJSON(), { role: req.venue.getRole(req.user._id) }));
 }
 
 /**
