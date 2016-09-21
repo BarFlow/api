@@ -17,6 +17,10 @@ describe('## Venue APIs', () => {
     }
   };
 
+  const member = {
+    user_id: '57da7c33f2a141513087faed'
+  };
+
   const headers = {};
 
   describe('# POST /auth/signup', () => {
@@ -98,6 +102,54 @@ describe('## Venue APIs', () => {
           expect(res.body.profile.name).to.equal('Demo Bar 2');
           expect(res.body.profile.email).to.equal('demo@barflow.com');
           expect(res.body.members[0].user_id).to.equal(user._id);
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+  describe('# POST /venues/:venue_id/members', () => {
+    it('should add a member', (done) => {
+      request(app)
+        .post(`/venues/${venue._id}/members`)
+        .set(headers)
+        .send(member)
+        .expect(httpStatus.OK)
+        .then(res => {
+          member._id = res.body.members[1]._id;
+          expect(res.body.members[1].user_id).to.equal(member.user_id);
+          expect(res.body.members[1].role).to.equal('staff');
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+  describe('# PUT /venues/:venue_id/members/:member_id', () => {
+    it('should update a member', (done) => {
+      request(app)
+        .put(`/venues/${venue._id}/members/${member._id}`)
+        .set(headers)
+        .send({
+          role: 'manager'
+        })
+        .expect(httpStatus.OK)
+        .then(res => {
+          expect(res.body.members[1].role).to.equal('manager');
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+  describe('# DELETE /venues/:venue_id/members/:member_id', () => {
+    it('delete a member', (done) => {
+      request(app)
+        .delete(`/venues/${venue._id}/members/${member._id}`)
+        .set(headers)
+        .send()
+        .expect(httpStatus.OK)
+        .then(() => {
           done();
         })
         .catch(done);

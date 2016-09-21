@@ -24,5 +24,16 @@ export default {
         type: Joi.string().trim().allow(null)
       }
     }
+  },
+  addMember: {
+    body: {
+      user_id: Joi.string().trim().required(),
+      role: Joi.string().trim().valid('staff', 'manager', 'owner')
+    }
+  },
+  updateMember: {
+    body: {
+      role: Joi.string().trim().valid('staff', 'manager', 'owner').required()
+    }
   }
 };

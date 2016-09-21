@@ -42,7 +42,7 @@ function login(req, res, next) {
           return jwt.sign({
             _id: user._id,
             admin: user.admin,
-            roles: roles || []
+            roles: roles || {}
           }, config.jwtSecret, { expiresIn: '7d' });
         })
         .then((token) => {
@@ -116,7 +116,7 @@ function refreshToken(req, res, next) {
       payload = {
         _id: user._id,
         admin: user.admin,
-        roles: roles || []
+        roles: roles || {}
       };
 
       // Create JWT

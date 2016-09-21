@@ -34,7 +34,7 @@ function create(req, res, next) {
     profile: req.body.profile,
     members: [{
       user_id: req.user._id,
-      type: 'owner'
+      role: 'owner'
     }]
   });
 
@@ -89,4 +89,54 @@ function remove(req, res, next) {
     .error((e) => next(e));
 }
 
-export default { load, get, create, update, list, remove };
+/**
+ * Add new member to venue
+ * @property {string} req.body.user_id
+ * @property {string} req.body.role
+ * @returns {Venue}
+ */
+function addMember(req, res, next) {
+  const venue = req.venue;
+
+  delete req.body.created_at; // eslint-disable-line
+  venue.members.push(req.body);
+
+  venue.saveAsync()
+    .then((savedVenue) => res.json(savedVenue))
+    .error((e) => next(e));
+}
+
+/**
+ * Update member
+ * @property {string} req.body.role
+ * @returns {Venue}
+ */
+function updateMember(req, res, next) {
+  const venue = req.venue;
+
+  const member = venue.members.id(req.params.member_id);
+  member.role = req.body.role; // eslint-disable-line
+  member.updated_at = new Date(); // eslint-disable-line
+
+  venue.saveAsync()
+    .then((savedVenue) => res.json(savedVenue))
+    .error((e) => next(e));
+}
+
+/**
+ * Remove member from venue
+ * @property {string} req.body.venuename - The venuename of venue.
+ * @property {string} req.body.mobileNumber - The mobileNumber of venue.
+ * @returns {Venue}
+ */
+function removeMember(req, res, next) {
+  const venue = req.venue;
+
+  venue.members.id(req.params.member_id).remove();
+
+  venue.saveAsync()
+    .then((savedVenue) => res.json(savedVenue))
+    .error((e) => next(e));
+}
+
+export default { load, get, create, update, list, remove, addMember, updateMember, removeMember };
