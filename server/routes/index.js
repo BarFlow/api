@@ -2,6 +2,7 @@ import express from 'express';
 import auth from '../helpers/auth';
 import authRoutes from './auth/auth';
 import typeRoutes from './type/type';
+import supplierRoutes from './supplier/supplier';
 import productRoutes from './product/product';
 import inventoryRoutes from './inventory/inventory';
 import venueRoutes from './venue/venue';
@@ -19,6 +20,8 @@ router.get('/health-check', (req, res) =>
 router.use('/auth', authRoutes);
 
 router.use('/types', auth.authenticate, typeRoutes);
+
+router.use('/suppliers', auth.authenticate, supplierRoutes);
 
 router.use('/products', auth.authenticate, productRoutes);
 
