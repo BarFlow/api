@@ -15,12 +15,11 @@ const ProductSchema = new mongoose.Schema({
   type: {
     type: String,
     index: true,
-    required: true,
+    default: 'beverage'
   },
   category: {
     type: String,
     index: true,
-    required: true,
   },
   sub_category: {
     type: String,
@@ -75,6 +74,7 @@ ProductSchema.methods.toJSON = function ProductModelRemoveHash() {
   delete obj.approved;
   delete obj.created_at;
   delete obj.updated_at;
+  delete obj.sku;
 
   return obj;
 };
