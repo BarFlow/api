@@ -32,13 +32,13 @@ const VenueSchema = new mongoose.Schema({
     {
       user_id: {
         type: mongoose.Schema.Types.ObjectId,
-        index: true,
+        index: { unique: true },
         required: true,
         ref: 'User'
       },
-      type: {
+      role: {
         type: String,
-        required: true
+        default: 'staff'
       },
       created_at: {
         type: Date,
@@ -79,7 +79,7 @@ VenueSchema.pre('save', function VenueModelPreSave(next) {
 VenueSchema.methods.getRole = function VenueModelGetRole(userId) {
   const venue = this;
   const me = venue.members.find(m => m.user_id.toString() === userId.toString());
-  return !me ? false : me.type;
+  return !me ? false : me.role;
 };
 
 // Filter model metadata out of the response

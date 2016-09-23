@@ -41,7 +41,8 @@ const authorize = (role) =>
 
     // Creating new resource
     if (req.method === 'POST') {
-      venueIds.push(req.body.venue_id);
+      const venueId = req.venueId || req.body.venue_id;
+      venueIds.push(venueId);
 
     // Batch update resources
     } else if ((req.method === 'PUT' || req.method === 'PATCH') && Array.isArray(req.body)) {

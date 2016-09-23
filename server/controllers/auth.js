@@ -3,6 +3,7 @@ import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 import User from '../models/user';
 import Venue from '../models/venue';
+import Lead from '../models/lead';
 import Promise from 'bluebird';
 
 const config = require('../../config/env');
@@ -28,6 +29,13 @@ function login(req, res, next) {
           // If password dosen't match return error
           if (!match) return Promise.reject(err);
 
+          // Save lead
+          if (req.body.lead) {
+            Lead.create({
+              email: req.body.lead
+            });
+          }
+
           // Get list of venues for user
           return Venue.list(user._id);
         })
@@ -42,7 +50,7 @@ function login(req, res, next) {
           return jwt.sign({
             _id: user._id,
             admin: user.admin,
-            roles: roles || []
+            roles: roles || {}
           }, config.jwtSecret, { expiresIn: '7d' });
         })
         .then((token) => {
@@ -116,7 +124,7 @@ function refreshToken(req, res, next) {
       payload = {
         _id: user._id,
         admin: user.admin,
-        roles: roles || []
+        roles: roles || {}
       };
 
       // Create JWT

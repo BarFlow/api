@@ -4,36 +4,23 @@ import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 
 /**
- * Product Schema
+ * Supplier Schema
  */
-const ProductSchema = new mongoose.Schema({
+const SupplierSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
-    index: 'text'
+    required: true
   },
-  type: {
+  email: {
     type: String,
-    index: true,
-    default: 'beverage'
+    required: true
   },
-  category: {
+  address: {
     type: String,
-    index: true,
   },
-  sub_category: {
+  tel: {
     type: String,
-    index: true
   },
-  images: {
-    thumbnail: String,
-    normal: String,
-    original: String
-  },
-  measurable: Boolean,
-  measurable_from: Number,
-  measurable_till: Number,
-  capacity: Number,
   approved: {
     type: Boolean,
     default: false
@@ -56,10 +43,10 @@ const ProductSchema = new mongoose.Schema({
 /**
  *  Set updated_at before model gets saved.
 */
-ProductSchema.pre('save', function ProductModelPreSave(next) {
-  const product = this;
+SupplierSchema.pre('save', function SupplierModelPreSave(next) {
+  const supplier = this;
 
-  product.updated_at = new Date();
+  supplier.updated_at = new Date();
 
   return next();
 });
@@ -68,13 +55,12 @@ ProductSchema.pre('save', function ProductModelPreSave(next) {
  * Methods
  */
 // Filter model metadata out of the response
-ProductSchema.methods.toJSON = function ProductModelRemoveHash() {
+SupplierSchema.methods.toJSON = function SupplierModelRemoveHash() {
   const obj = this.toObject();
   delete obj.__v;
   delete obj.approved;
   delete obj.created_at;
   delete obj.updated_at;
-  delete obj.sku;
 
   return obj;
 };
@@ -82,28 +68,28 @@ ProductSchema.methods.toJSON = function ProductModelRemoveHash() {
 /**
  * Statics
  */
-ProductSchema.statics = {
+SupplierSchema.statics = {
   /**
-   * Get product
-   * @param {ObjectId} id - The objectId of product.
-   * @returns {Promise<Product, APIError>}
+   * Get supplier
+   * @param {ObjectId} id - The objectId of supplier.
+   * @returns {Promise<Supplier, APIError>}
    */
   get(id) {
     return this.findById(id)
-      .execAsync().then((product) => {
-        if (product) {
-          return product;
+      .execAsync().then((supplier) => {
+        if (supplier) {
+          return supplier;
         }
-        const err = new APIError('No such product exists!', httpStatus.NOT_FOUND);
+        const err = new APIError('No such supplier exists!', httpStatus.NOT_FOUND);
         return Promise.reject(err);
       });
   },
 
   /**
-   * List products associated with the current user, in ascending order of "order" attribute.
-   * @param {number} skip - Number of products to be skipped.
-   * @param {number} limit - Limit number of products to be returned.
-   * @returns {Promise<Product[]>}
+   * List suppliers associated with the current user, in ascending order of "order" attribute.
+   * @param {number} skip - Number of suppliers to be skipped.
+   * @param {number} limit - Limit number of suppliers to be returned.
+   * @returns {Promise<Supplier[]>}
    */
   list(filters, whiteList) {
     const skip = parseInt(filters.skip, 10) || 0;
@@ -125,10 +111,10 @@ ProductSchema.statics = {
     .limit(limit);
 
     return query.execAsync()
-    .then((products) =>
+    .then((suppliers) =>
       query.limit().skip().count().execAsync()
       .then((count) => { // eslint-disable-line
-        return { products, count };
+        return { suppliers, count };
       })
     );
   },
@@ -136,6 +122,6 @@ ProductSchema.statics = {
 };
 
 /**
- * @typedef Product
+ * @typedef Supplier
  */
-export default mongoose.model('Product', ProductSchema);
+export default mongoose.model('Supplier', SupplierSchema);

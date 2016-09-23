@@ -3,7 +3,7 @@ import httpStatus from 'http-status';
 import { expect } from 'chai';
 import app from '../../index';
 
-describe('## Venue APIs', () => {
+describe('## Supplier APIs', () => {
   const user = {
     name: 'BarFlow User',
     email: `${new Date().getTime()}-user@barflow.com`,
@@ -17,8 +17,9 @@ describe('## Venue APIs', () => {
     }
   };
 
-  const member = {
-    user_id: '57da7c33f2a141513087faed'
+  const supplier = {
+    name: 'Supplier Name',
+    email: 'email@cim.com'
   };
 
   const headers = {};
@@ -47,9 +48,7 @@ describe('## Venue APIs', () => {
         .expect(httpStatus.CREATED)
         .then(res => {
           venue._id = res.body._id;
-          expect(res.body.profile.name).to.equal('Demo Bar');
-          expect(res.body.profile.email).to.equal('demo@barflow.com');
-          expect(res.body.members[0].user_id).to.equal(user._id);
+          supplier.venue_id = res.body._id;
           done();
         })
         .catch(done);
@@ -70,96 +69,80 @@ describe('## Venue APIs', () => {
     });
   });
 
-  describe('# GET /venues/:venue_id', () => {
-    it('should get a venue', (done) => {
+  describe('# POST /suppliers', () => {
+    it('should create an supplier', (done) => {
       request(app)
-        .get(`/venues/${venue._id}`)
+        .post('/suppliers')
+        .set(headers)
+        .send(supplier)
+        .expect(httpStatus.CREATED)
+        .then(res => {
+          supplier._id = res.body._id;
+          expect(res.body.name).to.equal(supplier.name);
+          expect(res.body.venue_id).to.equal(supplier.venue_id);
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+  describe('# GET /suppliers', () => {
+    it('should get list of suppliers with matching partial name', (done) => {
+      request(app)
+        .get('/suppliers?name=su')
         .set(headers)
         .send()
         .expect(httpStatus.OK)
         .then(res => {
-          expect(res.body.profile.name).to.equal('Demo Bar');
-          expect(res.body.profile.email).to.equal('demo@barflow.com');
-          expect(res.body.members[0].user_id).to.equal(user._id);
+          expect(res.body[0]._id).to.equal(supplier._id);
+          expect(res.body[0].name).to.equal(supplier.name);
+          expect(res.body[0].venue_id).to.equal(supplier.venue_id);
           done();
         })
         .catch(done);
     });
   });
 
-  describe('# PUT /venues/:venue_id', () => {
-    it('should update a venue', (done) => {
+  describe('# GET /suppliers/:supplier_id', () => {
+    it('should get the supplier', (done) => {
       request(app)
-        .put(`/venues/${venue._id}`)
-        .set(headers)
-        .send({
-          profile: {
-            name: 'Demo Bar 2'
-          }
-        })
-        .expect(httpStatus.OK)
-        .then(res => {
-          expect(res.body.profile.name).to.equal('Demo Bar 2');
-          expect(res.body.profile.email).to.equal('demo@barflow.com');
-          expect(res.body.members[0].user_id).to.equal(user._id);
-          done();
-        })
-        .catch(done);
-    });
-  });
-
-  describe('# POST /venues/:venue_id/members', () => {
-    it('should add a member', (done) => {
-      request(app)
-        .post(`/venues/${venue._id}/members`)
-        .set(headers)
-        .send(member)
-        .expect(httpStatus.OK)
-        .then(res => {
-          member._id = res.body.members[1]._id;
-          expect(res.body.members[1].user_id).to.equal(member.user_id);
-          expect(res.body.members[1].role).to.equal('staff');
-          done();
-        })
-        .catch(done);
-    });
-  });
-
-  describe('# PUT /venues/:venue_id/members/:member_id', () => {
-    it('should update a member', (done) => {
-      request(app)
-        .put(`/venues/${venue._id}/members/${member._id}`)
-        .set(headers)
-        .send({
-          role: 'manager'
-        })
-        .expect(httpStatus.OK)
-        .then(res => {
-          expect(res.body.members[1].role).to.equal('manager');
-          done();
-        })
-        .catch(done);
-    });
-  });
-
-  describe('# DELETE /venues/:venue_id/members/:member_id', () => {
-    it('delete a member', (done) => {
-      request(app)
-        .delete(`/venues/${venue._id}/members/${member._id}`)
+        .get(`/suppliers/${supplier._id}`)
         .set(headers)
         .send()
         .expect(httpStatus.OK)
-        .then(() => {
+        .then(res => {
+          expect(res.body._id).to.equal(supplier._id);
+          expect(res.body.name).to.equal(supplier.name);
+          expect(res.body.venue_id).to.equal(supplier.venue_id);
           done();
         })
         .catch(done);
     });
   });
 
-  describe('# DELETE /venues/:venue_id', () => {
-    it('should update a venue', (done) => {
+  describe('# PUT /suppliers/:supplier_id', () => {
+    it('should update the supplier', (done) => {
       request(app)
-        .delete(`/venues/${venue._id}`)
+        .put(`/suppliers/${supplier._id}`)
+        .set(headers)
+        .send({
+          name: 'Belvedere'
+        })
+        .expect(httpStatus.OK)
+        .then(res => {
+          expect(res.body._id).to.equal(supplier._id);
+          expect(res.body.name).to.equal('Belvedere');
+          expect(res.body.venue_id).to.equal(supplier.venue_id);
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+  describe('# DELETE /suppliers/:supplier_id', () => {
+    it('should remove the supplier', (done) => {
+      request(app)
+        .delete(`/suppliers/${supplier._id}`)
         .set(headers)
         .send()
         .expect(httpStatus.OK)

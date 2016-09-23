@@ -22,6 +22,15 @@ router.route('/:venue_id')
   /** DELETE /venues/:venue_id - Removes a venue */
   .delete(auth.authorize('owner'), venueCtrl.remove);
 
+/** POST /venues/members - Creates a new member for venue */
+router.route('/:venue_id/members')
+  .post(validate(paramValidation.addMember), auth.authorize('owner'), venueCtrl.addMember);
+
+/** POST /venues - Removes member from venue */
+router.route('/:venue_id/members/:member_id')
+  .put(validate(paramValidation.updateMember), auth.authorize('owner'), venueCtrl.updateMember)
+  .delete(auth.authorize('owner'), venueCtrl.removeMember);
+
 // ensure access role for resource
 router.param('venue_id', venueCtrl.load);
 
