@@ -3,6 +3,7 @@ import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 import User from '../models/user';
 import Venue from '../models/venue';
+import Lead from '../models/lead';
 import Promise from 'bluebird';
 
 const config = require('../../config/env');
@@ -27,6 +28,13 @@ function login(req, res, next) {
         .then(match => {
           // If password dosen't match return error
           if (!match) return Promise.reject(err);
+
+          // Save lead
+          if (req.body.lead) {
+            Lead.create({
+              email: req.body.lead
+            });
+          }
 
           // Get list of venues for user
           return Venue.list(user._id);
