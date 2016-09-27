@@ -4,13 +4,17 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: barflow/api
+    image: barflow/api:upload
     ports:
     - "3000:3000"
     links:
     - mongo
     environment:
-      - BARFLOW_MONGO_HOST=mongo
+      - DB=$DB
+      - JWT_SECRET=$JWT_SECRET
+      - NODE_ENV=$NODE_ENV
+      - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
   mongo:
     image: mongo:3.2
     ports:

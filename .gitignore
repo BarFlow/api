@@ -40,3 +40,8 @@ node_modules
 
 # mongo db
 data
+
+# .env file with secrets
+.env
+dev.env
+prod.env
