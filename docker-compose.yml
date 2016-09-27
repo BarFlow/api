@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: barflow/api:upload
+    image: barflow/api
     ports:
     - "3000:3000"
     links:
@@ -17,6 +17,7 @@ services:
       - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
   mongo:
     image: mongo:3.2
+    # Remove this when in production
     ports:
     - "27017:27017"
     volumes:
