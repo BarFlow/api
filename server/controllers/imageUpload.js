@@ -45,7 +45,7 @@ const client = new Upload('barflow-images', {
       maxHeight: 130,
       maxWidth: 130,
       format: 'jpg',
-      suffix: '-thumb',
+      suffix: '-thumbnail',
       quality: 90,
       background: 'white',
       flatten: true
@@ -66,7 +66,14 @@ function s3upload(req, res, next) {
     if (err) {
       return next(err);
     }
-    res.json(versions);
+    res.json(versions.map(version => { // eslint-disable-line
+      return {
+        type: version.suffix ? version.suffix.substring(1) : 'original',
+        url: version.url,
+        width: version.width,
+        height: version.height
+      };
+    }));
   });
 }
 
