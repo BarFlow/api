@@ -37,7 +37,7 @@ function create(req, res, next) {
     section_id: req.body.section_id,
     inventory_item_id: req.body.inventory_item_id,
     volume: req.body.volume || 0,
-    order: req.body.order
+    order: req.body.order || 0
   });
 
   placement.saveAsync()

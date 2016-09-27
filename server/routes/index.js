@@ -36,7 +36,7 @@ router.use('/sections', auth.authenticate, sectionRoutes);
 
 router.use('/placements', auth.authenticate, placementRoutes);
 
-router.post('/upload', auth.authenticate, upload, s3upload);
+router.post('/uploads', auth.authenticate, upload, s3upload);
 
 
 export default router;

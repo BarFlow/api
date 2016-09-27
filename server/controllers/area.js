@@ -31,7 +31,7 @@ function get(req, res) {
 function create(req, res, next) {
   const area = new Area({
     name: req.body.name,
-    order: 0,
+    order: req.body.order || 0,
     venue_id: req.body.venue_id
   });
 

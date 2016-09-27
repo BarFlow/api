@@ -31,7 +31,7 @@ function get(req, res) {
 function create(req, res, next) {
   const section = new Section({
     name: req.body.name,
-    order: 0,
+    order: req.body.order || 0,
     venue_id: req.body.venue_id,
     area_id: req.body.area_id
   });
