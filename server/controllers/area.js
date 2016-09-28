@@ -68,14 +68,7 @@ function update(req, res, next) {
  * @returns {Area}
  */
 function bulkUpdate(req, res, next) {
-  const areas = req.body.map(area => { // eslint-disable-line
-    // Black listed params
-    delete area.__v; // eslint-disable-line
-    delete area.created_at; // eslint-disable-line
-
-    return area;
-  });
-  Area.bulkUpdate(areas).then(() =>	res.status(httpStatus.ACCEPTED).send())
+  Area.bulkUpdate(req.body).then(() =>	res.status(httpStatus.ACCEPTED).send())
     .error((e) => next(e));
 }
 

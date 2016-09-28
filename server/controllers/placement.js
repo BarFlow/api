@@ -31,7 +31,6 @@ function get(req, res) {
  */
 function create(req, res, next) {
   const placement = new Placement({
-    name: req.body.name,
     venue_id: req.body.venue_id,
     area_id: req.body.area_id,
     section_id: req.body.section_id,
@@ -78,14 +77,7 @@ function update(req, res, next) {
  * @returns {Placement}
  */
 function bulkUpdate(req, res, next) {
-  const placements = req.body.map(placement => { // eslint-disable-line
-    // Black listed params
-    delete placement.__v; // eslint-disable-line
-    delete placement.created_at; // eslint-disable-line
-
-    return placement;
-  });
-  Placement.bulkUpdate(placements).then(() =>	res.status(httpStatus.ACCEPTED).send())
+  Placement.bulkUpdate(req.body).then(() =>	res.status(httpStatus.ACCEPTED).send())
     .error((e) => next(e));
 }
 

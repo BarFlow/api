@@ -69,14 +69,7 @@ function update(req, res, next) {
  * @returns {Section}
  */
 function bulkUpdate(req, res, next) {
-  const sections = req.body.map(section => { // eslint-disable-line
-    // Black listed params
-    delete section.__v; // eslint-disable-line
-    delete section.created_at; // eslint-disable-line
-
-    return section;
-  });
-  Section.bulkUpdate(sections).then(() =>	res.status(httpStatus.ACCEPTED).send())
+  Section.bulkUpdate(req.body).then(() =>	res.status(httpStatus.ACCEPTED).send())
     .error((e) => next(e));
 }
 

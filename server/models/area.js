@@ -104,23 +104,22 @@ AreaSchema.statics = {
     return new Promise((resolve, reject) => {
       const bulk = this.collection.initializeOrderedBulkOp();
 
+      const whiteList = ['name', 'order'];
+
       for (let i = 0; i < areas.length; i++) {
-        // Model id is only used as filter, not to be updated
-        const id = areas[i]._id;
-        delete areas[i]._id; // eslint-disable-line
-
-        // We are using venue_id as a search filter to prevent malicious updates
-        const venueId = areas[i].venue_id;
-        delete areas[i].venue_id; // eslint-disable-line
-
-        // Set current time for updated_at
-        areas[i].updated_at = new Date(); // eslint-disable-line
+        const payload = Object.keys(areas[i]).reduce((mem, key) => { // eslint-disable-line
+          if (whiteList.indexOf(key) > -1) {
+            mem[key] = areas[i][key]; // eslint-disable-line
+          }
+          return mem;
+        }, {});
+        payload.updated_at = new Date();
 
         bulk.find({
-          _id: mongoose.Types.ObjectId(id), // eslint-disable-line
-          venue_id: mongoose.Types.ObjectId(venueId) // eslint-disable-line
+          _id: mongoose.Types.ObjectId(areas[i]._id), // eslint-disable-line
+          venue_id: mongoose.Types.ObjectId(areas[i].venue_id) // eslint-disable-line
         }).updateOne({
-          $set: areas[i]
+          $set: payload
         });
       }
       bulk.execute((err, res) => {
