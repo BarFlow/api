@@ -41,7 +41,21 @@ function create(req, res, next) {
 
   inventoryItem.saveAsync()
     .then((savedInventory) => res.status(httpStatus.CREATED).json(savedInventory))
-    .error((e) => next(e));
+    .error((e) => {
+      // If the product has been added to the venue already, ignore the request and
+      // send back the original model
+      if (e.code === 11000) {
+        return Inventory.findOne({
+          venue_id: req.body.venue_id,
+          product_id: req.body.product_id
+        })
+        .execAsync()
+        .then((inventory) => res.status(httpStatus.OK).json(inventory));
+      }
+
+      // If any other error occurs forward it
+      return next(e);
+    });
 }
 
 /**
