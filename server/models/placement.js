@@ -3,6 +3,9 @@ import mongoose from 'mongoose';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 
+// import Product from './product';
+// import Inventory from './inventory';
+
 /**
  * Placement Schema
  */
@@ -79,17 +82,26 @@ PlacementSchema.statics = {
   /**
    * Get placement
    * @param {ObjectId} id - The objectId of placement.
+   * @param {Boolean} populate - Populate data if given.
    * @returns {Promise<Placement, APIError>}
    */
-  get(id) {
-    return this.findById(id)
-      .execAsync().then((placement) => {
-        if (placement) {
-          return placement;
+  get(id, populate = false) {
+    const query = this.findById(id);
+    if (populate) {
+      query.populate({
+        path: 'inventory_item_id',
+        populate: {
+          path: 'product_id'
         }
-        const err = new APIError('No such placement exists!', httpStatus.NOT_FOUND);
-        return Promise.reject(err);
       });
+    }
+    return query.execAsync().then((placement) => {
+      if (placement) {
+        return placement;
+      }
+      const err = new APIError('No such placement exists!', httpStatus.NOT_FOUND);
+      return Promise.reject(err);
+    });
   },
 
   /**
@@ -103,9 +115,19 @@ PlacementSchema.statics = {
     delete filters.skip; // eslint-disable-line
     const limit = parseInt(filters.limit, 10) || 0;
     delete filters.limit; // eslint-disable-line
-    return this.find()
-    .where(filters)
-    .sort({ order: 1 })
+    const populate = filters.populate || false;
+    delete filters.populate; // eslint-disable-line
+    const query = this.find()
+    .where(filters);
+    if (populate) {
+      query.populate({
+        path: 'inventory_item_id',
+        populate: {
+          path: 'product_id'
+        }
+      });
+    }
+    return query.sort({ order: 1 })
     .skip(skip)
     .limit(limit)
     .execAsync();

@@ -7,7 +7,7 @@ import patchModel from '../helpers/patchModel';
  * Load placement and append to req.
  */
 function load(req, res, next, id) {
-  Placement.get(id).then((placement) => {
+  Placement.get(id, req.query.populate).then((placement) => {
     // !!! This is used by auth.authorize this MUST be set for any resource
     req.venueId = placement.venue_id; // eslint-disable-line no-param-reassign
     req.placement = placement; // eslint-disable-line no-param-reassign
