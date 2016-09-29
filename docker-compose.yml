@@ -1,12 +1,18 @@
 version: '2'
 services:
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: barflow/api
+  lb:
+    image: dockercloud/haproxy
+    links:
+      - api_v1
+      - api_v2
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
-    - "3000:3000"
+      - 8080:80
+  api_v1:
+    image: barflow/api:v1
+    ports:
+    - "3000"
     links:
     - mongo
     environment:
@@ -15,10 +21,23 @@ services:
       - NODE_ENV=$NODE_ENV
       - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+      - VIRTUAL_HOST=/v1/*
+  api_v2:
+    image: barflow/api:v2
+    ports:
+    - "3000"
+    links:
+    - mongo
+    environment:
+      - DB=$DB
+      - JWT_SECRET=$JWT_SECRET
+      - NODE_ENV=$NODE_ENV
+      - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+      - VIRTUAL_HOST=/v2/*
   mongo:
     image: mongo:3.2
-    # Remove this when in production
     ports:
-    - "27017:27017"
+    - "27017"
     volumes:
     - ./data:/data/db
