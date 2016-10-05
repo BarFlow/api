@@ -139,7 +139,7 @@ PlacementSchema.statics = {
     return new Promise((resolve, reject) => {
       const bulk = this.collection.initializeOrderedBulkOp();
 
-      const whiteList = ['volume', 'order'];
+      const whiteList = ['volume', 'order', 'updated_at'];
 
       for (let i = 0; i < placements.length; i++) {
         const payload = Object.keys(placements[i]).reduce((mem, key) => { // eslint-disable-line
@@ -148,7 +148,6 @@ PlacementSchema.statics = {
           }
           return mem;
         }, {});
-        payload.updated_at = new Date();
 
         bulk.find({
           _id: mongoose.Types.ObjectId(placements[i]._id), // eslint-disable-line

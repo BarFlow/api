@@ -2,6 +2,7 @@ import Promise from 'bluebird';
 import mongoose from 'mongoose';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
+import Section from './section';
 
 /**
  * Area Schema
@@ -21,6 +22,7 @@ const AreaSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  sections: Array,
   created_at: {
     type: Date,
     default: Date.now
@@ -52,7 +54,8 @@ AreaSchema.methods.toJSON = function AreaModelRemoveHash() {
     _id: obj._id,
     name: obj.name,
     order: obj.order,
-    venue_id: obj.venue_id
+    venue_id: obj.venue_id,
+    sections: obj.sections.length < 1 ? undefined : obj.sections
   };
 };
 
@@ -87,12 +90,42 @@ AreaSchema.statics = {
     delete filters.skip; // eslint-disable-line
     const limit = parseInt(filters.limit, 10) || 0;
     delete filters.limit; // eslint-disable-line
+    const populate = filters.populate || false;
+    delete filters.populate; // eslint-disable-line
+
     return this.find()
     .where(filters)
     .sort({ order: 1 })
     .skip(skip)
     .limit(limit)
-    .execAsync();
+    .execAsync()
+    .then(areas => {
+      if (!populate) {
+        return areas;
+      }
+
+      let populatedAreas = areas;
+      return Section.list({
+        populate: true,
+        area_id: {
+          $in: areas.map(area => area._id)
+        }
+      })
+      .then(sections => {
+        populatedAreas = populatedAreas.map(area => {
+          area.sections = []; // eslint-disable-line
+          sections.forEach(section => {
+            if (section.area_id.toString() == area._id.toString()) { //eslint-disable-line
+              area.sections.push(section);
+            }
+          });
+
+          return area;
+        });
+
+        return populatedAreas;
+      });
+    });
   },
 
   /**

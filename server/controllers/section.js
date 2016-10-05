@@ -85,6 +85,9 @@ function list(req, res, next) {
     req.query.venue_id = { $in: venues }; // eslint-disable-line
   }
 
+  // Populate models if query string is true and the request type is get
+  req.query.populate = req.query.populate === 'true' && req.method === 'GET'; // eslint-disable-line
+
   Section.list(req.query).then((sections) =>	res.json(sections))
     .error((e) => next(e));
 }

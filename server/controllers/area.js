@@ -83,6 +83,9 @@ function list(req, res, next) {
   if (!req.query.venue_id || venues.indexOf(req.query.venue_id) === -1) {
     req.query.venue_id = { $in: venues }; // eslint-disable-line
   }
+  // Populate models if query string is true and the request type is get
+
+  req.query.populate = req.query.populate === 'true' && req.method === 'GET'; // eslint-disable-line
 
   Area.list(req.query).then((areas) =>	res.json(areas))
     .error((e) => next(e));

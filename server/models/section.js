@@ -2,7 +2,6 @@ import Promise from 'bluebird';
 import mongoose from 'mongoose';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
-
 import Placement from './placement';
 
 /**
@@ -63,7 +62,7 @@ SectionSchema.methods.toJSON = function SectionModelRemoveHash() {
     order: obj.order,
     venue_id: obj.venue_id,
     area_id: obj.area_id,
-    placements: obj.placements
+    placements: obj.placements.length < 1 ? undefined : obj.placements
   };
 };
 
@@ -100,7 +99,7 @@ SectionSchema.statics = {
     delete filters.limit; // eslint-disable-line
     const populate = filters.populate || false;
     delete filters.populate; // eslint-disable-line
-    let sectionsCache = [];
+
     return this.find()
     .where(filters)
     .sort({ order: 1 })
@@ -108,31 +107,31 @@ SectionSchema.statics = {
     .limit(limit)
     .execAsync()
     .then(sections => {
-      if (populate) {
-        sectionsCache = sections;
-        return Placement.list({
-          populate: true,
-          section_id: {
-            $in: sections.map(section => section._id)
-          }
-        })
-        .then(placements => {
-          const populatedSections = sectionsCache.map(section => {
-            // section.placements = []; // eslint-disable-line
-            placements.forEach(placement => {
-              if (placement.section_id.toString() == section._id.toString()) { //eslint-disable-line
-                section.placements.push(placement);
-              }
-            });
-
-            return section;
-          });
-
-          return populatedSections;
-        });
+      if (!populate) {
+        return sections;
       }
 
-      return sections;
+      let populatedSections = sections;
+      return Placement.list({
+        populate: true,
+        section_id: {
+          $in: sections.map(section => section._id)
+        }
+      })
+      .then(placements => {
+        populatedSections = populatedSections.map(section => {
+          section.placements = []; // eslint-disable-line
+          placements.forEach(placement => {
+            if (placement.section_id.toString() == section._id.toString()) { //eslint-disable-line
+              section.placements.push(placement);
+            }
+          });
+
+          return section;
+        });
+
+        return populatedSections;
+      });
     });
   },
 
