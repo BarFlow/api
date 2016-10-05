@@ -3,9 +3,6 @@ import mongoose from 'mongoose';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 
-// import Product from './product';
-// import Inventory from './inventory';
-
 /**
  * Placement Schema
  */

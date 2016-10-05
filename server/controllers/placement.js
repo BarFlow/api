@@ -7,7 +7,11 @@ import patchModel from '../helpers/patchModel';
  * Load placement and append to req.
  */
 function load(req, res, next, id) {
-  Placement.get(id, req.query.populate).then((placement) => {
+  // Populate model if query string is true and the request type is get
+  const populate = req.query.populate === 'true' && req.method === 'GET';
+
+  // Get document by id
+  Placement.get(id, populate).then((placement) => {
     // !!! This is used by auth.authorize this MUST be set for any resource
     req.venueId = placement.venue_id; // eslint-disable-line no-param-reassign
     req.placement = placement; // eslint-disable-line no-param-reassign
@@ -92,6 +96,9 @@ function list(req, res, next) {
   if (!req.query.venue_id || venues.indexOf(req.query.venue_id) === -1) {
     req.query.venue_id = { $in: venues }; // eslint-disable-line
   }
+
+  // Populate models if query string is true and the request type is get
+  req.query.populate = req.query.populate === 'true' && req.method === 'GET'; // eslint-disable-line
 
   Placement.list(req.query).then((placements) =>	res.json(placements))
     .error((e) => next(e));

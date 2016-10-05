@@ -1,7 +1,7 @@
 version: '2'
 services:
   lb:
-    image: dockercloud/haproxy
+    image: dockercloud/haproxy:staging
     links:
       - api_v1
       - api_v2
