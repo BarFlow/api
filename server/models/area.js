@@ -2,6 +2,7 @@ import Promise from 'bluebird';
 import mongoose from 'mongoose';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
+import Section from './section';
 
 /**
  * Area Schema
@@ -21,6 +22,7 @@ const AreaSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  sections: Array,
   created_at: {
     type: Date,
     default: Date.now
@@ -52,7 +54,8 @@ AreaSchema.methods.toJSON = function AreaModelRemoveHash() {
     _id: obj._id,
     name: obj.name,
     order: obj.order,
-    venue_id: obj.venue_id
+    venue_id: obj.venue_id,
+    sections: obj.sections.length < 1 ? undefined : obj.sections
   };
 };
 
@@ -87,12 +90,42 @@ AreaSchema.statics = {
     delete filters.skip; // eslint-disable-line
     const limit = parseInt(filters.limit, 10) || 0;
     delete filters.limit; // eslint-disable-line
+    const populate = filters.populate || false;
+    delete filters.populate; // eslint-disable-line
+
     return this.find()
     .where(filters)
     .sort({ order: 1 })
     .skip(skip)
     .limit(limit)
-    .execAsync();
+    .execAsync()
+    .then(areas => {
+      if (!populate) {
+        return areas;
+      }
+
+      let populatedAreas = areas;
+      return Section.list({
+        populate: true,
+        area_id: {
+          $in: areas.map(area => area._id)
+        }
+      })
+      .then(sections => {
+        populatedAreas = populatedAreas.map(area => {
+          area.sections = []; // eslint-disable-line
+          sections.forEach(section => {
+            if (section.area_id.toString() == area._id.toString()) { //eslint-disable-line
+              area.sections.push(section.toJSON());
+            }
+          });
+
+          return area;
+        });
+
+        return populatedAreas;
+      });
+    });
   },
 
   /**
@@ -104,23 +137,22 @@ AreaSchema.statics = {
     return new Promise((resolve, reject) => {
       const bulk = this.collection.initializeOrderedBulkOp();
 
+      const whiteList = ['name', 'order'];
+
       for (let i = 0; i < areas.length; i++) {
-        // Model id is only used as filter, not to be updated
-        const id = areas[i]._id;
-        delete areas[i]._id; // eslint-disable-line
-
-        // We are using venue_id as a search filter to prevent malicious updates
-        const venueId = areas[i].venue_id;
-        delete areas[i].venue_id; // eslint-disable-line
-
-        // Set current time for updated_at
-        areas[i].updated_at = new Date(); // eslint-disable-line
+        const payload = Object.keys(areas[i]).reduce((mem, key) => { // eslint-disable-line
+          if (whiteList.indexOf(key) > -1) {
+            mem[key] = areas[i][key]; // eslint-disable-line
+          }
+          return mem;
+        }, {});
+        payload.updated_at = new Date();
 
         bulk.find({
-          _id: mongoose.Types.ObjectId(id), // eslint-disable-line
-          venue_id: mongoose.Types.ObjectId(venueId) // eslint-disable-line
+          _id: mongoose.Types.ObjectId(areas[i]._id), // eslint-disable-line
+          venue_id: mongoose.Types.ObjectId(areas[i].venue_id) // eslint-disable-line
         }).updateOne({
-          $set: areas[i]
+          $set: payload
         });
       }
       bulk.execute((err, res) => {

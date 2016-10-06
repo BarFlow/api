@@ -79,17 +79,26 @@ PlacementSchema.statics = {
   /**
    * Get placement
    * @param {ObjectId} id - The objectId of placement.
+   * @param {Boolean} populate - Populate data if given.
    * @returns {Promise<Placement, APIError>}
    */
-  get(id) {
-    return this.findById(id)
-      .execAsync().then((placement) => {
-        if (placement) {
-          return placement;
+  get(id, populate = false) {
+    const query = this.findById(id);
+    if (populate) {
+      query.populate({
+        path: 'inventory_item_id',
+        populate: {
+          path: 'product_id'
         }
-        const err = new APIError('No such placement exists!', httpStatus.NOT_FOUND);
-        return Promise.reject(err);
       });
+    }
+    return query.execAsync().then((placement) => {
+      if (placement) {
+        return placement;
+      }
+      const err = new APIError('No such placement exists!', httpStatus.NOT_FOUND);
+      return Promise.reject(err);
+    });
   },
 
   /**
@@ -103,9 +112,21 @@ PlacementSchema.statics = {
     delete filters.skip; // eslint-disable-line
     const limit = parseInt(filters.limit, 10) || 0;
     delete filters.limit; // eslint-disable-line
-    return this.find()
-    .where(filters)
-    .sort({ order: 1 })
+    const populate = filters.populate || false;
+    delete filters.populate; // eslint-disable-line
+    const query = this.find()
+    .where(filters);
+    if (populate) {
+      query.populate({
+        path: 'inventory_item_id',
+        select: '-__v -updated_at -created_at',
+        populate: {
+          path: 'product_id',
+          select: '-__v -updated_at -created_at',
+        }
+      });
+    }
+    return query.sort({ order: 1 })
     .skip(skip)
     .limit(limit)
     .execAsync();
@@ -120,28 +141,22 @@ PlacementSchema.statics = {
     return new Promise((resolve, reject) => {
       const bulk = this.collection.initializeOrderedBulkOp();
 
+      const whiteList = ['volume', 'order', 'updated_at'];
+
       for (let i = 0; i < placements.length; i++) {
-        // Model id is only used as filter, not to be updated
-        const id = placements[i]._id;
-        delete placements[i]._id; // eslint-disable-line
-
-        // We are using venue_id as a search filter to prevent malicious updates
-        const venueId = placements[i].venue_id;
-        delete placements[i].venue_id; // eslint-disable-line
-
-        // Store updated_at to only update old versions
-        const updatedAt = new Date(placements[i].updated_at); // eslint-disable-line
-        delete placements[i].updated_at; // eslint-disable-line
-
-        // Set current time for updated_at
-        placements[i].updated_at = new Date(); // eslint-disable-line
+        const payload = Object.keys(placements[i]).reduce((mem, key) => { // eslint-disable-line
+          if (whiteList.indexOf(key) > -1) {
+            mem[key] = placements[i][key]; // eslint-disable-line
+          }
+          return mem;
+        }, {});
 
         bulk.find({
-          _id: mongoose.Types.ObjectId(id), // eslint-disable-line
-          venue_id: mongoose.Types.ObjectId(venueId), // eslint-disable-line
-          updated_at: { $lte: updatedAt },
+          _id: mongoose.Types.ObjectId(placements[i]._id), // eslint-disable-line
+          venue_id: mongoose.Types.ObjectId(placements[i].venue_id), // eslint-disable-line
+          updated_at: { $lte: new Date(placements[i].updated_at) },
         }).updateOne({
-          $set: placements[i]
+          $set: payload
         });
       }
       bulk.execute((err, res) => {

@@ -7,7 +7,11 @@ import patchModel from '../helpers/patchModel';
  * Load placement and append to req.
  */
 function load(req, res, next, id) {
-  Placement.get(id).then((placement) => {
+  // Populate model if query string is true and the request type is get
+  const populate = req.query.populate === 'true' && req.method === 'GET';
+
+  // Get document by id
+  Placement.get(id, populate).then((placement) => {
     // !!! This is used by auth.authorize this MUST be set for any resource
     req.venueId = placement.venue_id; // eslint-disable-line no-param-reassign
     req.placement = placement; // eslint-disable-line no-param-reassign
@@ -31,13 +35,12 @@ function get(req, res) {
  */
 function create(req, res, next) {
   const placement = new Placement({
-    name: req.body.name,
     venue_id: req.body.venue_id,
     area_id: req.body.area_id,
     section_id: req.body.section_id,
     inventory_item_id: req.body.inventory_item_id,
     volume: req.body.volume || 0,
-    order: req.body.order
+    order: req.body.order || 0
   });
 
   placement.saveAsync()
@@ -78,14 +81,7 @@ function update(req, res, next) {
  * @returns {Placement}
  */
 function bulkUpdate(req, res, next) {
-  const placements = req.body.map(placement => { // eslint-disable-line
-    // Black listed params
-    delete placement.__v; // eslint-disable-line
-    delete placement.created_at; // eslint-disable-line
-
-    return placement;
-  });
-  Placement.bulkUpdate(placements).then(() =>	res.status(httpStatus.ACCEPTED).send())
+  Placement.bulkUpdate(req.body).then(() =>	res.status(httpStatus.ACCEPTED).send())
     .error((e) => next(e));
 }
 
@@ -100,6 +96,9 @@ function list(req, res, next) {
   if (!req.query.venue_id || venues.indexOf(req.query.venue_id) === -1) {
     req.query.venue_id = { $in: venues }; // eslint-disable-line
   }
+
+  // Populate models if query string is true and the request type is get
+  req.query.populate = req.query.populate === 'true' && req.method === 'GET'; // eslint-disable-line
 
   Placement.list(req.query).then((placements) =>	res.json(placements))
     .error((e) => next(e));

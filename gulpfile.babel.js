@@ -34,7 +34,9 @@ gulp.task('clean', () =>
 gulp.task('set-env', () => {
   plugins.env({
     vars: {
-      NODE_ENV: 'test'
+      NODE_ENV: 'test',
+      DB: 'localhost',
+      PORT: '3001'
     }
   });
 });

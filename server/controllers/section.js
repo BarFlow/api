@@ -31,7 +31,7 @@ function get(req, res) {
 function create(req, res, next) {
   const section = new Section({
     name: req.body.name,
-    order: 0,
+    order: req.body.order || 0,
     venue_id: req.body.venue_id,
     area_id: req.body.area_id
   });
@@ -69,14 +69,7 @@ function update(req, res, next) {
  * @returns {Section}
  */
 function bulkUpdate(req, res, next) {
-  const sections = req.body.map(section => { // eslint-disable-line
-    // Black listed params
-    delete section.__v; // eslint-disable-line
-    delete section.created_at; // eslint-disable-line
-
-    return section;
-  });
-  Section.bulkUpdate(sections).then(() =>	res.status(httpStatus.ACCEPTED).send())
+  Section.bulkUpdate(req.body).then(() =>	res.status(httpStatus.ACCEPTED).send())
     .error((e) => next(e));
 }
 
@@ -91,6 +84,9 @@ function list(req, res, next) {
   if (!req.query.venue_id || venues.indexOf(req.query.venue_id) === -1) {
     req.query.venue_id = { $in: venues }; // eslint-disable-line
   }
+
+  // Populate models if query string is true and the request type is get
+  req.query.populate = req.query.populate === 'true' && req.method === 'GET'; // eslint-disable-line
 
   Section.list(req.query).then((sections) =>	res.json(sections))
     .error((e) => next(e));

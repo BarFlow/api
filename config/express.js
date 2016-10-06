@@ -46,7 +46,13 @@ if (config.env === 'development') {
   }));
 }
 
-// mount all routes on /api path
+// Remove api version string if present from req url: /v1.1/ -> /
+app.use((req, res, next) => {
+  req.url = req.url.replace(/^\/v\d+(\.?\d+)?\//,'/'); // eslint-disable-line
+  next();
+});
+
+// mount all routes to root
 app.use('/', routes);
 
 // if error is not an instanceOf APIError, convert it.

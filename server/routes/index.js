@@ -9,6 +9,7 @@ import venueRoutes from './venue/venue';
 import areaRoutes from './area/area';
 import sectionRoutes from './section/section';
 import placementRoutes from './placement/placement';
+import { upload, s3upload } from '../controllers/imageUpload';
 
 const router = express.Router();	// eslint-disable-line new-cap
 
@@ -34,6 +35,8 @@ router.use('/areas', auth.authenticate, areaRoutes);
 router.use('/sections', auth.authenticate, sectionRoutes);
 
 router.use('/placements', auth.authenticate, placementRoutes);
+
+router.post('/uploads', auth.authenticate, upload, s3upload);
 
 
 export default router;

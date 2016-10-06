@@ -6,7 +6,8 @@ export default {
     body: {
       name: Joi.string().trim().required(),
       venue_id: Joi.string().trim().required(),
-      area_id: Joi.string().trim().required()
+      area_id: Joi.string().trim().required(),
+      order: Joi.number().integer()
     }
   },
   // PUT /:area_id
