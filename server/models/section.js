@@ -123,7 +123,7 @@ SectionSchema.statics = {
           section.placements = []; // eslint-disable-line
           placements.forEach(placement => {
             if (placement.section_id.toString() == section._id.toString()) { //eslint-disable-line
-              section.placements.push(placement);
+              section.placements.push(placement.toJSON());
             }
           });
 

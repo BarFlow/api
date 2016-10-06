@@ -119,8 +119,10 @@ PlacementSchema.statics = {
     if (populate) {
       query.populate({
         path: 'inventory_item_id',
+        select: '-__v -updated_at -created_at',
         populate: {
-          path: 'product_id'
+          path: 'product_id',
+          select: '-__v -updated_at -created_at',
         }
       });
     }

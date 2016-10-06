@@ -116,7 +116,7 @@ AreaSchema.statics = {
           area.sections = []; // eslint-disable-line
           sections.forEach(section => {
             if (section.area_id.toString() == area._id.toString()) { //eslint-disable-line
-              area.sections.push(section);
+              area.sections.push(section.toJSON());
             }
           });
 
