@@ -65,7 +65,8 @@ function update(req, res, next) {
   // White listed params
   const whiteList = {
     volume: req.body.volume,
-    order: req.body.order
+    order: req.body.order,
+    updated_at: req.body.updated_at
   };
 
   patchModel(placement, Placement, whiteList);
