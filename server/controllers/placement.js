@@ -65,7 +65,19 @@ function saveModel(req, res, next) {
   });
 
   placement.saveAsync()
-    .then((savedPlacement) => res.status(httpStatus.CREATED).json(savedPlacement))
+    .then((savedPlacement) => {
+      // Populate models if query string is true and the request type is get
+      if (req.query.populate === 'true') {
+        return Placement.populate(savedPlacement,
+          { path: 'inventory_item_id',
+          populate: {
+            path: 'product_id'
+          } });
+      }
+
+      return savedPlacement;
+    })
+    .then(savedPlacement => res.status(httpStatus.CREATED).json(savedPlacement))
     .error((e) => next(e));
 }
 
