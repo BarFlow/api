@@ -7,7 +7,7 @@ export default {
       venue_id: Joi.string().trim().required(),
       area_id: Joi.string().trim().required(),
       section_id: Joi.string().trim().required(),
-      inventory_item_id: Joi.string().trim().required(),
+      inventory_item_id: Joi.string().trim(),
       volume: Joi.number(),
       order: Joi.number().integer()
     }

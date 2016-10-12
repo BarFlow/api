@@ -49,16 +49,6 @@ const PlacementSchema = new mongoose.Schema({
   }
 });
 
-/**
- *  Set updated_at before model gets saved.
-*/
-PlacementSchema.pre('save', function PlacementModelPreSave(next) {
-  const placement = this;
-
-  placement.updated_at = new Date();
-
-  return next();
-});
 
 /**
  * Methods

@@ -97,6 +97,29 @@ InventorySchema.statics = {
       });
   },
 
+  create(data) {
+    return new Promise((resolve, reject) => {
+      const inventoryItem = new this(data);
+      inventoryItem.saveAsync()
+        .then((savedInventory) => resolve(savedInventory))
+        .error((e) => {
+          // If the product has been added to the venue already, ignore the request and
+          // send back the original model
+          if (e.code === 11000) {
+            return this.findOne({
+              venue_id: data.venue_id,
+              product_id: data.product_id
+            })
+            .execAsync()
+            .then((inventory) => resolve(inventory));
+          }
+
+          // If any other error occurs forward it
+          reject(e);
+        });
+    });
+  },
+
   /**
    * List inventoryItems associated with the current user, in ascending order of "order" attribute.
    * @param {number} skip - Number of inventoryItems to be skipped.

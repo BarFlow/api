@@ -34,6 +34,15 @@ describe('## Placement APIs', () => {
     measurable_till: 0.98764
   };
 
+  const product2 = {
+    name: 'Absolut2',
+    type: 'beverage',
+    category: 'vodka',
+    measurable: true,
+    measurable_from: 0.1234,
+    measurable_till: 0.98764
+  };
+
   const inventoryItem = {
     stock_level: 1.34,
     par_level: 15,
@@ -44,6 +53,11 @@ describe('## Placement APIs', () => {
   const placement = {
     volume: 1.23,
     order: 111
+  };
+
+  const placement2 = {
+    volume: 9.23,
+    order: 999
   };
 
   const headers = {};
@@ -75,8 +89,10 @@ describe('## Placement APIs', () => {
           area.venue_id = res.body._id;
           section.venue_id = res.body._id;
           product.venue_id = res.body._id;
+          product2.venue_id = res.body._id;
           inventoryItem.venue_id = res.body._id;
           placement.venue_id = res.body._id;
+          placement2.venue_id = res.body._id;
           done();
         })
         .catch(done);
@@ -108,6 +124,7 @@ describe('## Placement APIs', () => {
           area._id = res.body._id;
           section.area_id = res.body._id;
           placement.area_id = res.body._id;
+          placement2.area_id = res.body._id;
           done();
         })
         .catch(done);
@@ -125,6 +142,7 @@ describe('## Placement APIs', () => {
         .then(res => {
           section._id = res.body._id;
           placement.section_id = res.body._id;
+          placement2.section_id = res.body._id;
           done();
         })
         .catch(done);
@@ -190,6 +208,54 @@ describe('## Placement APIs', () => {
         .then(res => {
           expect(res.body[0].volume).to.equal(placement.volume);
           expect(res.body[0].order).to.equal(placement.order);
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+  describe('# POST /products', () => {
+    it('should create an product', (done) => {
+      request(app)
+        .post('/products')
+        .set(headers)
+        .send(product2)
+        .expect(httpStatus.CREATED)
+        .then(res => {
+          product2._id = res.body._id;
+          placement2.product_id = res.body._id;
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+  describe('# POST /placement', () => {
+    it('should create an placement item', (done) => {
+      request(app)
+        .post('/placements')
+        .set(headers)
+        .send(placement2)
+        .expect(httpStatus.CREATED)
+        .then(res => {
+          expect(res.body.volume).to.equal(placement2.volume);
+          expect(res.body.order).to.equal(placement2.order);
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+  describe('# GET /placement', () => {
+    it('should get list of placements', (done) => {
+      request(app)
+        .get('/placements')
+        .set(headers)
+        .send()
+        .expect(httpStatus.OK)
+        .then(res => {
+          expect(res.body[1].volume).to.equal(placement2.volume);
+          expect(res.body[1].order).to.equal(placement2.order);
           done();
         })
         .catch(done);

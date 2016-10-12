@@ -10,10 +10,10 @@ services:
     ports:
       - 8080:80
   api_v1:
-    image: barflow/api:v1
+    image: barflow/api:latest
     ports:
     - "3000"
-    links:
+    depends_on:
     - mongo
     environment:
       - DB=$DB
@@ -26,7 +26,7 @@ services:
     image: barflow/api:v2
     ports:
     - "3000"
-    links:
+    depends_on:
     - mongo
     environment:
       - DB=$DB

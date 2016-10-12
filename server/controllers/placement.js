@@ -1,6 +1,7 @@
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 import Placement from '../models/placement';
+import Inventory from '../models/inventory';
 import patchModel from '../helpers/patchModel';
 
 /**
@@ -34,6 +35,26 @@ function get(req, res) {
  * @returns {Placement}
  */
 function create(req, res, next) {
+  const err = new APIError('Either inventory_item_id or product_id is required.',
+  httpStatus.BAD_REQUEST, true);
+  // Required params missing from request body
+  if (!req.body.inventory_item_id && !req.body.product_id) {
+    return next(err);
+  }
+
+  // inventory_item_id is missing but product_id is given
+  if (!req.body.inventory_item_id && req.body.product_id) {
+    return Inventory.create(req.body)
+    .then(inventoryItem => {
+      req.body.inventory_item_id = inventoryItem._id; // eslint-disable-line
+      saveModel(req, res, next);
+    });
+  }
+
+  saveModel(req, res, next);
+}
+
+function saveModel(req, res, next) {
   const placement = new Placement({
     venue_id: req.body.venue_id,
     area_id: req.body.area_id,
@@ -44,7 +65,19 @@ function create(req, res, next) {
   });
 
   placement.saveAsync()
-    .then((savedPlacement) => res.status(httpStatus.CREATED).json(savedPlacement))
+    .then((savedPlacement) => {
+      // Populate models if query string is true and the request type is get
+      if (req.query.populate === 'true') {
+        return Placement.populate(savedPlacement,
+          { path: 'inventory_item_id',
+          populate: {
+            path: 'product_id'
+          } });
+      }
+
+      return savedPlacement;
+    })
+    .then(savedPlacement => res.status(httpStatus.CREATED).json(savedPlacement))
     .error((e) => next(e));
 }
 
@@ -65,7 +98,8 @@ function update(req, res, next) {
   // White listed params
   const whiteList = {
     volume: req.body.volume,
-    order: req.body.order
+    order: req.body.order,
+    updated_at: req.body.updated_at
   };
 
   patchModel(placement, Placement, whiteList);
