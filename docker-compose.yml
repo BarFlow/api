@@ -1,18 +1,17 @@
 version: '2'
 services:
   lb:
-    image: dockercloud/haproxy:staging
+    image: barflow/lb:latest
     links:
       - api_v1
       - api_v2
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - salespage
     ports:
-      - 8080:80
+      - "80:80"
   api_v1:
     image: barflow/api:latest
-    ports:
-    - "3000"
+    # ports:
+    # - "3000"
     depends_on:
     - mongo
     environment:
@@ -21,11 +20,10 @@ services:
       - NODE_ENV=$NODE_ENV
       - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-      - VIRTUAL_HOST=/v1/*
   api_v2:
     image: barflow/api:v2
-    ports:
-    - "3000"
+    # ports:
+    # - "3000"
     depends_on:
     - mongo
     environment:
@@ -34,10 +32,15 @@ services:
       - NODE_ENV=$NODE_ENV
       - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-      - VIRTUAL_HOST=/v2/*
+  salespage:
+    image: barflow/salespage
+    # ports:
+    # - "8080"
+    # environment:
+    #   - VIRTUAL_HOST=barflow.io
   mongo:
     image: mongo:3.2
-    ports:
-    - "27017"
+    # ports:
+    # - "27017"
     volumes:
     - ./data:/data/db

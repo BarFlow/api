@@ -72,7 +72,17 @@ function list(req, res, next) {
   // If parent_id is falsy set it to null, so we only get top level elements
   if (req.query.parent_id === '' || req.query.parent_id === 'null') req.query.parent_id = null; // eslint-disable-line
 
-  Type.list(req.query).then((types) =>	res.json(types))
+  Type.list(req.query).then((types) =>	res.json(types.map(type => {
+    const typeJson = type.toJSON();
+    const capitalizedTitle = typeJson.title.charAt(0).toUpperCase() + typeJson.title.slice(1);
+    typeJson.images = typeJson.images || {
+      thumbnail: `http://placehold.it/455x855/6D6D72/fff?text=${capitalizedTitle}`,
+      normal: `http://placehold.it/150x150/6D6D72/fff?text=${capitalizedTitle}`
+    };
+    typeJson.measurable_from = typeJson.measurable_from || 0.1;
+    typeJson.measurable_till = typeJson.measurable_till || 0.8;
+    return typeJson;
+  })))
     .error((e) => next(e));
 }
 
