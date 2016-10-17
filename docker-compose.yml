@@ -1,46 +1,48 @@
 version: '2'
 services:
-  lb:
+  barflow_lb:
     image: barflow/lb:latest
     links:
-      - api_v1
-      - api_v2
-      - salespage
+      - barflow_api_v1
+      - barflow_api_v2
+      - barflow_salespage
     ports:
       - "80:80"
-  api_v1:
-    image: barflow/api:latest
-    # ports:
-    # - "3000"
-    depends_on:
-    - mongo
-    environment:
-      - DB=$DB
-      - JWT_SECRET=$JWT_SECRET
-      - NODE_ENV=$NODE_ENV
-      - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-      - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-  api_v2:
-    image: barflow/api:v2
-    # ports:
-    # - "3000"
-    depends_on:
-    - mongo
-    environment:
-      - DB=$DB
-      - JWT_SECRET=$JWT_SECRET
-      - NODE_ENV=$NODE_ENV
-      - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-      - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-  salespage:
-    image: barflow/salespage
-    # ports:
-    # - "8080"
-    # environment:
-    #   - VIRTUAL_HOST=barflow.io
-  mongo:
-    image: mongo:3.2
-    # ports:
-    # - "27017"
+      - "443:443"
     volumes:
-    - ./data:/data/db
+      - ../secrets:/etc/ssl/certs
+      - ../secrets:/etc/letsencrypt/live/barflow.io
+  barflow_api_v1:
+    image: barflow/api:latest
+    ports:
+      - "3000"
+    depends_on:
+      - barflow_mongo
+    environment:
+      - DB=$DB
+      - JWT_SECRET=$JWT_SECRET
+      - NODE_ENV=$NODE_ENV
+      - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+  barflow_api_v2:
+    image: barflow/api:v2
+    ports:
+      - "3000"
+    depends_on:
+      - barflow_mongo
+    environment:
+      - DB=$DB
+      - JWT_SECRET=$JWT_SECRET
+      - NODE_ENV=$NODE_ENV
+      - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+  barflow_salespage:
+    image: barflow/salespage
+    ports:
+      - "8080"
+  barflow_mongo:
+    image: mongo:3.2
+    ports:
+      - "27017"
+    volumes:
+      - ./data:/data/db
