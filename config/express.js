@@ -46,12 +46,6 @@ if (config.env === 'development') {
   }));
 }
 
-// Remove api version string if present from req url: /v1.1/ -> /
-app.use((req, res, next) => {
-  req.url = req.url.replace(/^\/v\d+(\.?\d+)?\//,'/'); // eslint-disable-line
-  next();
-});
-
 // mount all routes to root
 app.use('/', routes);
 
@@ -86,7 +80,7 @@ if (config.env !== 'test') {
 app.use((err, req, res, next) =>		// eslint-disable-line no-unused-vars
   res.status(err.status).json({
     message: err.isPublic ? err.message : httpStatus[err.status],
-    stack: config.env === 'development' ? err.stack : {}
+    stack: config.env === 'development' ? err.stack : undefined
   })
 );
 

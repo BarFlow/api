@@ -120,7 +120,7 @@ ProductSchema.statics = {
       query.where({ name: new RegExp(`^${name}`, 'i') });
     }
 
-    query.sort({ order: 1 })
+    query.sort({ name: 1 })
     .skip(skip)
     .limit(limit);
 
