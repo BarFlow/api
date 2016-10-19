@@ -11,7 +11,7 @@ export default {
       images: Joi.object({
         thumbnail: Joi.string().trim().required(),
         normal: Joi.string().trim().required(),
-        original: Joi.string().trim().required()
+        original: Joi.string().trim()
       }),
       measurable: Joi.boolean(),
       measurable_from: Joi.number(),
