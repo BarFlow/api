@@ -23,6 +23,7 @@ const ProductSchema = new mongoose.Schema({
   },
   sub_category: {
     type: String,
+    default: 'other',
     index: true
   },
   images: {
@@ -108,7 +109,7 @@ ProductSchema.statics = {
   list(filters, whiteList) {
     const skip = parseInt(filters.skip, 10) || 0;
     delete filters.skip; // eslint-disable-line
-    const limit = parseInt(filters.limit, 10) || 30;
+    const limit = parseInt(filters.limit, 10) || 100;
     delete filters.limit; // eslint-disable-line
     const name = filters.name;
     delete filters.name; // eslint-disable-line
