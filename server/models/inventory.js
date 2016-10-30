@@ -87,7 +87,7 @@ InventorySchema.statics = {
   get(id) {
     return this.findById(id)
       .populate('product_id',
-      'name type category sub_category images capacity measurable measurable_from measurable_till')
+      '-__v -updated_at -created_at')
       .execAsync().then((inventoryItem) => {
         if (inventoryItem) {
           return inventoryItem;
@@ -129,11 +129,19 @@ InventorySchema.statics = {
   list(filters) {
     const skip = parseInt(filters.skip, 10) || 0;
     delete filters.skip; // eslint-disable-line
-    const limit = parseInt(filters.limit, 10) || 0;
+    const limit = parseInt(filters.limit, 10) || 30;
     delete filters.limit; // eslint-disable-line
-    return this.find()
-    .where(filters)
-    .sort({ order: 1 })
+    const populate = filters.populate || false;
+    delete filters.populate; // eslint-disable-line
+    const query = this.find()
+    .where(filters);
+    if (populate) {
+      query.populate({
+        path: 'product_id',
+        select: '-__v -updated_at -created_at',
+      });
+    }
+    return query.sort({ name: 1 })
     .skip(skip)
     .limit(limit)
     .execAsync();
