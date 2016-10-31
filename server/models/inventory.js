@@ -25,7 +25,7 @@ const InventorySchema = new mongoose.Schema({
     ref: 'Supplier'
   },
   supplier_product_code: {
-    type: Number
+    type: String
   },
   stock_level: {
     type: Number
