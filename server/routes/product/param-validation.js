@@ -7,7 +7,7 @@ export default {
       name: Joi.string().trim().required(),
       type: Joi.string().trim().required(),
       category: Joi.string().trim().required(),
-      sub_category: Joi.string().trim(),
+      sub_category: Joi.string().trim().empty(''),
       images: Joi.object({
         thumbnail: Joi.string().trim().required(),
         normal: Joi.string().trim().required(),
@@ -26,7 +26,7 @@ export default {
       name: Joi.string().trim(),
       type: Joi.string().trim(),
       category: Joi.string().trim(),
-      sub_category: Joi.string().trim(),
+      sub_category: Joi.string().trim().empty(''),
       images: Joi.object({
         thumbnail: Joi.string().trim(),
         normal: Joi.string().trim(),

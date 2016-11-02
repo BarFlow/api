@@ -15,8 +15,8 @@ export default {
     body: {
       name: Joi.string().trim(),
       email: Joi.string().trim(),
-      address: Joi.string().trim(),
-      tel: Joi.string().trim()
+      address: Joi.string().trim().empty(''),
+      tel: Joi.string().trim().empty('')
     }
   }
 };
