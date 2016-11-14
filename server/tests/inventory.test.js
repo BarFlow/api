@@ -27,9 +27,9 @@ describe('## Inventory APIs', () => {
   };
 
   const inventoryItem = {
-    stock_level: 1.34,
     par_level: 15,
-    wholesale_cost: 10,
+    cost_price: 1.34,
+    sale_unit_size: 10,
     sale_price: 20
   };
 
@@ -112,9 +112,9 @@ describe('## Inventory APIs', () => {
         .then(res => {
           inventoryItem._id = res.body._id;
           expect(res.body.product_id).to.equal(inventoryItem.product_id);
-          expect(res.body.stock_level).to.equal(inventoryItem.stock_level);
+          expect(res.body.cost_price).to.equal(inventoryItem.cost_price);
           expect(res.body.par_level).to.equal(inventoryItem.par_level);
-          expect(res.body.wholesale_cost).to.equal(inventoryItem.wholesale_cost);
+          expect(res.body.sale_unit_size).to.equal(inventoryItem.sale_unit_size);
           expect(res.body.sale_price).to.equal(inventoryItem.sale_price);
           expect(res.body.venue_id).to.equal(inventoryItem.venue_id);
           done();
@@ -132,9 +132,9 @@ describe('## Inventory APIs', () => {
         .expect(httpStatus.OK)
         .then(res => {
           expect(res.body[0].product_id).to.equal(inventoryItem.product_id);
-          expect(res.body[0].stock_level).to.equal(inventoryItem.stock_level);
+          expect(res.body[0].cost_price).to.equal(inventoryItem.cost_price);
           expect(res.body[0].par_level).to.equal(inventoryItem.par_level);
-          expect(res.body[0].wholesale_cost).to.equal(inventoryItem.wholesale_cost);
+          expect(res.body[0].sale_unit_size).to.equal(inventoryItem.sale_unit_size);
           expect(res.body[0].sale_price).to.equal(inventoryItem.sale_price);
           expect(res.body[0].venue_id).to.equal(inventoryItem.venue_id);
           done();
@@ -151,9 +151,9 @@ describe('## Inventory APIs', () => {
         .send()
         .expect(httpStatus.OK)
         .then(res => {
-          expect(res.body.stock_level).to.equal(inventoryItem.stock_level);
+          expect(res.body.cost_price).to.equal(inventoryItem.cost_price);
           expect(res.body.par_level).to.equal(inventoryItem.par_level);
-          expect(res.body.wholesale_cost).to.equal(inventoryItem.wholesale_cost);
+          expect(res.body.sale_unit_size).to.equal(inventoryItem.sale_unit_size);
           expect(res.body.sale_price).to.equal(inventoryItem.sale_price);
           expect(res.body.venue_id).to.equal(inventoryItem.venue_id);
           done();

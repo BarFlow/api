@@ -28,18 +28,7 @@ function get(req, res) {
  * @returns {Inventory}
  */
 function create(req, res, next) {
-  const inventoryItem = {
-    venue_id: req.body.venue_id,
-    product_id: req.body.product_id,
-    supplier_id: req.body.supplier_id,
-    supplier_product_code: req.body.supplier_product_code,
-    stock_level: req.body.stock_level,
-    par_level: req.body.par_level,
-    wholesale_cost: req.body.wholesale_cost,
-    sale_price: req.body.sale_price
-  };
-
-  Inventory.create(inventoryItem)
+  Inventory.create(req.body)
     .then((savedInventory) => res.status(httpStatus.CREATED).json(savedInventory))
     .error((e) => {
       next(e);

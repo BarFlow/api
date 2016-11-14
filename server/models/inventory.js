@@ -27,17 +27,26 @@ const InventorySchema = new mongoose.Schema({
   supplier_product_code: {
     type: String
   },
-  stock_level: {
-    type: Number
-  },
   par_level: {
     type: Number
   },
-  wholesale_cost: {
+  cost_price: {
     type: Number
   },
   sale_price: {
     type: Number
+  },
+  sale_unit_size: {
+    type: Number
+  },
+  package_size: {
+    type: Number
+  },
+  count_as_full: {
+    type: Number
+  },
+  measurable: {
+    type: Boolean
   },
   created_at: {
     type: Date,
