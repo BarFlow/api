@@ -118,7 +118,7 @@ ProductSchema.statics = {
     query.where(filters);
 
     if (name) {
-      query.where({ name: new RegExp(`^${name}`, 'i') });
+      query.where({ name: new RegExp(name, 'i') });
     }
 
     query.sort({ name: 1 })

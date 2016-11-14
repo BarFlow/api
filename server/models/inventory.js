@@ -133,15 +133,36 @@ InventorySchema.statics = {
     delete filters.limit; // eslint-disable-line
     const populate = filters.populate || false;
     delete filters.populate; // eslint-disable-line
-    const query = this.find()
-    .where(filters);
+    const product = filters.product || {};
+    delete filters.product; // eslint-disable-line
+    const query = this.find(filters);
     if (populate) {
-      query.populate({
+      if (product.name) {
+        product.name = new RegExp(product.name, 'i') // eslint-disable-line
+      }
+      return query.populate({
         path: 'product_id',
         select: '-__v -updated_at -created_at',
-      });
+        match: product
+      })
+      .execAsync()
+      .then(items =>
+        items.filter(item => item.product_id !== null)
+        .sort((a, b) => {
+          const nameA = a.product_id.name.toUpperCase();
+          const nameB = b.product_id.name.toUpperCase();
+          if (nameA < nameB) {
+            return -1;
+          }
+          if (nameA > nameB) {
+            return 1;
+          }
+          return 0;
+        })
+        .splice(skip, limit)
+      );
     }
-    return query.sort({ name: 1 })
+    return query
     .skip(skip)
     .limit(limit)
     .execAsync();
