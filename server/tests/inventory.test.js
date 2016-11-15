@@ -143,6 +143,26 @@ describe('## Inventory APIs', () => {
     });
   });
 
+  describe('# GET /inventory', () => {
+    it('should get list of inventory items even with empty product params in query', (done) => {
+      request(app)
+        .get('/inventory?product[name]')
+        .set(headers)
+        .send()
+        .expect(httpStatus.OK)
+        .then(res => {
+          expect(res.body[0].product_id).to.equal(inventoryItem.product_id);
+          expect(res.body[0].cost_price).to.equal(inventoryItem.cost_price);
+          expect(res.body[0].par_level).to.equal(inventoryItem.par_level);
+          expect(res.body[0].sale_unit_size).to.equal(inventoryItem.sale_unit_size);
+          expect(res.body[0].sale_price).to.equal(inventoryItem.sale_price);
+          expect(res.body[0].venue_id).to.equal(inventoryItem.venue_id);
+          done();
+        })
+        .catch(done);
+    });
+  });
+
   describe('# GET /inventory/:inventory_id', () => {
     it('should get the inventory', (done) => {
       request(app)

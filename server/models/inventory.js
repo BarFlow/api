@@ -43,7 +43,8 @@ const InventorySchema = new mongoose.Schema({
     type: Number
   },
   count_as_full: {
-    type: Number
+    type: Number,
+    default: 0.5
   },
   measurable: {
     type: Boolean
@@ -142,8 +143,17 @@ InventorySchema.statics = {
     delete filters.limit; // eslint-disable-line
     const populate = filters.populate || false;
     delete filters.populate; // eslint-disable-line
-    const product = filters.product || {};
+
+    // Clear all product filters that has no value but present in query
+    const product = filters.product ? Object.keys(filters.product).reduce((mem, key) => {
+      if (filters.product[key] !== '') {
+        mem[key] = filters.product[key]; // eslint-disable-line
+      }
+      return mem;
+    }, {})
+    : {};
     delete filters.product; // eslint-disable-line
+
     const query = this.find(filters);
     if (populate) {
       if (product.name) {
