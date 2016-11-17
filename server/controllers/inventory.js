@@ -84,7 +84,10 @@ function list(req, res, next) {
     req.query.venue_id = { $in: venues }; // eslint-disable-line
   }
 
-  Inventory.list(req.query).then((inventoryItems) =>	res.json(inventoryItems))
+  Inventory.list(req.query)
+    .then((results) =>
+      res.header('X-Total-Count', results.count).json(results.items)
+    )
     .error((e) => next(e));
 }
 

@@ -165,8 +165,8 @@ InventorySchema.statics = {
         match: product
       })
       .execAsync()
-      .then(items =>
-        items.filter(item => item.product_id !== null)
+      .then(results => {
+        let items = results.filter(item => item.product_id !== null)
         .sort((a, b) => {
           const nameA = a.product_id.name.toUpperCase();
           const nameB = b.product_id.name.toUpperCase();
@@ -177,14 +177,18 @@ InventorySchema.statics = {
             return 1;
           }
           return 0;
-        })
-        .splice(skip, limit)
-      );
+        });
+        const count = items.length;
+        items = items.splice(skip, limit);
+
+        return { items, count };
+      });
     }
     return query
     .skip(skip)
     .limit(limit)
-    .execAsync();
+    .execAsync()
+    .then(items => ({ items, count: 0 }));
   },
 
   /**
