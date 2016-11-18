@@ -29,7 +29,15 @@ function get(req, res) {
  */
 function create(req, res, next) {
   Inventory.create(req.body)
-    .then((savedInventory) => res.status(httpStatus.CREATED).json(savedInventory))
+    .then((savedInventory) => {
+      // Populate models if query string is true and the request type is get
+      if (req.query.populate === 'true') {
+        return Inventory.populate(savedInventory, { path: 'product_id' });
+      }
+
+      return savedInventory;
+    })
+    .then(savedInventory => res.status(httpStatus.CREATED).json(savedInventory))
     .error((e) => {
       next(e);
     });
