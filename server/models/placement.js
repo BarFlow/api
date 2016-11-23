@@ -119,7 +119,9 @@ PlacementSchema.statics = {
     return query.sort({ order: 1 })
     .skip(skip)
     .limit(limit)
-    .execAsync();
+    .execAsync()
+    // remove orphan placemnets
+    .then(results => results.filter(result => result.inventory_item_id));
   },
 
   /**
