@@ -13,12 +13,14 @@ const SupplierSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: true
   },
   address: {
     type: String,
   },
   tel: {
+    type: String,
+  },
+  account_number: {
     type: String,
   },
   approved: {
