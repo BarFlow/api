@@ -1,4 +1,4 @@
-import Joi from 'joi';
+import Joi from '../../helpers/customJoi';
 
 export default {
   // POST /
@@ -7,9 +7,9 @@ export default {
       profile: {
         name: Joi.string().trim().required(),
         email: Joi.string().trim().regex(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/).required(), // eslint-disable-line
-        tel: Joi.string().trim().empty(''),
-        address: Joi.string().trim().empty(''),
-        type: Joi.string().trim().empty('')
+        tel: Joi.string().trim(),
+        address: Joi.string().trim(),
+        type: Joi.string().trim()
       }
     }
   },
@@ -19,9 +19,9 @@ export default {
       profile: {
         name: Joi.string().trim(),
         email: Joi.string().trim().regex(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/),  // eslint-disable-line
-        tel: Joi.string().trim().allow(null).empty(''),
-        address: Joi.string().trim().allow(null).empty(''),
-        type: Joi.string().trim().allow(null).empty('')
+        tel: Joi.string().trim().empty(''),
+        address: Joi.string().trim().empty(''),
+        type: Joi.string().trim().empty('')
       }
     }
   },

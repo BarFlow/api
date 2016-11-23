@@ -1,4 +1,4 @@
-import Joi from 'joi';
+import Joi from '../../helpers/customJoi';
 
 export default {
   // POST /
@@ -31,7 +31,7 @@ export default {
         thumbnail: Joi.string().trim(),
         normal: Joi.string().trim(),
         original: Joi.string().trim()
-      }),
+      }).empty(''),
       measurable: Joi.boolean(),
       measurable_from: Joi.number(),
       measurable_till: Joi.number(),

@@ -1,43 +1,49 @@
-import Joi from 'joi';
+import Joi from '../../helpers/customJoi';
 
 export default {
   // POST /
   create: {
     body: {
-      venue_id: Joi.string().trim().required(),
-      product_id: Joi.string().trim().required(),
-      supplier_id: Joi.string().trim(),
+      venue_id: Joi.objectId().trim().required(),
+      product_id: Joi.objectId().trim().required(),
+      supplier_id: Joi.objectId().trim(),
       supplier_product_code: Joi.string().trim().empty(''),
-      stock_level: Joi.number(),
       par_level: Joi.number(),
-      wholesale_cost: Joi.number(),
+      package_size: Joi.number(),
+      count_as_full: Joi.number(),
+      sale_unit_size: Joi.number(),
+      cost_price: Joi.number(),
       sale_price: Joi.number()
     }
   },
   // PUT /:area_id
   update: {
     body: {
-      product_id: Joi.string().trim(),
-      supplier_id: Joi.string().trim(),
+      product_id: Joi.objectId().trim(),
+      supplier_id: Joi.objectId().allow(null),
       supplier_product_code: Joi.string().trim().empty(''),
-      stock_level: Joi.number(),
-      par_level: Joi.number(),
-      wholesale_cost: Joi.number(),
-      sale_price: Joi.number()
+      par_level: Joi.number().empty(''),
+      package_size: Joi.number().empty(''),
+      count_as_full: Joi.number().empty(''),
+      sale_unit_size: Joi.number().empty(''),
+      cost_price: Joi.number().empty(''),
+      sale_price: Joi.number().empty('')
     }
   },
   // PUT /
   bulkUpdate: {
     body: Joi.array().items(Joi.object({
-      _id: Joi.string().trim().required(),
-      venue_id: Joi.string().trim().required(),
-      product_id: Joi.string().trim(),
-      supplier_id: Joi.string().trim(),
+      _id: Joi.objectId().trim().required(),
+      venue_id: Joi.objectId().trim().required(),
+      product_id: Joi.objectId().trim(),
+      supplier_id: Joi.objectId().allow(null),
       supplier_product_code: Joi.string().trim().empty(''),
-      stock_level: Joi.number(),
-      par_level: Joi.number(),
-      wholesale_cost: Joi.number(),
-      sale_price: Joi.number()
+      par_level: Joi.number().empty(''),
+      package_size: Joi.number().empty(''),
+      count_as_full: Joi.number().empty(''),
+      sale_unit_size: Joi.number().empty(''),
+      cost_price: Joi.number().empty(''),
+      sale_price: Joi.number().empty('')
     }))
   }
 };
