@@ -51,32 +51,44 @@ function generateReport(filters) {
   .then(results =>
     results.filter(item => item.inventory_item_id && item.area_id && item.section_id)
     .reduce((mem, item) => {
-      item = item.toObject(); //eslint-disable-line
+      item = item.toObject();
       if (!mem[item.inventory_item_id._id]) {
-        mem[item.inventory_item_id._id] = item.inventory_item_id; // eslint-disable-line
-        mem[item.inventory_item_id._id].areas = {}; // eslint-disable-line
-        mem[item.inventory_item_id._id].volume = 0; // eslint-disable-line
+        mem[item.inventory_item_id._id] = item.inventory_item_id;
+        mem[item.inventory_item_id._id].areas = {};
+        mem[item.inventory_item_id._id].volume = 0;
       }
       if (!mem[item.inventory_item_id._id].areas[item.area_id._id]) {
-        mem[item.inventory_item_id._id].areas[item.area_id._id] = item.area_id; //eslint-disable-line
-        mem[item.inventory_item_id._id].areas[item.area_id._id].sections = {}; //eslint-disable-line
-        mem[item.inventory_item_id._id].areas[item.area_id._id].volume = 0; //eslint-disable-line
+        mem[item.inventory_item_id._id].areas[item.area_id._id] = item.area_id;
+        mem[item.inventory_item_id._id].areas[item.area_id._id].sections = {};
+        mem[item.inventory_item_id._id].areas[item.area_id._id].volume = 0;
       }
       if (!mem[item.inventory_item_id._id].areas[item.area_id._id].sections[item.section_id._id]) {
         mem[item.inventory_item_id._id].areas[item.area_id._id].sections[item.section_id._id] = item.section_id; //eslint-disable-line
         mem[item.inventory_item_id._id].areas[item.area_id._id].sections[item.section_id._id].volume = 0; //eslint-disable-line
       }
 
-      mem[item.inventory_item_id._id].volume += item.volume; //eslint-disable-line
-      mem[item.inventory_item_id._id].areas[item.area_id._id].volume += item.volume; //eslint-disable-line
+      mem[item.inventory_item_id._id].volume += item.volume;
+      mem[item.inventory_item_id._id].areas[item.area_id._id].volume += item.volume;
       mem[item.inventory_item_id._id].areas[item.area_id._id].sections[item.section_id._id].volume += item.volume; //eslint-disable-line
       return mem;
     }, {})
   )
   .then((results) => {
     const report = Object.keys(results).map((itemId) => {
-      results[itemId].areas = Object.keys(results[itemId].areas).map(areaId => { //eslint-disable-line
-        results[itemId].areas[areaId].sections = Object.keys(results[itemId].areas[areaId].sections) //eslint-disable-line
+      // calculating how much to order based on par_level, volume and count_as_full
+      results[itemId].order = 0;
+      let order = results[itemId].par_level - results[itemId].volume;
+      if (results[itemId].par_level && order > 0) {
+        const maradek = order % 1;
+        order -= maradek;
+        if (maradek > results[itemId].count_as_full) {
+          order++;
+        }
+        results[itemId].order = order;
+      }
+
+      results[itemId].areas = Object.keys(results[itemId].areas).map((areaId) => {
+        results[itemId].areas[areaId].sections = Object.keys(results[itemId].areas[areaId].sections)
         .map(sectionId =>
           results[itemId].areas[areaId].sections[sectionId]
         );
@@ -98,27 +110,36 @@ function getExport(req, res) {
 }
 
 function generateXLSfromReport(report) {
-  let productNameMaxLength = 0;
+  let productNameMaxLength = 10;
+  let categoryMaxLength = 10;
+  let supplierNameMaxLength = 10;
+
   const products = _.orderBy(report.map((item) => {
     const supplier = item.supplier_id || {};
-
-    let order = 0;
-    if (item.par_level - item.volume > 0) {
-      order = item.par_level - item.volume;
+    if (supplier.name && supplier.name.length > supplierNameMaxLength) {
+      supplierNameMaxLength = supplier.name.length;
     }
 
     if (item.product_id.name.length > productNameMaxLength) {
       productNameMaxLength = item.product_id.name.length;
     }
 
+    let category = item.product_id.category || 'other';
+    if (item.product_id.sub_category) {
+      category += `/${item.product_id.sub_category}`;
+    }
+    if (category.length > categoryMaxLength) {
+      categoryMaxLength = category.length;
+    }
+
     return {
-      category: item.product_id.category || 'other',
+      category,
       name: item.product_id.name,
       supplier: supplier.name || '',
       sku: item.supplier_product_code || '',
       par_level: item.par_level || 0,
-      stock_level: item.volume || 0,
-      order
+      stock_level: parseFloat(item.volume.toFixed(1)) || 0,
+      order: item.order || 0
     };
   }), ['category', 'supplier', 'name']);
 
@@ -127,6 +148,15 @@ function generateXLSfromReport(report) {
 
   // Add Worksheets to the workbook
   const ws = wb.addWorksheet('Stock Sheet');
+
+  const header = wb.createStyle({
+    font: {
+      bold: true,
+    },
+    alignment: {
+      horizontal: 'center'
+    }
+  });
 
   const columns = [
     { key: 'category', title: 'Category', type: 'string' },
@@ -141,7 +171,7 @@ function generateXLSfromReport(report) {
   for (let i = 0; i < products.length; i++) {
     if (i === 0) {
       for (let k = 0; k < columns.length; k++) {
-        ws.cell(i + 1, k + 1).string(columns[k].title);
+        ws.cell(i + 1, k + 1).string(columns[k].title).style(header);
       }
     }
     for (let j = 0; j < columns.length; j++) {
@@ -149,7 +179,9 @@ function generateXLSfromReport(report) {
     }
   }
 
+  ws.column(1).setWidth(categoryMaxLength);
   ws.column(2).setWidth(productNameMaxLength);
+  ws.column(3).setWidth(supplierNameMaxLength);
 
   return wb;
 }
