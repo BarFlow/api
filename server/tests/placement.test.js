@@ -68,7 +68,7 @@ describe('## Placement APIs', () => {
         .post('/auth/signup')
         .send(user)
         .expect(httpStatus.CREATED)
-        .then(res => {
+        .then((res) => {
           user._id = res.body.user._id;
           headers.Authorization = `Bearer ${res.body.token}`;
           done();
@@ -84,7 +84,7 @@ describe('## Placement APIs', () => {
         .set(headers)
         .send(venue)
         .expect(httpStatus.CREATED)
-        .then(res => {
+        .then((res) => {
           venue._id = res.body._id;
           area.venue_id = res.body._id;
           section.venue_id = res.body._id;
@@ -105,7 +105,7 @@ describe('## Placement APIs', () => {
         .post('/auth/login')
         .send(user)
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           headers.Authorization = `Bearer ${res.body.token}`;
           done();
         })
@@ -120,7 +120,7 @@ describe('## Placement APIs', () => {
         .set(headers)
         .send(area)
         .expect(httpStatus.CREATED)
-        .then(res => {
+        .then((res) => {
           area._id = res.body._id;
           section.area_id = res.body._id;
           placement.area_id = res.body._id;
@@ -139,7 +139,7 @@ describe('## Placement APIs', () => {
         .set(headers)
         .send(section)
         .expect(httpStatus.CREATED)
-        .then(res => {
+        .then((res) => {
           section._id = res.body._id;
           placement.section_id = res.body._id;
           placement2.section_id = res.body._id;
@@ -156,7 +156,7 @@ describe('## Placement APIs', () => {
         .set(headers)
         .send(product)
         .expect(httpStatus.CREATED)
-        .then(res => {
+        .then((res) => {
           product._id = res.body._id;
           inventoryItem.product_id = res.body._id;
           done();
@@ -172,7 +172,7 @@ describe('## Placement APIs', () => {
         .set(headers)
         .send(inventoryItem)
         .expect(httpStatus.CREATED)
-        .then(res => {
+        .then((res) => {
           inventoryItem._id = res.body._id;
           placement.inventory_item_id = res.body._id;
           done();
@@ -188,7 +188,7 @@ describe('## Placement APIs', () => {
         .set(headers)
         .send(placement)
         .expect(httpStatus.CREATED)
-        .then(res => {
+        .then((res) => {
           placement._id = res.body._id;
           expect(res.body.volume).to.equal(placement.volume);
           expect(res.body.order).to.equal(placement.order);
@@ -205,7 +205,7 @@ describe('## Placement APIs', () => {
         .set(headers)
         .send()
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           expect(res.body[0].volume).to.equal(placement.volume);
           expect(res.body[0].order).to.equal(placement.order);
           done();
@@ -221,7 +221,7 @@ describe('## Placement APIs', () => {
         .set(headers)
         .send(product2)
         .expect(httpStatus.CREATED)
-        .then(res => {
+        .then((res) => {
           product2._id = res.body._id;
           placement2.product_id = res.body._id;
           done();
@@ -237,7 +237,7 @@ describe('## Placement APIs', () => {
         .set(headers)
         .send(placement2)
         .expect(httpStatus.CREATED)
-        .then(res => {
+        .then((res) => {
           expect(res.body.volume).to.equal(placement2.volume);
           expect(res.body.order).to.equal(placement2.order);
           done();
@@ -253,7 +253,7 @@ describe('## Placement APIs', () => {
         .set(headers)
         .send()
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           expect(res.body[1].volume).to.equal(placement2.volume);
           expect(res.body[1].order).to.equal(placement2.order);
           done();
@@ -269,7 +269,7 @@ describe('## Placement APIs', () => {
         .set(headers)
         .send()
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           expect(res.body.volume).to.equal(placement.volume);
           expect(res.body.order).to.equal(placement.order);
           done();
@@ -288,7 +288,7 @@ describe('## Placement APIs', () => {
           updated_at: new Date()
         })
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           expect(res.body._id).to.equal(placement._id);
           expect(res.body.volume).to.equal(999);
           expect(res.body.venue_id).to.equal(placement.venue_id);
@@ -354,7 +354,7 @@ describe('## Placement APIs', () => {
         .set(headers)
         .send()
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           expect(res.body._id).to.equal(placement._id);
           expect(res.body.volume).to.equal(111);
           expect(res.body.venue_id).to.equal(placement.venue_id);

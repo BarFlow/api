@@ -1,9 +1,9 @@
 import httpStatus from 'http-status';
-import APIError from '../helpers/APIError';
 import multer from 'multer';
 import uuid from 'uuid';
 import Upload from 's3-uploader';
 import path from 'path';
+import APIError from '../helpers/APIError';
 import config from '../../config/env';
 
 const storage = multer.diskStorage({

@@ -41,7 +41,7 @@ describe('## Inventory APIs', () => {
         .post('/auth/signup')
         .send(user)
         .expect(httpStatus.CREATED)
-        .then(res => {
+        .then((res) => {
           user._id = res.body.user._id;
           headers.Authorization = `Bearer ${res.body.token}`;
           done();
@@ -57,7 +57,7 @@ describe('## Inventory APIs', () => {
         .set(headers)
         .send(venue)
         .expect(httpStatus.CREATED)
-        .then(res => {
+        .then((res) => {
           venue._id = res.body._id;
           product.venue_id = res.body._id;
           inventoryItem.venue_id = res.body._id;
@@ -76,7 +76,7 @@ describe('## Inventory APIs', () => {
         .post('/auth/login')
         .send(user)
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           headers.Authorization = `Bearer ${res.body.token}`;
           done();
         })
@@ -91,7 +91,7 @@ describe('## Inventory APIs', () => {
         .set(headers)
         .send(product)
         .expect(httpStatus.CREATED)
-        .then(res => {
+        .then((res) => {
           product._id = res.body._id;
           inventoryItem.product_id = res.body._id;
           expect(res.body.name).to.equal(product.name);
@@ -109,7 +109,7 @@ describe('## Inventory APIs', () => {
         .set(headers)
         .send(inventoryItem)
         .expect(httpStatus.CREATED)
-        .then(res => {
+        .then((res) => {
           inventoryItem._id = res.body._id;
           expect(res.body.product_id).to.equal(inventoryItem.product_id);
           expect(res.body.cost_price).to.equal(inventoryItem.cost_price);
@@ -130,7 +130,7 @@ describe('## Inventory APIs', () => {
         .set(headers)
         .send()
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           expect(res.body[0].product_id).to.equal(inventoryItem.product_id);
           expect(res.body[0].cost_price).to.equal(inventoryItem.cost_price);
           expect(res.body[0].par_level).to.equal(inventoryItem.par_level);
@@ -150,7 +150,7 @@ describe('## Inventory APIs', () => {
         .set(headers)
         .send()
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           expect(res.body[0].product_id).to.equal(inventoryItem.product_id);
           expect(res.body[0].cost_price).to.equal(inventoryItem.cost_price);
           expect(res.body[0].par_level).to.equal(inventoryItem.par_level);
@@ -170,7 +170,7 @@ describe('## Inventory APIs', () => {
         .set(headers)
         .send()
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           expect(res.body.cost_price).to.equal(inventoryItem.cost_price);
           expect(res.body.par_level).to.equal(inventoryItem.par_level);
           expect(res.body.sale_unit_size).to.equal(inventoryItem.sale_unit_size);
@@ -191,7 +191,7 @@ describe('## Inventory APIs', () => {
           sale_price: 999
         })
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           expect(res.body._id).to.equal(inventoryItem._id);
           expect(res.body.sale_price).to.equal(999);
           expect(res.body.venue_id).to.equal(inventoryItem.venue_id);
@@ -223,7 +223,7 @@ describe('## Inventory APIs', () => {
         .set(headers)
         .send()
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           expect(res.body._id).to.equal(inventoryItem._id);
           expect(res.body.sale_price).to.equal(111);
           expect(res.body.venue_id).to.equal(inventoryItem.venue_id);

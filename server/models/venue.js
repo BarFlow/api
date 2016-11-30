@@ -123,7 +123,7 @@ VenueSchema.statics = {
     return this.find({ 'members.user_id': userId })
       .sort({ created_at: -1 })
       .execAsync()
-      .then(venues => venues.map(venue => {
+      .then(venues => venues.map((venue) => {
         venue.role = venue.getRole(userId); // eslint-disable-line
         return venue;
       }));

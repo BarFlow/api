@@ -32,7 +32,7 @@ describe('## Section APIs', () => {
         .post('/auth/signup')
         .send(user)
         .expect(httpStatus.CREATED)
-        .then(res => {
+        .then((res) => {
           user._id = res.body.user._id;
           headers.Authorization = `Bearer ${res.body.token}`;
           done();
@@ -48,7 +48,7 @@ describe('## Section APIs', () => {
         .set(headers)
         .send(venue)
         .expect(httpStatus.CREATED)
-        .then(res => {
+        .then((res) => {
           venue._id = res.body._id;
           section.venue_id = res.body._id;
           expect(res.body.profile.name).to.equal('Demo Bar');
@@ -66,7 +66,7 @@ describe('## Section APIs', () => {
         .post('/auth/login')
         .send(user)
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           headers.Authorization = `Bearer ${res.body.token}`;
           done();
         })
@@ -81,7 +81,7 @@ describe('## Section APIs', () => {
         .set(headers)
         .send(section)
         .expect(httpStatus.CREATED)
-        .then(res => {
+        .then((res) => {
           section._id = res.body._id;
           expect(res.body.name).to.equal('Main Section');
           expect(res.body.venue_id).to.equal(section.venue_id);
@@ -98,7 +98,7 @@ describe('## Section APIs', () => {
         .set(headers)
         .send()
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           expect(res.body[0]._id).to.equal(section._id);
           expect(res.body[0].name).to.equal('Main Section');
           expect(res.body[0].venue_id).to.equal(section.venue_id);
@@ -115,7 +115,7 @@ describe('## Section APIs', () => {
         .set(headers)
         .send()
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           expect(res.body._id).to.equal(section._id);
           expect(res.body.name).to.equal('Main Section');
           expect(res.body.venue_id).to.equal(section.venue_id);
@@ -134,7 +134,7 @@ describe('## Section APIs', () => {
           name: 'Patio Section'
         })
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           expect(res.body._id).to.equal(section._id);
           expect(res.body.name).to.equal('Patio Section');
           expect(res.body.venue_id).to.equal(section.venue_id);
@@ -166,7 +166,7 @@ describe('## Section APIs', () => {
         .set(headers)
         .send()
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           expect(res.body._id).to.equal(section._id);
           expect(res.body.name).to.equal('Patio Section Batch');
           expect(res.body.venue_id).to.equal(section.venue_id);

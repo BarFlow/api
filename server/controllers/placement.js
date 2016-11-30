@@ -17,7 +17,7 @@ function load(req, res, next, id) {
     req.venueId = placement.venue_id; // eslint-disable-line no-param-reassign
     req.placement = placement; // eslint-disable-line no-param-reassign
     return next();
-  }).error((e) => next(e));
+  }).error(e => next(e));
 }
 
 /**
@@ -45,7 +45,7 @@ function create(req, res, next) {
   // inventory_item_id is missing but product_id is given
   if (!req.body.inventory_item_id && req.body.product_id) {
     return Inventory.create(req.body)
-    .then(inventoryItem => {
+    .then((inventoryItem) => {
       req.body.inventory_item_id = inventoryItem._id; // eslint-disable-line
       saveModel(req, res, next);
     });
@@ -70,15 +70,15 @@ function saveModel(req, res, next) {
       if (req.query.populate === 'true') {
         return Placement.populate(savedPlacement,
           { path: 'inventory_item_id',
-          populate: {
-            path: 'product_id'
-          } });
+            populate: {
+              path: 'product_id'
+            } });
       }
 
       return savedPlacement;
     })
     .then(savedPlacement => res.status(httpStatus.CREATED).json(savedPlacement))
-    .error((e) => next(e));
+    .error(e => next(e));
 }
 
 /**
@@ -105,8 +105,8 @@ function update(req, res, next) {
   patchModel(placement, Placement, whiteList);
 
   placement.saveAsync()
-    .then((savedPlacement) => res.json(savedPlacement))
-    .error((e) => next(e));
+    .then(savedPlacement => res.json(savedPlacement))
+    .error(e => next(e));
 }
 
 /**
@@ -115,8 +115,8 @@ function update(req, res, next) {
  * @returns {Placement}
  */
 function bulkUpdate(req, res, next) {
-  Placement.bulkUpdate(req.body).then(() =>	res.status(httpStatus.ACCEPTED).send())
-    .error((e) => next(e));
+  Placement.bulkUpdate(req.body).then(() => res.status(httpStatus.ACCEPTED).send())
+    .error(e => next(e));
 }
 
 /**
@@ -134,8 +134,8 @@ function list(req, res, next) {
   // Populate models if query string is true and the request type is get
   req.query.populate = req.query.populate === 'true' && req.method === 'GET'; // eslint-disable-line
 
-  Placement.list(req.query).then((placements) =>	res.json(placements))
-    .error((e) => next(e));
+  Placement.list(req.query).then(placements => res.json(placements))
+    .error(e => next(e));
 }
 
 /**
@@ -146,8 +146,8 @@ function remove(req, res, next) {
   const placement = req.placement;
 
   placement.removeAsync()
-    .then((deletedPlacement) => res.json(deletedPlacement))
-    .error((e) => next(e));
+    .then(deletedPlacement => res.json(deletedPlacement))
+    .error(e => next(e));
 }
 
 export default { load, get, create, update, bulkUpdate, list, remove };

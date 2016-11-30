@@ -3,7 +3,17 @@ import httpStatus from 'http-status';
 import APIError from './APIError';
 import config from '../../config/env';
 
-const authenticate = expressJwt({ secret: config.jwtSecret });
+const authenticate = expressJwt({
+  secret: config.jwtSecret,
+  getToken: function fromHeaderOrQuerystring(req) {
+    if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+      return req.headers.authorization.split(' ')[1];
+    } else if (req.query && req.query.token) {
+      return req.query.token;
+    }
+    return null;
+  }
+});
 
 const getAuthorityLevel = (role) => {
   let authority = 0;
@@ -23,7 +33,7 @@ const getAuthorityLevel = (role) => {
   return authority;
 };
 
-const authorize = (role) =>
+const authorize = role =>
   (req, res, next) => {
     // Set error message based on method
     const err = new APIError(
@@ -46,7 +56,7 @@ const authorize = (role) =>
 
     // Batch update resources
     } else if ((req.method === 'PUT' || req.method === 'PATCH') && Array.isArray(req.body)) {
-      req.body.forEach(obj => {
+      req.body.forEach((obj) => {
         if (obj.venue_id) {
           venueIds.push(obj.venue_id);
         }

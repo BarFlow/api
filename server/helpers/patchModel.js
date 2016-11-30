@@ -1,5 +1,5 @@
 const updateDocument = function updateDocument(doc, SchemaTarget, data) {
-  for (const field in SchemaTarget.schema.paths) {
+  for (const field in SchemaTarget.schema.paths) {  //eslint-disable-line
     if ((field !== '_id') && (field !== '__v')) {
       const newValue = getObjValue(field, data);
       if (newValue !== undefined) {
@@ -11,7 +11,7 @@ const updateDocument = function updateDocument(doc, SchemaTarget, data) {
 };
 
 function getObjValue(field, data) {
-  return field.split('.').reduce((obj, f) => {
+  return field.split('.').reduce((obj, f) => { //eslint-disable-line
     if (obj) return obj[f];
   }, data);
 }

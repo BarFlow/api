@@ -4,7 +4,7 @@ import auth from '../../helpers/auth';
 import paramValidation from './param-validation';
 import venueCtrl from '../../controllers/venue';
 
-const router = express.Router();	// eslint-disable-line new-cap
+const router = express.Router();  // eslint-disable-line new-cap
 
 /** POST /venues - Creates a new venue */
 router.route('/')

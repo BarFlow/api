@@ -9,7 +9,7 @@ function load(req, res, next, id) {
   Type.get(id).then((type) => {
     req.type = type; // eslint-disable-line no-param-reassign
     return next();
-  }).error((e) => next(e));
+  }).error(e => next(e));
 }
 
 /**
@@ -30,8 +30,8 @@ function create(req, res, next) {
   const type = new Type(req.body);
 
   type.saveAsync()
-    .then((savedType) => res.status(httpStatus.CREATED).json(savedType))
-    .error((e) => next(e));
+    .then(savedType => res.status(httpStatus.CREATED).json(savedType))
+    .error(e => next(e));
 }
 
 /**
@@ -46,8 +46,8 @@ function update(req, res, next) {
   patchModel(type, Type, req.body);
 
   type.saveAsync()
-    .then((savedType) => res.json(savedType))
-    .error((e) => next(e));
+    .then(savedType => res.json(savedType))
+    .error(e => next(e));
 }
 
 /**
@@ -58,8 +58,8 @@ function update(req, res, next) {
 function bulkUpdate(req, res, next) {
   const types = req.body;
 
-  Type.bulkUpdate(types).then(() =>	res.status(httpStatus.ACCEPTED).send())
-    .error((e) => next(e));
+  Type.bulkUpdate(types).then(() => res.status(httpStatus.ACCEPTED).send())
+    .error(e => next(e));
 }
 
 /**
@@ -72,7 +72,7 @@ function list(req, res, next) {
   // If parent_id is falsy set it to null, so we only get top level elements
   if (req.query.parent_id === '' || req.query.parent_id === 'null') req.query.parent_id = null; // eslint-disable-line
 
-  Type.list(req.query).then((types) =>	res.json(types.map(type => {
+  Type.list(req.query).then(types => res.json(types.map((type) => {
     const typeJson = type.toJSON();
     const capitalizedTitle = typeJson.title.charAt(0).toUpperCase() + typeJson.title.slice(1);
     typeJson.images = typeJson.images || {
@@ -83,7 +83,7 @@ function list(req, res, next) {
     typeJson.measurable_till = typeJson.measurable_till || 0.8;
     return typeJson;
   })))
-    .error((e) => next(e));
+    .error(e => next(e));
 }
 
 /**
@@ -94,8 +94,8 @@ function remove(req, res, next) {
   const type = req.type;
 
   type.removeAsync()
-    .then((deletedType) => res.json(deletedType))
-    .error((e) => next(e));
+    .then(deletedType => res.json(deletedType))
+    .error(e => next(e));
 }
 
 export default { load, get, create, update, bulkUpdate, list, remove };

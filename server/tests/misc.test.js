@@ -1,7 +1,6 @@
 import request from 'supertest-as-promised';
 import httpStatus from 'http-status';
-import chai from 'chai';
-import { expect } from 'chai';
+import chai, { expect } from 'chai';
 import app from '../../index';
 
 chai.config.includeStack = true;
@@ -12,7 +11,7 @@ describe('## Misc', () => {
       request(app)
         .get('/health-check')
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           expect(res.text).to.equal('OK');
           done();
         })
@@ -25,7 +24,7 @@ describe('## Misc', () => {
       request(app)
         .get('/404')
         .expect(httpStatus.NOT_FOUND)
-        .then(res => {
+        .then((res) => {
           expect(res.body.message).to.equal('Not Found');
           done();
         })
@@ -53,8 +52,8 @@ describe('## Misc', () => {
           password: 'foobar'
         })
         .expect(httpStatus.BAD_REQUEST)
-        .then(res => {
-          expect(res.body.message).to.equal(`"name" is required`);
+        .then((res) => {
+          expect(res.body.message).to.equal('"name" is required');
           done();
         })
         .catch(done);

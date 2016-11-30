@@ -18,7 +18,7 @@ describe('## Auth APIs', () => {
         .post('/auth/signup')
         .send(user)
         .expect(httpStatus.CREATED)
-        .then(res => {
+        .then((res) => {
           expect(res.body.user.email).to.equal(user.email);
           expect(res.body.token).to.be.a('string');
           done();
@@ -33,7 +33,7 @@ describe('## Auth APIs', () => {
         .post('/auth/login')
         .send(user)
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           headers.Authorization = `Bearer ${res.body.token}`;
           expect(res.body.user._id).to.be.a('string');
           expect(res.body.user.email).to.equal(user.email);

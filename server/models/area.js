@@ -99,7 +99,7 @@ AreaSchema.statics = {
     .skip(skip)
     .limit(limit)
     .execAsync()
-    .then(areas => {
+    .then((areas) => {
       if (!populate) {
         return areas;
       }
@@ -111,10 +111,10 @@ AreaSchema.statics = {
           $in: areas.map(area => area._id)
         }
       })
-      .then(sections => {
-        populatedAreas = populatedAreas.map(area => {
+      .then((sections) => {
+        populatedAreas = populatedAreas.map((area) => {
           area.sections = []; // eslint-disable-line
-          sections.forEach(section => {
+          sections.forEach((section) => {
             if (section.area_id.toString() == area._id.toString()) { //eslint-disable-line
               area.sections.push(section.toJSON());
             }

@@ -106,7 +106,7 @@ SectionSchema.statics = {
     .skip(skip)
     .limit(limit)
     .execAsync()
-    .then(sections => {
+    .then((sections) => {
       if (!populate) {
         return sections;
       }
@@ -118,10 +118,10 @@ SectionSchema.statics = {
           $in: sections.map(section => section._id)
         }
       })
-      .then(placements => {
-        populatedSections = populatedSections.map(section => {
+      .then((placements) => {
+        populatedSections = populatedSections.map((section) => {
           section.placements = []; // eslint-disable-line
-          placements.forEach(placement => {
+          placements.forEach((placement) => {
             if (placement.section_id.toString() == section._id.toString()) { //eslint-disable-line
               section.placements.push(placement.toJSON());
             }

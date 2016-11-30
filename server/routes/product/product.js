@@ -4,7 +4,7 @@ import auth from '../../helpers/auth';
 import paramValidation from './param-validation';
 import productCtrl from '../../controllers/product';
 
-const router = express.Router();	// eslint-disable-line new-cap
+const router = express.Router();  // eslint-disable-line new-cap
 
 router.route('/')
   /** GET /products - Returns all products */

@@ -1,4 +1,6 @@
 import httpStatus from 'http-status';
+import xl from 'excel4node';
+import _ from 'lodash';
 import Report from '../models/report';
 import Placement from '../models/placement';
 import patchModel from '../helpers/patchModel';
@@ -15,7 +17,7 @@ function load(req, res, next, id) {
     req.venueId = report.venue_id; // eslint-disable-line no-param-reassign
     req.report = report; // eslint-disable-line no-param-reassign
     return next();
-  }).error((e) => next(e));
+  }).error(e => next(e));
 }
 
 /**
@@ -41,9 +43,9 @@ function generateReport(filters) {
     path: 'inventory_item_id',
     select: '-__v -updated_at -created_at',
     populate: {
-      path: 'product_id',
+      path: 'product_id supplier_id',
       select: '-__v -updated_at -created_at',
-    }
+    },
   })
   .execAsync()
   .then(results =>
@@ -71,8 +73,8 @@ function generateReport(filters) {
       return mem;
     }, {})
   )
-  .then(results => {
-    const report = Object.keys(results).map(itemId => {
+  .then((results) => {
+    const report = Object.keys(results).map((itemId) => {
       results[itemId].areas = Object.keys(results[itemId].areas).map(areaId => { //eslint-disable-line
         results[itemId].areas[areaId].sections = Object.keys(results[itemId].areas[areaId].sections) //eslint-disable-line
         .map(sectionId =>
@@ -82,8 +84,74 @@ function generateReport(filters) {
       });
       return results[itemId];
     });
-    return report;
+    return _.orderBy(report, ['product_id.name']);
   });
+}
+
+function getExport(req, res) {
+  const xls = generateXLSfromReport(req.report.data);
+  xls.write(`${new Date(req.report.created_at)
+    .toString()
+    .split(' ')
+    .splice(0, 5)
+    .join(' ')}.xlsx`, res);
+}
+
+function generateXLSfromReport(report) {
+  let productNameMaxLength = 0;
+  const products = _.orderBy(report.map((item) => {
+    const supplier = item.supplier_id || {};
+
+    let order = 0;
+    if (item.par_level - item.volume > 0) {
+      order = item.par_level - item.volume;
+    }
+
+    if (item.product_id.name.length > productNameMaxLength) {
+      productNameMaxLength = item.product_id.name.length;
+    }
+
+    return {
+      category: item.product_id.category || 'other',
+      name: item.product_id.name,
+      supplier: supplier.name || '',
+      sku: item.supplier_product_code || '',
+      par_level: item.par_level || 0,
+      stock_level: item.volume || 0,
+      order
+    };
+  }), ['category', 'supplier', 'name']);
+
+  // Create a new instance of  a Workbook class
+  const wb = new xl.Workbook();
+
+  // Add Worksheets to the workbook
+  const ws = wb.addWorksheet('Stock Sheet');
+
+  const columns = [
+    { key: 'category', title: 'Category', type: 'string' },
+    { key: 'name', title: 'Product', type: 'string' },
+    { key: 'supplier', title: 'Supplier', type: 'string' },
+    { key: 'sku', title: 'SKU', type: 'string' },
+    { key: 'par_level', title: 'Par Level', type: 'number' },
+    { key: 'stock_level', title: 'Stock Level', type: 'number' },
+    { key: 'order', title: 'Order', type: 'number' }
+  ];
+
+  for (let i = 0; i < products.length; i++) {
+    if (i === 0) {
+      for (let k = 0; k < columns.length; k++) {
+        ws.cell(i + 1, k + 1).string(columns[k].title);
+      }
+    }
+    for (let j = 0; j < columns.length; j++) {
+      ws.cell(i + 2, j + 1)[columns[j].type](products[i][columns[j].key]);
+    }
+  }
+
+  ws.column(2).setWidth(productNameMaxLength);
+
+  return wb;
 }
 
 /**
@@ -93,16 +161,18 @@ function generateReport(filters) {
  * @returns {Report}
  */
 function create(req, res, next) {
-  generateReport({ venue_id: req.body.venue_id }).then(reportData => {
+  generateReport({ venue_id: req.body.venue_id }).then((reportData) => {
     const report = new Report({
       venue_id: req.body.venue_id,
       data: reportData
     });
-
+    return report;
+  })
+  .then(report =>
     report.saveAsync()
-    .then((savedReport) => res.status(httpStatus.CREATED).json(savedReport))
-    .error((e) => next(e));
-  });
+    .then(savedReport => res.status(httpStatus.CREATED).json(savedReport))
+    .error(e => next(e))
+  );
 }
 
 /**
@@ -125,8 +195,8 @@ function update(req, res, next) {
   patchModel(report, Report, req.body);
 
   report.saveAsync()
-    .then((savedReport) => res.json(savedReport))
-    .error((e) => next(e));
+    .then(savedReport => res.json(savedReport))
+    .error(e => next(e));
 }
 
 /**
@@ -140,8 +210,8 @@ function list(req, res, next) {
   const whiteList = { venue_id : { $in: venues }}; // eslint-disable-line
 
   Report.list(req.query, whiteList)
-    .then((results) =>	res.json(results))
-    .error((e) => next(e));
+    .then(results => res.json(results))
+    .error(e => next(e));
 }
 
 /**
@@ -152,8 +222,8 @@ function remove(req, res, next) {
   const report = req.report;
 
   report.removeAsync()
-    .then((deletedReport) => res.json(deletedReport))
-    .error((e) => next(e));
+    .then(deletedReport => res.json(deletedReport))
+    .error(e => next(e));
 }
 
-export default { load, get, create, update, list, remove };
+export default { load, get, create, update, list, remove, getExport };

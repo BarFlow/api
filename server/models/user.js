@@ -1,8 +1,8 @@
 import Promise from 'bluebird';
 import mongoose from 'mongoose';
 import httpStatus from 'http-status';
-import APIError from '../helpers/APIError';
 import bcrypt from 'bcrypt';
+import APIError from '../helpers/APIError';
 
 const SALT_WORK_FACTOR = 10;
 

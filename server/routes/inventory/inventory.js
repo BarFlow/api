@@ -7,7 +7,7 @@ import inventoryCtrl from '../../controllers/inventory';
 // BUG: express-validation array of object https://github.com/AndrewKeig/express-validation/issues/36#event-751224940
 validate.options({ contextRequest: true });
 
-const router = express.Router();	// eslint-disable-line new-cap
+const router = express.Router();  // eslint-disable-line new-cap
 
 router.route('/')
   /** GET /inventory - Returns inventory items associated with the user */

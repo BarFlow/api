@@ -11,7 +11,7 @@ function load(req, res, next, id) {
     req.venueId = area.venue_id; // eslint-disable-line no-param-reassign
     req.area = area; // eslint-disable-line no-param-reassign
     return next();
-  }).error((e) => next(e));
+  }).error(e => next(e));
 }
 
 /**
@@ -36,8 +36,8 @@ function create(req, res, next) {
   });
 
   area.saveAsync()
-    .then((savedArea) => res.status(httpStatus.CREATED).json(savedArea))
-    .error((e) => next(e));
+    .then(savedArea => res.status(httpStatus.CREATED).json(savedArea))
+    .error(e => next(e));
 }
 
 /**
@@ -58,8 +58,8 @@ function update(req, res, next) {
   patchModel(area, Area, whiteList);
 
   area.saveAsync()
-    .then((savedArea) => res.json(savedArea))
-    .error((e) => next(e));
+    .then(savedArea => res.json(savedArea))
+    .error(e => next(e));
 }
 
 /**
@@ -68,8 +68,8 @@ function update(req, res, next) {
  * @returns {Area}
  */
 function bulkUpdate(req, res, next) {
-  Area.bulkUpdate(req.body).then(() =>	res.status(httpStatus.ACCEPTED).send())
-    .error((e) => next(e));
+  Area.bulkUpdate(req.body).then(() => res.status(httpStatus.ACCEPTED).send())
+    .error(e => next(e));
 }
 
 /**
@@ -87,8 +87,8 @@ function list(req, res, next) {
 
   req.query.populate = req.query.populate === 'true' && req.method === 'GET'; // eslint-disable-line
 
-  Area.list(req.query).then((areas) =>	res.json(areas))
-    .error((e) => next(e));
+  Area.list(req.query).then(areas => res.json(areas))
+    .error(e => next(e));
 }
 
 /**
@@ -99,8 +99,8 @@ function remove(req, res, next) {
   const area = req.area;
 
   area.removeAsync()
-    .then((deletedArea) => res.json(deletedArea))
-    .error((e) => next(e));
+    .then(deletedArea => res.json(deletedArea))
+    .error(e => next(e));
 }
 
 export default { load, get, create, update, bulkUpdate, list, remove };

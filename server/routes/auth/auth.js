@@ -4,7 +4,7 @@ import paramValidation from './param-validation';
 import authCtrl from '../../controllers/auth';
 import auth from '../../helpers/auth';
 
-const router = express.Router();	// eslint-disable-line new-cap
+const router = express.Router();  // eslint-disable-line new-cap
 
 /** POST /auth/signup - Registering a new user */
 router.route('/signup')

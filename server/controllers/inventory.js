@@ -11,7 +11,7 @@ function load(req, res, next, id) {
     req.venueId = inventoryItem.venue_id; // eslint-disable-line no-param-reassign
     req.inventoryItem = inventoryItem; // eslint-disable-line no-param-reassign
     return next();
-  }).error((e) => next(e));
+  }).error(e => next(e));
 }
 
 /**
@@ -59,8 +59,8 @@ function update(req, res, next) {
   patchModel(inventoryItem, Inventory, req.body);
 
   inventoryItem.saveAsync()
-    .then((savedInventory) => res.json(savedInventory))
-    .error((e) => next(e));
+    .then(savedInventory => res.json(savedInventory))
+    .error(e => next(e));
 }
 
 /**
@@ -76,8 +76,8 @@ function bulkUpdate(req, res, next) {
 
     return inventoryItem;
   });
-  Inventory.bulkUpdate(inventoryItems).then(() =>	res.status(httpStatus.ACCEPTED).send())
-    .error((e) => next(e));
+  Inventory.bulkUpdate(inventoryItems).then(() => res.status(httpStatus.ACCEPTED).send())
+    .error(e => next(e));
 }
 
 /**
@@ -93,10 +93,10 @@ function list(req, res, next) {
   }
 
   Inventory.list(req.query)
-    .then((results) =>
+    .then(results =>
       res.header('X-Total-Count', results.count).json(results.items)
     )
-    .error((e) => next(e));
+    .error(e => next(e));
 }
 
 /**
@@ -107,8 +107,8 @@ function remove(req, res, next) {
   const inventoryItem = req.inventoryItem;
 
   inventoryItem.removeAsync()
-    .then((deletedInventory) => res.json(deletedInventory))
-    .error((e) => next(e));
+    .then(deletedInventory => res.json(deletedInventory))
+    .error(e => next(e));
 }
 
 export default { load, get, create, update, bulkUpdate, list, remove };

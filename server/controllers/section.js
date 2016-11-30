@@ -11,7 +11,7 @@ function load(req, res, next, id) {
     req.venueId = section.venue_id; // eslint-disable-line no-param-reassign
     req.section = section; // eslint-disable-line no-param-reassign
     return next();
-  }).error((e) => next(e));
+  }).error(e => next(e));
 }
 
 /**
@@ -37,8 +37,8 @@ function create(req, res, next) {
   });
 
   section.saveAsync()
-    .then((savedSection) => res.status(httpStatus.CREATED).json(savedSection))
-    .error((e) => next(e));
+    .then(savedSection => res.status(httpStatus.CREATED).json(savedSection))
+    .error(e => next(e));
 }
 
 /**
@@ -59,8 +59,8 @@ function update(req, res, next) {
   patchModel(section, Section, whiteList);
 
   section.saveAsync()
-    .then((savedSection) => res.json(savedSection))
-    .error((e) => next(e));
+    .then(savedSection => res.json(savedSection))
+    .error(e => next(e));
 }
 
 /**
@@ -69,8 +69,8 @@ function update(req, res, next) {
  * @returns {Section}
  */
 function bulkUpdate(req, res, next) {
-  Section.bulkUpdate(req.body).then(() =>	res.status(httpStatus.ACCEPTED).send())
-    .error((e) => next(e));
+  Section.bulkUpdate(req.body).then(() => res.status(httpStatus.ACCEPTED).send())
+    .error(e => next(e));
 }
 
 /**
@@ -88,8 +88,8 @@ function list(req, res, next) {
   // Populate models if query string is true and the request type is get
   req.query.populate = req.query.populate === 'true' && req.method === 'GET'; // eslint-disable-line
 
-  Section.list(req.query).then((sections) =>	res.json(sections))
-    .error((e) => next(e));
+  Section.list(req.query).then(sections => res.json(sections))
+    .error(e => next(e));
 }
 
 /**
@@ -100,8 +100,8 @@ function remove(req, res, next) {
   const section = req.section;
 
   section.removeAsync()
-    .then((deletedSection) => res.json(deletedSection))
-    .error((e) => next(e));
+    .then(deletedSection => res.json(deletedSection))
+    .error(e => next(e));
 }
 
 export default { load, get, create, update, bulkUpdate, list, remove };

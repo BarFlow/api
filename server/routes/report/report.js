@@ -4,7 +4,7 @@ import auth from '../../helpers/auth';
 import paramValidation from './param-validation';
 import reportCtrl from '../../controllers/report';
 
-const router = express.Router();	// eslint-disable-line new-cap
+const router = express.Router();  // eslint-disable-line new-cap
 
 router.route('/')
   /** GET /reports - Returns all reports */
@@ -19,6 +19,10 @@ router.route('/:report_id')
   // .put(auth.authorize('manager'), reportCtrl.update)
   /** DELETE /reports/:report_id - Removes an report */
   .delete(auth.authorize('manager'), reportCtrl.remove);
+
+router.route('/:report_id/export')
+  /** GET /reports/:report_id - Returns an report */
+  .get(reportCtrl.getExport);
 
 // Load resource to req object -> req.report
 router.param('report_id', reportCtrl.load);

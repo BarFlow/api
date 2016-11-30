@@ -12,7 +12,7 @@ function load(req, res, next, id) {
   Venue.get(id).then((venue) => {
     req.venue = venue; // eslint-disable-line no-param-reassign
     return next();
-  }).error((e) => next(e));
+  }).error(e => next(e));
 }
 
 /**
@@ -39,8 +39,8 @@ function create(req, res, next) {
   });
 
   venue.saveAsync()
-    .then((savedVenue) => res.status(httpStatus.CREATED).json(savedVenue))
-    .error((e) => next(e));
+    .then(savedVenue => res.status(httpStatus.CREATED).json(savedVenue))
+    .error(e => next(e));
 }
 
 /**
@@ -62,8 +62,8 @@ function update(req, res, next) {
   patchModel(venue, Venue, whiteList);
 
   venue.saveAsync()
-    .then((savedVenue) => res.json(savedVenue))
-    .error((e) => next(e));
+    .then(savedVenue => res.json(savedVenue))
+    .error(e => next(e));
 }
 
 /**
@@ -73,8 +73,8 @@ function update(req, res, next) {
  * @returns {Venue[]}
  */
 function list(req, res, next) {
-  Venue.list(req.user._id).then((venues) =>	res.json(venues))
-    .error((e) => next(e));
+  Venue.list(req.user._id).then(venues => res.json(venues))
+    .error(e => next(e));
 }
 
 /**
@@ -85,8 +85,8 @@ function remove(req, res, next) {
   const venue = req.venue;
 
   venue.removeAsync()
-    .then((deletedVenue) => res.json(deletedVenue))
-    .error((e) => next(e));
+    .then(deletedVenue => res.json(deletedVenue))
+    .error(e => next(e));
 }
 
 /**
@@ -102,8 +102,8 @@ function addMember(req, res, next) {
   venue.members.push(req.body);
 
   venue.saveAsync()
-    .then((savedVenue) => res.json(savedVenue))
-    .error((e) => next(e));
+    .then(savedVenue => res.json(savedVenue))
+    .error(e => next(e));
 }
 
 /**
@@ -119,8 +119,8 @@ function updateMember(req, res, next) {
   member.updated_at = new Date(); // eslint-disable-line
 
   venue.saveAsync()
-    .then((savedVenue) => res.json(savedVenue))
-    .error((e) => next(e));
+    .then(savedVenue => res.json(savedVenue))
+    .error(e => next(e));
 }
 
 /**
@@ -135,8 +135,8 @@ function removeMember(req, res, next) {
   venue.members.id(req.params.member_id).remove();
 
   venue.saveAsync()
-    .then((savedVenue) => res.json(savedVenue))
-    .error((e) => next(e));
+    .then(savedVenue => res.json(savedVenue))
+    .error(e => next(e));
 }
 
 export default { load, get, create, update, list, remove, addMember, updateMember, removeMember };

@@ -29,7 +29,7 @@ describe('## Venue APIs', () => {
         .post('/auth/signup')
         .send(user)
         .expect(httpStatus.CREATED)
-        .then(res => {
+        .then((res) => {
           user._id = res.body.user._id;
           headers.Authorization = `Bearer ${res.body.token}`;
           done();
@@ -45,7 +45,7 @@ describe('## Venue APIs', () => {
         .set(headers)
         .send(venue)
         .expect(httpStatus.CREATED)
-        .then(res => {
+        .then((res) => {
           venue._id = res.body._id;
           expect(res.body.profile.name).to.equal('Demo Bar');
           expect(res.body.profile.email).to.equal('demo@barflow.com');
@@ -62,7 +62,7 @@ describe('## Venue APIs', () => {
         .post('/auth/login')
         .send(user)
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           headers.Authorization = `Bearer ${res.body.token}`;
           done();
         })
@@ -77,7 +77,7 @@ describe('## Venue APIs', () => {
         .set(headers)
         .send()
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           expect(res.body.profile.name).to.equal('Demo Bar');
           expect(res.body.profile.email).to.equal('demo@barflow.com');
           expect(res.body.members[0].user_id).to.equal(user._id);
@@ -98,7 +98,7 @@ describe('## Venue APIs', () => {
           }
         })
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           expect(res.body.profile.name).to.equal('Demo Bar 2');
           expect(res.body.profile.email).to.equal('demo@barflow.com');
           expect(res.body.members[0].user_id).to.equal(user._id);
@@ -115,7 +115,7 @@ describe('## Venue APIs', () => {
         .set(headers)
         .send(member)
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           member._id = res.body.members[1]._id;
           expect(res.body.members[1].user_id).to.equal(member.user_id);
           expect(res.body.members[1].role).to.equal('staff');
@@ -134,7 +134,7 @@ describe('## Venue APIs', () => {
           role: 'manager'
         })
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           expect(res.body.members[1].role).to.equal('manager');
           done();
         })

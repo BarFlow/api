@@ -113,7 +113,7 @@ SupplierSchema.statics = {
     .limit(limit);
 
     return query.execAsync()
-    .then((suppliers) =>
+    .then(suppliers =>
       query.limit().skip().count().execAsync()
       .then((count) => { // eslint-disable-line
         return { suppliers, count };

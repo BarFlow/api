@@ -33,7 +33,7 @@ describe('## Type APIs', () => {
         .post('/auth/login')
         .send(user)
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           user._id = res.body.user._id;
           headers.Authorization = `Bearer ${res.body.token}`;
           done();
@@ -49,7 +49,7 @@ describe('## Type APIs', () => {
         .set(headers)
         .send(type)
         .expect(httpStatus.CREATED)
-        .then(res => {
+        .then((res) => {
           type._id = res.body._id;
           expect(res.body.title).to.equal(type.title);
           expect(res.body.type_id).to.equal(type.type_id);
@@ -66,7 +66,7 @@ describe('## Type APIs', () => {
         .set(headers)
         .send()
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           expect(res.body[0]._id).to.equal(type._id);
           expect(res.body[0].title).to.equal(type.title);
           expect(res.body[0].type_id).to.equal(type.type_id);
@@ -83,7 +83,7 @@ describe('## Type APIs', () => {
         .set(headers)
         .send()
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           expect(res.body._id).to.equal(type._id);
           expect(res.body.title).to.equal(type.title);
           expect(res.body.type_id).to.equal(type.type_id);
@@ -102,7 +102,7 @@ describe('## Type APIs', () => {
           title: 'Wine'
         })
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           expect(res.body._id).to.equal(type._id);
           expect(res.body.title).to.equal('Wine');
           expect(res.body.type_id).to.equal(type.type_id);
@@ -134,7 +134,7 @@ describe('## Type APIs', () => {
         .set(headers)
         .send()
         .expect(httpStatus.OK)
-        .then(res => {
+        .then((res) => {
           expect(res.body._id).to.equal(type._id);
           expect(res.body.title).to.equal('Rose');
           expect(res.body.type_id).to.equal(type.type_id);

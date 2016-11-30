@@ -111,7 +111,7 @@ InventorySchema.statics = {
     return new Promise((resolve, reject) => {
       const inventoryItem = new this(data);
       inventoryItem.saveAsync()
-        .then((savedInventory) => resolve(savedInventory))
+        .then(savedInventory => resolve(savedInventory))
         .error((e) => {
           // If the product has been added to the venue already, ignore the request and
           // send back the original model
@@ -121,7 +121,7 @@ InventorySchema.statics = {
               product_id: data.product_id
             })
             .execAsync()
-            .then((inventory) => resolve(inventory));
+            .then(inventory => resolve(inventory));
           }
 
           // If any other error occurs forward it
@@ -165,7 +165,7 @@ InventorySchema.statics = {
         match: product
       })
       .execAsync()
-      .then(results => {
+      .then((results) => {
         let items = results.filter(item => item.product_id !== null)
         .sort((a, b) => {
           const nameA = a.product_id.name.toUpperCase();

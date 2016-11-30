@@ -11,7 +11,7 @@ function load(req, res, next, id) {
     req.venueId = product.venue_id; // eslint-disable-line no-param-reassign
     req.product = product; // eslint-disable-line no-param-reassign
     return next();
-  }).error((e) => next(e));
+  }).error(e => next(e));
 }
 
 /**
@@ -43,8 +43,8 @@ function create(req, res, next) {
   });
 
   product.saveAsync()
-    .then((savedProduct) => res.status(httpStatus.CREATED).json(savedProduct))
-    .error((e) => next(e));
+    .then(savedProduct => res.status(httpStatus.CREATED).json(savedProduct))
+    .error(e => next(e));
 }
 
 /**
@@ -67,8 +67,8 @@ function update(req, res, next) {
   patchModel(product, Product, req.body);
 
   product.saveAsync()
-    .then((savedProduct) => res.json(savedProduct))
-    .error((e) => next(e));
+    .then(savedProduct => res.json(savedProduct))
+    .error(e => next(e));
 }
 
 /**
@@ -82,8 +82,8 @@ function list(req, res, next) {
   const whiteList = { $or : [{ venue_id : { $in: venues }}, {approved: true}] }; // eslint-disable-line
 
   Product.list(req.query, whiteList)
-    .then((results) =>	res.header('X-Total-Count', results.count).json(results.products))
-    .error((e) => next(e));
+    .then(results => res.header('X-Total-Count', results.count).json(results.products))
+    .error(e => next(e));
 }
 
 /**
@@ -94,8 +94,8 @@ function remove(req, res, next) {
   const product = req.product;
 
   product.removeAsync()
-    .then((deletedProduct) => res.json(deletedProduct))
-    .error((e) => next(e));
+    .then(deletedProduct => res.json(deletedProduct))
+    .error(e => next(e));
 }
 
 export default { load, get, create, update, list, remove };

@@ -1,10 +1,10 @@
 import jwt from 'jsonwebtoken';
 import httpStatus from 'http-status';
+import Promise from 'bluebird';
 import APIError from '../helpers/APIError';
 import User from '../models/user';
 import Venue from '../models/venue';
 import Lead from '../models/lead';
-import Promise from 'bluebird';
 
 const config = require('../../config/env');
 
@@ -19,13 +19,13 @@ function login(req, res, next) {
   const err = new APIError('Authentication error', httpStatus.UNAUTHORIZED);
   // Find user by email adderss
   User.findOne({ email: req.body.email })
-    .then(user => {
+    .then((user) => {
       // If user not found return error
       if (!user) return next(err);
 
       // Compare given password with the model
       return user.comparePassword(req.body.password)
-        .then(match => {
+        .then((match) => {
           // If password dosen't match return error
           if (!match) return Promise.reject(err);
 
@@ -39,7 +39,7 @@ function login(req, res, next) {
           // Get list of venues for user
           return Venue.list(user._id);
         })
-        .then(venues => {
+        .then((venues) => {
           // Pluck venue data
           const roles = venues.reduce((normalized, venue)  => { // eslint-disable-line
             normalized[venue.id] = venue.role; // eslint-disable-line
@@ -61,7 +61,7 @@ function login(req, res, next) {
           });
         });
     })
-    .catch((e) => next(e));
+    .catch(e => next(e));
 }
 
 /**
@@ -97,9 +97,9 @@ function signup(req, res, next) {
       };
     })
     // Sending response back to client
-    .then((savedUser) => res.status(httpStatus.CREATED).json(savedUser))
+    .then(savedUser => res.status(httpStatus.CREATED).json(savedUser))
     // If any error happens forward it to middleware
-    .error((e) => next(e));
+    .error(e => next(e));
 }
 
 /**
@@ -114,7 +114,7 @@ function refreshToken(req, res, next) {
   let payload = {};
   // Get list of venues for user
   Venue.list(user._id)
-    .then(venues => {
+    .then((venues) => {
       // Pluck venue data
       const roles = venues.reduce((normalized, venue)  => { // eslint-disable-line
         normalized[venue.id] = venue.role; // eslint-disable-line
@@ -137,7 +137,7 @@ function refreshToken(req, res, next) {
         payload
       });
     })
-    .catch((e) => next(e));
+    .catch(e => next(e));
 }
 
 export default { login, signup, refreshToken };

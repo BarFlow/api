@@ -126,7 +126,7 @@ ProductSchema.statics = {
     .limit(limit);
 
     return query.execAsync()
-    .then((products) =>
+    .then(products =>
       query.limit().skip().count().execAsync()
       .then((count) => { // eslint-disable-line
         return { products, count };
