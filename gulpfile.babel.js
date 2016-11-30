@@ -89,7 +89,7 @@ gulp.task('nodemon', ['copy', 'babel'], () =>
 
 // covers files for code coverage
 gulp.task('pre-test', () =>
-  gulp.src([...paths.js, '!gulpfile.babel.js'])
+  gulp.src([...paths.js, '!config/*.js', '!gulpfile.babel.js'])
     // Covering files
     .pipe(plugins.istanbul({
       instrumenter: isparta.Instrumenter,
@@ -102,7 +102,7 @@ gulp.task('pre-test', () =>
 // triggers mocha test with code coverage
 gulp.task('test', ['pre-test', 'set-env'], () => {
   let reporters;
-  let	exitCode = 0;
+  let exitCode = 0;
 
   if (plugins.util.env['code-coverage-reporter']) {
     reporters = [...options.codeCoverage.reporters, plugins.util.env['code-coverage-reporter']];

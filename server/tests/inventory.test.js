@@ -123,6 +123,27 @@ describe('## Inventory APIs', () => {
     });
   });
 
+  describe('# POST /inventory', () => {
+    it('should create an inventory', (done) => {
+      request(app)
+        .post('/inventory')
+        .set(headers)
+        .send(inventoryItem)
+        .expect(httpStatus.CREATED)
+        .then((res) => {
+          inventoryItem._id = res.body._id;
+          expect(res.body.product_id).to.equal(inventoryItem.product_id);
+          expect(res.body.cost_price).to.equal(inventoryItem.cost_price);
+          expect(res.body.par_level).to.equal(inventoryItem.par_level);
+          expect(res.body.sale_unit_size).to.equal(inventoryItem.sale_unit_size);
+          expect(res.body.sale_price).to.equal(inventoryItem.sale_price);
+          expect(res.body.venue_id).to.equal(inventoryItem.venue_id);
+          done();
+        })
+        .catch(done);
+    });
+  });
+
   describe('# GET /inventory', () => {
     it('should get list of inventory items', (done) => {
       request(app)
@@ -146,17 +167,12 @@ describe('## Inventory APIs', () => {
   describe('# GET /inventory', () => {
     it('should get list of inventory items even with empty product params in query', (done) => {
       request(app)
-        .get('/inventory?product[name]')
+        .get('/inventory?populate=true&product[name]=&product[category]=vodka')
         .set(headers)
         .send()
         .expect(httpStatus.OK)
         .then((res) => {
-          expect(res.body[0].product_id).to.equal(inventoryItem.product_id);
-          expect(res.body[0].cost_price).to.equal(inventoryItem.cost_price);
-          expect(res.body[0].par_level).to.equal(inventoryItem.par_level);
-          expect(res.body[0].sale_unit_size).to.equal(inventoryItem.sale_unit_size);
-          expect(res.body[0].sale_price).to.equal(inventoryItem.sale_price);
-          expect(res.body[0].venue_id).to.equal(inventoryItem.venue_id);
+          expect(res.body[0].category).to.equal(inventoryItem.category);
           done();
         })
         .catch(done);
@@ -176,6 +192,20 @@ describe('## Inventory APIs', () => {
           expect(res.body.sale_unit_size).to.equal(inventoryItem.sale_unit_size);
           expect(res.body.sale_price).to.equal(inventoryItem.sale_price);
           expect(res.body.venue_id).to.equal(inventoryItem.venue_id);
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+  describe('# GET /inventory/57fd42f6acbc0b2e46e69e25', () => {
+    it('should not found inventory', (done) => {
+      request(app)
+        .get('/inventory/57fd42f6acbc0b2e46e69e25')
+        .set(headers)
+        .send()
+        .expect(httpStatus.NOT_FOUND)
+        .then(() => {
           done();
         })
         .catch(done);

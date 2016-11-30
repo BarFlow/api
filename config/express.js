@@ -43,9 +43,9 @@ if (config.env === 'development') {
   expressWinston.responseWhitelist.push('body');
   app.use(expressWinston.logger({
     winstonInstance,
-    meta: true, 	// optional: log meta data about request (defaults to true)
+    meta: true, // optional: log meta data about request (defaults to true)
     msg: 'HTTP {{req.method}} {{req.url}} {{res.statusCode}} {{res.responseTime}}ms',
-    colorStatus: true 	// Color the status code (default green, 3XX cyan, 4XX yellow, 5XX red).
+    colorStatus: true // Color the status code (default green, 3XX cyan, 4XX yellow, 5XX red).
   }));
 }
 
@@ -80,7 +80,7 @@ if (config.env !== 'test') {
 }
 
 // error handler, send stacktrace only during development
-app.use((err, req, res, next) =>		// eslint-disable-line no-unused-vars
+app.use((err, req, res, next) =>  // eslint-disable-line no-unused-vars
   res.status(err.status).json({
     message: err.isPublic ? err.message : httpStatus[err.status],
     stack: config.env === 'development' ? err.stack : undefined
