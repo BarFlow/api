@@ -23,7 +23,7 @@ router.route('/:area_id')
   /** PUT /areas/:area_id - Updates an area */
   .put(validate(paramValidation.update), auth.authorize('manager'), areaCtrl.update)
   /** DELETE /areas/:area_id - Removes an area */
-  .delete(auth.authorize('owner'), areaCtrl.remove);
+  .delete(auth.authorize('manager'), areaCtrl.remove);
 
 // Load resource to req object -> req.area
 router.param('area_id', areaCtrl.load);

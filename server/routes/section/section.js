@@ -23,7 +23,7 @@ router.route('/:section_id')
   /** PUT /sections/:section_id - Updates an section */
   .put(validate(paramValidation.update), auth.authorize('manager'), sectionCtrl.update)
   /** DELETE /sections/:section_id - Removes an section */
-  .delete(auth.authorize('owner'), sectionCtrl.remove);
+  .delete(auth.authorize('manager'), sectionCtrl.remove);
 
 // Load resource to req object -> req.section
 router.param('section_id', sectionCtrl.load);

@@ -18,7 +18,7 @@ router.route('/:supplier_id')
   /** PUT /suppliers/:supplier_id - Updates an supplier */
   .put(validate(paramValidation.update), auth.authorize('manager'), supplierCtrl.update)
   /** DELETE /suppliers/:supplier_id - Removes an supplier */
-  .delete(auth.authorize('owner'), supplierCtrl.remove);
+  .delete(auth.authorize('manager'), supplierCtrl.remove);
 
 // Load resource to req object -> req.supplier
 router.param('supplier_id', supplierCtrl.load);

@@ -18,7 +18,7 @@ router.route('/:product_id')
   /** PUT /products/:product_id - Updates an product */
   .put(validate(paramValidation.update), auth.authorize('manager'), productCtrl.update)
   /** DELETE /products/:product_id - Removes an product */
-  .delete(auth.authorize('owner'), productCtrl.remove);
+  .delete(auth.authorize('manager'), productCtrl.remove);
 
 // Load resource to req object -> req.product
 router.param('product_id', productCtrl.load);
