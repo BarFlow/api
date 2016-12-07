@@ -91,6 +91,21 @@ describe('## Product APIs', () => {
   });
 
   describe('# GET /products', () => {
+    it('should get list of products', (done) => {
+      request(app)
+        .get('/products')
+        .set(headers)
+        .send()
+        .expect(httpStatus.OK)
+        .then((res) => {
+          expect(res.body).to.be.instanceof(Array);
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+  describe('# GET /products', () => {
     it('should get list of products with matching partial name', (done) => {
       request(app)
         .get('/products?name=Abs')

@@ -131,7 +131,7 @@ ProductSchema.statics = {
     const query = this.find(find, { score: { $meta: 'textScore' } });
 
     if (name) {
-      query.sort({ score: { $meta: 'textScore' } });
+      query.sort({ score: { $meta: 'textScore' }, name: 1 });
     } else {
       query.sort({ name: 1 });
     }
