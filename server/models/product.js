@@ -10,7 +10,7 @@ const ProductSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    index: 'text'
+    index: true
   },
   type: {
     type: String,
@@ -53,6 +53,8 @@ const ProductSchema = new mongoose.Schema({
     default: Date.now
   }
 });
+
+ProductSchema.index({ name: 'text' }, { category: 'text' }, { sub_category: 'text' });
 
 /**
  *  Set updated_at before model gets saved.
@@ -114,16 +116,27 @@ ProductSchema.statics = {
     const name = filters.name;
     delete filters.name; // eslint-disable-line
 
-    const query = this.find(whiteList);
-    query.where(filters);
+    const find = name ?
+    Object.assign(filters, whiteList, {
+      $or: [
+        { name: new RegExp(name, 'i') },
+        {
+          $text: {
+            $search: name
+          },
+        }
+      ],
+    }) : {};
+
+    const query = this.find(find, { score: { $meta: 'textScore' } });
 
     if (name) {
-      query.where({ name: new RegExp(name, 'i') });
+      query.sort({ score: { $meta: 'textScore' } });
+    } else {
+      query.sort({ name: 1 });
     }
-
-    query.sort({ name: 1 })
-    .skip(skip)
-    .limit(limit);
+    query.skip(skip);
+    query.limit(limit);
 
     return query.execAsync()
     .then(products =>

@@ -77,13 +77,12 @@ function generateReport(filters) {
     const report = Object.keys(results).map((itemId) => {
       // calculating how much to order based on par_level, volume and count_as_full
       results[itemId].order = 0;
-      let order = results[itemId].par_level - results[itemId].volume;
+      let fullBottles = results[itemId].volume - (results[itemId].volume % 1);
+      if (results[itemId].volume % 1 > results[itemId].count_as_full) {
+        fullBottles++;
+      }
+      const order = results[itemId].par_level - fullBottles;
       if (results[itemId].par_level && order > 0) {
-        const maradek = order % 1;
-        order -= maradek;
-        if (maradek > results[itemId].count_as_full) {
-          order++;
-        }
         results[itemId].order = order;
       }
 

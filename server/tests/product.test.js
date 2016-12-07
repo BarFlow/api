@@ -98,9 +98,7 @@ describe('## Product APIs', () => {
         .send()
         .expect(httpStatus.OK)
         .then((res) => {
-          expect(res.body[0]._id).to.equal(product._id);
           expect(res.body[0].name).to.equal(product.name);
-          expect(res.body[0].venue_id).to.equal(product.venue_id);
           done();
         })
         .catch(done);
