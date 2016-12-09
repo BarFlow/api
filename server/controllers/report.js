@@ -49,7 +49,11 @@ function generateReport(filters) {
   })
   .execAsync()
   .then(results =>
-    results.filter(item => item.inventory_item_id && item.area_id && item.section_id)
+    results.filter(item =>
+      item.inventory_item_id
+      && item.inventory_item_id.product_id
+      && item.area_id
+      && item.section_id)
     .reduce((mem, item) => {
       item = item.toObject();
       if (!mem[item.inventory_item_id._id]) {

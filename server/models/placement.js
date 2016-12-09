@@ -121,7 +121,13 @@ PlacementSchema.statics = {
     .limit(limit)
     .execAsync()
     // remove orphan placemnets
-    .then(results => results.filter(result => result.inventory_item_id));
+    .then(results => results.filter(result => result.inventory_item_id))
+    .then((results) => {
+      if (populate) {
+        results = results.filter(result => result.inventory_item_id.product_id);
+      }
+      return results;
+    });
   },
 
   /**
