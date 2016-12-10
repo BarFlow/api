@@ -111,13 +111,13 @@ ProductSchema.statics = {
   list(filters, whiteList) {
     const skip = parseInt(filters.skip, 10) || 0;
     delete filters.skip; // eslint-disable-line
-    const limit = parseInt(filters.limit, 10) || 100;
+    const limit = parseInt(filters.limit, 10) || 50;
     delete filters.limit; // eslint-disable-line
     const name = filters.name;
     delete filters.name; // eslint-disable-line
 
     const find = name ?
-    Object.assign(filters, whiteList, {
+    {
       $or: [
         { name: new RegExp(name, 'i') },
         {
@@ -125,10 +125,12 @@ ProductSchema.statics = {
             $search: name
           },
         }
-      ],
-    }) : {};
+      ]
+    } : {};
 
     const query = this.find(find, { score: { $meta: 'textScore' } });
+    query.where(whiteList);
+    query.where(filters);
 
     if (name) {
       query.sort({ score: { $meta: 'textScore' }, name: 1 });
