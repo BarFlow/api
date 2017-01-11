@@ -116,7 +116,7 @@ ProductSchema.statics = {
     const name = filters.name;
     delete filters.name; // eslint-disable-line
 
-    const find = name ?
+    const findByName = name ?
     {
       $or: [
         { name: new RegExp(name, 'i') },
@@ -128,9 +128,11 @@ ProductSchema.statics = {
       ]
     } : {};
 
-    const query = this.find(find, { score: { $meta: 'textScore' } });
-    query.where(whiteList);
-    query.where(filters);
+    const query = this.find(Object.assign(
+      {},
+      { $and: [findByName, whiteList] },
+    filters), { score: { $meta: 'textScore' } });
+
 
     if (name) {
       query.sort({ score: { $meta: 'textScore' }, name: 1 });
