@@ -28,7 +28,8 @@ const InventorySchema = new mongoose.Schema({
     type: String
   },
   par_level: {
-    type: Number
+    type: Number,
+    default: 1
   },
   cost_price: {
     type: Number
