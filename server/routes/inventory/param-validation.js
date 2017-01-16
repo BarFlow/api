@@ -6,7 +6,7 @@ export default {
     body: {
       venue_id: Joi.objectId().trim().required(),
       product_id: Joi.objectId().trim().required(),
-      supplier_id: Joi.objectId().trim(),
+      supplier_id: Joi.objectId().trim().allow(null),
       supplier_product_code: Joi.string().trim().empty(''),
       par_level: Joi.number(),
       package_size: Joi.number(),
