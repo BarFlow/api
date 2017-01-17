@@ -1,4 +1,5 @@
 import httpStatus from 'http-status';
+import Promise from 'bluebird';
 import APIError from '../helpers/APIError';
 import Placement from '../models/placement';
 import Inventory from '../models/inventory';
@@ -37,37 +38,56 @@ function get(req, res) {
 function create(req, res, next) {
   const err = new APIError('Either inventory_item_id or product_id is required.',
   httpStatus.BAD_REQUEST, true);
-  // Required params missing from request body
-  if (!req.body.inventory_item_id && !req.body.product_id) {
-    return next(err);
+
+  if (!Array.isArray(req.body)) {
+    req.body = [req.body];
   }
 
-  // inventory_item_id is missing but product_id is given
-  if (!req.body.inventory_item_id && req.body.product_id) {
-    return Inventory.create(req.body)
-    .then((inventoryItem) => {
-      req.body.inventory_item_id = inventoryItem._id; // eslint-disable-line
-      saveModel(req, res, next);
-    });
+  for (let i = 0; i < req.body.length; i++) {
+    const placement = req.body[i];
+    // Required params missing from request body
+    if (!placement.inventory_item_id && !placement.product_id) {
+      return next(err);
+    }
   }
 
-  saveModel(req, res, next);
+  Promise.all(req.body.map((placement) => {
+    // inventory_item_id is missing but product_id is given
+    if (!placement.inventory_item_id && placement.product_id) {
+      return Inventory.create(placement)
+      .then((inventoryItem) => {
+        placement.inventory_item_id = inventoryItem._id; // eslint-disable-line
+        return saveModel(placement, req.query.populate === 'true');
+      });
+    }
+
+    return saveModel(placement, req.query.populate === 'true');
+  }))
+    .then((savedPlacements) => {
+      // If only one item is saved return an object insted of an array
+      if (savedPlacements.length === 1) {
+        savedPlacements = savedPlacements[0];
+      }
+
+      return res.status(httpStatus.CREATED).json(savedPlacements);
+    })
+    .error(e => next(e));
 }
 
-function saveModel(req, res, next) {
+function saveModel(model, populate) {
   const placement = new Placement({
-    venue_id: req.body.venue_id,
-    area_id: req.body.area_id,
-    section_id: req.body.section_id,
-    inventory_item_id: req.body.inventory_item_id,
-    volume: req.body.volume || 0,
-    order: req.body.order || 0
+    venue_id: model.venue_id,
+    area_id: model.area_id,
+    section_id: model.section_id,
+    inventory_item_id: model.inventory_item_id,
+    volume: model.volume || 0,
+    order: model.order || 0
   });
 
-  placement.saveAsync()
+  return placement.saveAsync()
     .then((savedPlacement) => {
       // Populate models if query string is true and the request type is get
-      if (req.query.populate === 'true') {
+      if (populate) {
         return Placement.populate(savedPlacement,
           { path: 'inventory_item_id',
             populate: {
@@ -76,9 +96,7 @@ function saveModel(req, res, next) {
       }
 
       return savedPlacement;
-    })
-    .then(savedPlacement => res.status(httpStatus.CREATED).json(savedPlacement))
-    .error(e => next(e));
+    });
 }
 
 /**
