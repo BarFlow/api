@@ -51,8 +51,15 @@ const authorize = role =>
 
     // Creating new resource
     if (req.method === 'POST') {
-      const venueId = req.venueId || req.body.venue_id;
-      venueIds.push(venueId);
+      if (Array.isArray(req.body)) {
+        req.body.forEach((obj) => {
+          if (obj.venue_id) {
+            venueIds.push(obj.venue_id);
+          }
+        });
+      } else {
+        venueIds.push(req.venueId || req.body.venue_id);
+      }
 
     // Batch update resources
     } else if ((req.method === 'PUT' || req.method === 'PATCH') && Array.isArray(req.body)) {
