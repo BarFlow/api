@@ -1,6 +1,7 @@
 import Promise from 'bluebird';
 import mongoose from 'mongoose';
 import httpStatus from 'http-status';
+import _ from 'lodash';
 import APIError from '../helpers/APIError';
 
 /**
@@ -102,6 +103,8 @@ PlacementSchema.statics = {
     delete filters.skip; // eslint-disable-line
     const limit = parseInt(filters.limit, 10) || 0;
     delete filters.limit; // eslint-disable-line
+    const orderBy = filters.orderBy ? filters.orderBy.split(',').map(att => `inventory_item_id.product_id.${att}`) : [];
+    delete filters.orderBy; // eslint-disable-line
     const populate = filters.populate || false;
     delete filters.populate; // eslint-disable-line
     const query = this.find()
@@ -126,6 +129,11 @@ PlacementSchema.statics = {
       if (populate) {
         results = results.filter(result => result.inventory_item_id.product_id);
       }
+
+      if (orderBy.length) {
+        results = _.orderBy(results, orderBy);
+      }
+
       return results;
     });
   },
