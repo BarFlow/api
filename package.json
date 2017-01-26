@@ -41,7 +41,7 @@
     "cookie-parser": "^1.4.1",
     "cors": "^2.7.1",
     "debug": "^2.2.0",
-    "excel4node": "^1.2.1",
+    "excel4node": "1.0.3",
     "express": "4.14.0",
     "express-jwt": "3.4.0",
     "express-validation": "1.0.0",
