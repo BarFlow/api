@@ -58,7 +58,7 @@ function update(req, res, next) {
 
   patchModel(inventoryItem, Inventory, req.body);
 
-  inventoryItem.saveAsync()
+  inventoryItem.saveAsync().then(() => Inventory.get(inventoryItem._id))
     .then(savedInventory => res.json(savedInventory))
     .error(e => next(e));
 }
