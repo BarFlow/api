@@ -39,7 +39,8 @@ function create(req, res, next) {
     measurable_from: req.body.measurable_from,
     measurable_till: req.body.measurable_till,
     capacity: req.body.capacity,
-    venue_id: req.body.venue_id
+    venue_id: req.body.venue_id,
+    parent_id: req.body.parent_id
   });
 
   product.saveAsync()
