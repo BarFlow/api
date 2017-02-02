@@ -10,6 +10,7 @@ import areaRoutes from './area/area';
 import sectionRoutes from './section/section';
 import placementRoutes from './placement/placement';
 import reportRoutes from './report/report';
+import orderRoutes from './order/order';
 import { upload, s3upload } from '../controllers/imageUpload';
 
 const router = express.Router();  // eslint-disable-line new-cap
@@ -38,6 +39,8 @@ router.use('/sections', auth.authenticate, sectionRoutes);
 router.use('/placements', auth.authenticate, placementRoutes);
 
 router.use('/reports', auth.authenticate, reportRoutes);
+
+router.use('/orders', auth.authenticate, orderRoutes);
 
 router.post('/uploads', auth.authenticate, upload, s3upload);
 
