@@ -134,6 +134,13 @@ describe('## Order APIs', () => {
             inventory_item: inventoryItem,
             ammount: 1
           }
+        ],
+        other_items: [
+          {
+            description: 'Delivery fee',
+            ammount: 1,
+            price: 1
+          }
         ]
       };
       request(app)
@@ -143,6 +150,7 @@ describe('## Order APIs', () => {
         .expect(httpStatus.CREATED)
         .then((res) => {
           expect(res.body.placed_by).to.equal(user.name);
+          expect(res.body.total_invoice_value).to.equal(2.4);
           done();
         })
         .catch(done);
@@ -189,10 +197,40 @@ describe('## Order APIs', () => {
     });
   });
 
+  describe('# GET /order', () => {
+    it('should get list of populated order items', (done) => {
+      request(app)
+        .get('/orders?populate=true')
+        .set(headers)
+        .send()
+        .expect(httpStatus.OK)
+        .then((res) => {
+          expect(res.body[0].placed_by).to.equal(user.name);
+          done();
+        })
+        .catch(done);
+    });
+  });
+
   describe('# GET /orders/:orders_id', () => {
     it('should get the order', (done) => {
       request(app)
         .get(`/orders/${order._id}`)
+        .set(headers)
+        .send()
+        .expect(httpStatus.OK)
+        .then((res) => {
+          expect(res.body.placed_by).to.equal(user.name);
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+  describe('# GET /orders/:orders_id', () => {
+    it('should get the populated order', (done) => {
+      request(app)
+        .get(`/orders/${order._id}?populate=true`)
         .set(headers)
         .send()
         .expect(httpStatus.OK)

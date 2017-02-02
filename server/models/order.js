@@ -100,15 +100,20 @@ OrderSchema.statics = {
    * @param {ObjectId} id - The objectId of order.
    * @returns {Promise<Order, APIError>}
    */
-  get(id) {
-    return this.findById(id)
-      .execAsync().then((order) => {
-        if (order) {
-          return order;
-        }
-        const err = new APIError('No such order exists!', httpStatus.NOT_FOUND);
-        return Promise.reject(err);
+  get(id, populate = false) {
+    const query = this.findById(id);
+    if (populate) {
+      query.populate({
+        path: 'supplier_id'
       });
+    }
+    return query.execAsync().then((order) => {
+      if (order) {
+        return order;
+      }
+      const err = new APIError('No such order exists!', httpStatus.NOT_FOUND);
+      return Promise.reject(err);
+    });
   },
 
   /**
@@ -116,11 +121,20 @@ OrderSchema.statics = {
    * @returns {Promise<Order[]>}
    */
   list(filters, whiteList) {
-    return this.find(whiteList)
-    // .select('created_at venue_id')
+    const populate = filters.populate;
+    delete filters.populate;
+    const query = this.find(whiteList)
+    .select('-items -other_items')
     .where(filters)
-    .sort({ created_at: -1 })
-    .execAsync();
+    .sort({ created_at: -1 });
+
+    if (populate) {
+      query.populate({
+        path: 'supplier_id'
+      });
+    }
+
+    return query.execAsync();
   },
 
 };

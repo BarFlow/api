@@ -6,7 +6,7 @@ import patchModel from '../helpers/patchModel';
  * Load order and append to req.
  */
 function load(req, res, next, id) {
-  Order.get(id).then((order) => {
+  Order.get(id, req.query.populate === 'true').then((order) => {
     // !!! This is used by auth.authorize this MUST be set for any resource
     req.venueId = order.venue_id; // eslint-disable-line no-param-reassign
     req.order = order; // eslint-disable-line no-param-reassign
