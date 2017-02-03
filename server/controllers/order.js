@@ -208,7 +208,7 @@ function generateOrderSheet({
     }
   });
 
-  const { name: supplierName = 'Other', account_number: accountNumber = '' } = supplierId;
+  const { name: supplierName = 'PURCHASE ORDER', account_number: accountNumber = '' } = supplierId;
 
   // Add Worksheets to the workbook
   const ws = wb.addWorksheet(supplierName);
