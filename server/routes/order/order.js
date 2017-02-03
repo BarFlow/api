@@ -20,9 +20,12 @@ router.route('/:order_id')
   /** DELETE /orders/:order_id - Removes an order */
   .delete(auth.authorize('manager'), orderCtrl.remove);
 
-// router.route('/:order_id/export')
+router.route('/:order_id/export')
   /** GET /orders/:order_id - Returns an order */
-  // .get(orderCtrl.getExport);
+  .get((req, res, next) => {
+    req.query.populate = 'true';
+    next();
+  }, orderCtrl.getExport);
 
 // Load resource to req object -> req.order
 router.param('order_id', orderCtrl.load);

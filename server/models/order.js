@@ -32,6 +32,7 @@ const OrderSchema = new mongoose.Schema({
     type: String,
     enum: ['draft', 'sent', 'confirmed', 'delivered']
   },
+  venue_name: String,
   placed_by: String,
   contact_tel: String,
   contact_email: String,
@@ -59,6 +60,7 @@ OrderSchema.pre('save', function OrderModelPreSave(next) {
 
   Promise.all([User.get(this.created_by), Venue.get(this.venue_id)])
     .then(([user, venue]) => {
+      this.venue_name = this.venue_name || venue.profile.name;
       this.placed_by = this.placed_by || user.name;
       this.contact_tel = this.contact_tel || venue.profile.tel;
       this.contact_email = this.contact_email || user.email;

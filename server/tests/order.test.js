@@ -242,6 +242,20 @@ describe('## Order APIs', () => {
     });
   });
 
+  describe('# GET /orders/:orders_id/export', () => {
+    it('should get the export of the order', (done) => {
+      request(app)
+        .get(`/orders/${order._id}/export`)
+        .set(headers)
+        .send()
+        .expect(httpStatus.OK)
+        .then(() => {
+          done();
+        })
+        .catch(done);
+    });
+  });
+
   describe('# GET /orders/57fd42f6acbc0b2e46e69e25', () => {
     it('should not found order', (done) => {
       request(app)
