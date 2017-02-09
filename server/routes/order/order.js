@@ -22,10 +22,7 @@ router.route('/:order_id')
 
 router.route('/:order_id/export')
   /** GET /orders/:order_id - Returns an order */
-  .get((req, res, next) => {
-    req.query.populate = 'true';
-    next();
-  }, orderCtrl.getExport);
+  .get(orderCtrl.getExport);
 
 // Load resource to req object -> req.order
 router.param('order_id', orderCtrl.load);

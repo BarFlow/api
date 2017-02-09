@@ -8,7 +8,7 @@ import patchModel from '../helpers/patchModel';
  * Load order and append to req.
  */
 function load(req, res, next, id) {
-  Order.get(id, req.query.populate === 'true').then((order) => {
+  Order.get(id, req.query.populate === 'true' || req.path.indexOf('export') > -1).then((order) => {
     // !!! This is used by auth.authorize this MUST be set for any resource
     req.venueId = order.venue_id; // eslint-disable-line no-param-reassign
     req.order = order; // eslint-disable-line no-param-reassign
@@ -208,7 +208,7 @@ function generateOrderSheet({
     }
   });
 
-  const { name: supplierName = 'PURCHASE ORDER', account_number: accountNumber = '' } = supplierId;
+  const { name: supplierName = 'PURCHASE ORDER', account_number: accountNumber = '' } = supplierId || {};
 
   // Add Worksheets to the workbook
   const ws = wb.addWorksheet(supplierName);
@@ -274,7 +274,7 @@ function generateOrderSheet({
   items.forEach((item) => {
     ++currentRow;
     const {
-      product_supplier_code: sku = '',
+      supplier_product_code: sku = '',
       cost_price: price = 0,
       product_id: product = {
         name: ''
@@ -294,9 +294,11 @@ function generateOrderSheet({
     const {
       description,
       price = 0,
-      ammount = 0
+      ammount = 0,
+      sku = ''
     } = item;
 
+    ws.cell(currentRow, 1).string(sku);
     ws.cell(currentRow, 2).string(description);
     ws.cell(currentRow, 3).number(price).style(currencyStyle);
     ws.cell(currentRow, 4).number(ammount);

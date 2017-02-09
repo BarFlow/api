@@ -23,7 +23,6 @@ const createBody = {
         capacity: Joi.number().integer(),
         venue_id: Joi.objectId().trim()
       }),
-      supplier_id: Joi.objectId().allow(null),
       supplier_product_code: Joi.string().trim().empty(''),
       par_level: Joi.number().empty(''),
       package_size: Joi.number().empty(''),
