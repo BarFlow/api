@@ -21,7 +21,7 @@ if (config.env === 'development') {
 }
 
 // parse body params and attache them to req.body
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '1mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(cookieParser());
