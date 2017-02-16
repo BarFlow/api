@@ -324,11 +324,14 @@ function create(req, res, next) {
     });
     return report;
   })
-  .then(report =>
-    report.saveAsync()
-    .then(savedReport => res.status(httpStatus.CREATED).json(savedReport))
-    .error(e => next(e))
-  );
+  .then(report => report.saveAsync())
+  .then(savedReport =>
+    Placement.update({ venue_id: req.body.venue_id }, { volume: 0 }).execAsync()
+    .then(() => {
+      res.status(httpStatus.CREATED).json(savedReport);
+    })
+  )
+  .error(e => next(e));
 }
 
 /**
