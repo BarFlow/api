@@ -19,6 +19,7 @@ const ProductSchema = new mongoose.Schema({
   },
   category: {
     type: String,
+    default: 'other',
     index: true,
   },
   sub_category: {
@@ -32,9 +33,19 @@ const ProductSchema = new mongoose.Schema({
     original: String
   },
   measurable: Boolean,
-  measurable_from: Number,
-  measurable_till: Number,
+  measurable_from: {
+    type: Number,
+    default: 0.1
+  },
+  measurable_till: {
+    type: Number,
+    default: 0.9
+  },
   capacity: Number,
+  measure_unit: {
+    type: String,
+    default: 'ml'
+  },
   approved: {
     type: Boolean,
     default: false
@@ -81,6 +92,8 @@ ProductSchema.methods.toJSON = function ProductModelRemoveHash() {
   delete obj.created_at;
   delete obj.updated_at;
   delete obj.sku;
+  delete obj.from;
+  delete obj.score;
 
   return obj;
 };

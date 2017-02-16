@@ -34,6 +34,7 @@ function create(req, res, next) {
     address: req.body.address,
     email: req.body.email,
     tel: req.body.tel,
+    min_order: req.body.min_order,
     venue_id: req.body.venue_id
   });
 

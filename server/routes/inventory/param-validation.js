@@ -11,9 +11,8 @@ export default {
       par_level: Joi.number(),
       package_size: Joi.number(),
       count_as_full: Joi.number(),
-      sale_unit_size: Joi.number(),
       cost_price: Joi.number(),
-      sale_price: Joi.number()
+      count_by: Joi.string()
     }
   },
   // PUT /:area_id
@@ -25,9 +24,8 @@ export default {
       par_level: Joi.number().empty(''),
       package_size: Joi.number().empty(''),
       count_as_full: Joi.number().empty(''),
-      sale_unit_size: Joi.number().empty(''),
       cost_price: Joi.number().empty(''),
-      sale_price: Joi.number().empty('')
+      count_by: Joi.string().empty('')
     }
   },
   // PUT /
@@ -41,9 +39,8 @@ export default {
       par_level: Joi.number().empty(''),
       package_size: Joi.number().empty(''),
       count_as_full: Joi.number().empty(''),
-      sale_unit_size: Joi.number().empty(''),
       cost_price: Joi.number().empty(''),
-      sale_price: Joi.number().empty('')
+      count_by: Joi.string().empty('')
     }))
   }
 };

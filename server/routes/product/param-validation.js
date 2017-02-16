@@ -17,6 +17,7 @@ export default {
       measurable_from: Joi.number(),
       measurable_till: Joi.number(),
       capacity: Joi.number().integer(),
+      measure_unit: Joi.string().trim(),
       venue_id: Joi.string().trim().required()
     }
   },
@@ -36,6 +37,7 @@ export default {
       measurable_from: Joi.number(),
       measurable_till: Joi.number(),
       capacity: Joi.number().integer(),
+      measure_unit: Joi.string().trim()
     }
   }
 };

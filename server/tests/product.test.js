@@ -23,7 +23,8 @@ describe('## Product APIs', () => {
     category: 'vodka',
     measurable: true,
     measurable_from: 0.1234,
-    measurable_till: 0.98764
+    measurable_till: 0.98764,
+    measure_unit: 'cl'
   };
 
   const headers = {};
@@ -84,6 +85,7 @@ describe('## Product APIs', () => {
           product._id = res.body._id;
           expect(res.body.name).to.equal(product.name);
           expect(res.body.venue_id).to.equal(product.venue_id);
+          expect(res.body.measure_unit).to.equal(product.measure_unit);
           done();
         })
         .catch(done);
@@ -143,13 +145,15 @@ describe('## Product APIs', () => {
         .put(`/products/${product._id}`)
         .set(headers)
         .send({
-          name: 'Belvedere'
+          name: 'Belvedere',
+          measure_unit: 'l'
         })
         .expect(httpStatus.OK)
         .then((res) => {
           expect(res.body._id).to.equal(product._id);
           expect(res.body.name).to.equal('Belvedere');
           expect(res.body.venue_id).to.equal(product.venue_id);
+          expect(res.body.measure_unit).to.equal('l');
           done();
         })
         .catch(done);

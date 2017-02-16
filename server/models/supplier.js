@@ -23,6 +23,9 @@ const SupplierSchema = new mongoose.Schema({
   account_number: {
     type: String,
   },
+  min_order: {
+    type: Number,
+  },
   approved: {
     type: Boolean,
     default: false

@@ -29,8 +29,7 @@ describe('## Inventory APIs', () => {
   const inventoryItem = {
     par_level: 15,
     cost_price: 1.34,
-    sale_unit_size: 10,
-    sale_price: 20
+    count_by: 'case'
   };
 
   const headers = {};
@@ -114,8 +113,7 @@ describe('## Inventory APIs', () => {
           expect(res.body.product_id).to.equal(inventoryItem.product_id);
           expect(res.body.cost_price).to.equal(inventoryItem.cost_price);
           expect(res.body.par_level).to.equal(inventoryItem.par_level);
-          expect(res.body.sale_unit_size).to.equal(inventoryItem.sale_unit_size);
-          expect(res.body.sale_price).to.equal(inventoryItem.sale_price);
+          expect(res.body.count_by).to.equal(inventoryItem.count_by);
           expect(res.body.venue_id).to.equal(inventoryItem.venue_id);
           done();
         })
@@ -135,8 +133,7 @@ describe('## Inventory APIs', () => {
           expect(res.body.product_id).to.equal(inventoryItem.product_id);
           expect(res.body.cost_price).to.equal(inventoryItem.cost_price);
           expect(res.body.par_level).to.equal(inventoryItem.par_level);
-          expect(res.body.sale_unit_size).to.equal(inventoryItem.sale_unit_size);
-          expect(res.body.sale_price).to.equal(inventoryItem.sale_price);
+          expect(res.body.count_by).to.equal(inventoryItem.count_by);
           expect(res.body.venue_id).to.equal(inventoryItem.venue_id);
           done();
         })
@@ -155,8 +152,8 @@ describe('## Inventory APIs', () => {
           expect(res.body[0].product_id).to.equal(inventoryItem.product_id);
           expect(res.body[0].cost_price).to.equal(inventoryItem.cost_price);
           expect(res.body[0].par_level).to.equal(inventoryItem.par_level);
-          expect(res.body[0].sale_unit_size).to.equal(inventoryItem.sale_unit_size);
-          expect(res.body[0].sale_price).to.equal(inventoryItem.sale_price);
+          expect(res.body[0].count_by).to.equal(inventoryItem.count_by);
+          expect(res.body[0].cost_price).to.equal(inventoryItem.cost_price);
           expect(res.body[0].venue_id).to.equal(inventoryItem.venue_id);
           done();
         })
@@ -189,8 +186,7 @@ describe('## Inventory APIs', () => {
         .then((res) => {
           expect(res.body.cost_price).to.equal(inventoryItem.cost_price);
           expect(res.body.par_level).to.equal(inventoryItem.par_level);
-          expect(res.body.sale_unit_size).to.equal(inventoryItem.sale_unit_size);
-          expect(res.body.sale_price).to.equal(inventoryItem.sale_price);
+          expect(res.body.count_by).to.equal(inventoryItem.count_by);
           expect(res.body.venue_id).to.equal(inventoryItem.venue_id);
           done();
         })
@@ -218,12 +214,12 @@ describe('## Inventory APIs', () => {
         .put(`/inventory/${inventoryItem._id}`)
         .set(headers)
         .send({
-          sale_price: 999
+          cost_price: 999
         })
         .expect(httpStatus.OK)
         .then((res) => {
           expect(res.body._id).to.equal(inventoryItem._id);
-          expect(res.body.sale_price).to.equal(999);
+          expect(res.body.cost_price).to.equal(999);
           expect(res.body.venue_id).to.equal(inventoryItem.venue_id);
           done();
         })
@@ -233,7 +229,7 @@ describe('## Inventory APIs', () => {
 
   describe('# PUT /inventory/', () => {
     it('should batch update inventorys', (done) => {
-      inventoryItem.sale_price = 111;
+      inventoryItem.cost_price = 111;
       request(app)
         .put('/inventory/')
         .set(headers)
@@ -255,7 +251,7 @@ describe('## Inventory APIs', () => {
         .expect(httpStatus.OK)
         .then((res) => {
           expect(res.body._id).to.equal(inventoryItem._id);
-          expect(res.body.sale_price).to.equal(111);
+          expect(res.body.cost_price).to.equal(111);
           expect(res.body.venue_id).to.equal(inventoryItem.venue_id);
           done();
         })

@@ -34,14 +34,13 @@ const InventorySchema = new mongoose.Schema({
   cost_price: {
     type: Number
   },
-  sale_price: {
-    type: Number
-  },
-  sale_unit_size: {
-    type: Number
+  count_by: {
+    type: String,
+    default: 'bottle'
   },
   package_size: {
-    type: Number
+    type: Number,
+    default: 6
   },
   count_as_full: {
     type: Number,
