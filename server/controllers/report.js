@@ -5,6 +5,7 @@ import Report from '../models/report';
 import Placement from '../models/placement';
 import Venue from '../models/venue';
 import User from '../models/user';
+import Inventory from '../models/inventory';
 import patchModel from '../helpers/patchModel';
 
 /**
@@ -79,6 +80,23 @@ function generateReport(filters) {
       return mem;
     }, {})
   )
+  .then(results =>
+    Inventory.find(filters).populate({
+      path: 'product_id supplier_id',
+      select: '-__v -updated_at -created_at'
+    }).execAsync().then(inventories =>
+      inventories.reduce((mem, item) => {
+        item = item.toObject();
+        if (!mem[item._id]) {
+          mem[item._id] = Object.assign({}, item, {
+            areas: {},
+            volume: 0
+          });
+        }
+        return mem;
+      }, results)
+    )
+  )
   .then((results) => {
     const report = Object.keys(results).map((itemId) => {
       // calculating how much to order based on par_level, volume and count_as_full
@@ -101,7 +119,7 @@ function generateReport(filters) {
       });
       return results[itemId];
     });
-    return _.orderBy(report, ['product_id.name']);
+    return _.orderBy(report, ['product_id.category', 'product_id.sub_category', 'product_id.name']);
   });
 }
 
