@@ -85,7 +85,7 @@ function generateReport(filters) {
       path: 'product_id supplier_id',
       select: '-__v -updated_at -created_at'
     }).execAsync().then(inventories =>
-      inventories.reduce((mem, item) => {
+      inventories.filter(item => item.product_id).reduce((mem, item) => {
         item = item.toObject();
         if (!mem[item._id]) {
           mem[item._id] = Object.assign({}, item, {
