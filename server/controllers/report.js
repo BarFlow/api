@@ -140,7 +140,8 @@ function generateReport(filters) {
           if (!mem[item._id]) {
             mem[item._id] = Object.assign({}, item, {
               areas: {},
-              volume: 0
+              volume: 0,
+              value: 0
             });
           }
           return mem;
