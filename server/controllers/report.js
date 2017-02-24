@@ -59,67 +59,114 @@ function generateReport(filters) {
       && item.section_id)
     .reduce((mem, item) => {
       item = item.toObject();
-      if (!mem[item.inventory_item_id._id]) {
-        mem[item.inventory_item_id._id] = item.inventory_item_id;
-        mem[item.inventory_item_id._id].areas = {};
-        mem[item.inventory_item_id._id].volume = 0;
+
+      if (!mem.items[item.inventory_item_id._id]) {
+        mem.items[item.inventory_item_id._id] = item.inventory_item_id;
+        mem.items[item.inventory_item_id._id].areas = {};
+        mem.items[item.inventory_item_id._id].volume = 0;
+        mem.items[item.inventory_item_id._id].value = 0;
       }
-      if (!mem[item.inventory_item_id._id].areas[item.area_id._id]) {
-        mem[item.inventory_item_id._id].areas[item.area_id._id] = item.area_id;
-        mem[item.inventory_item_id._id].areas[item.area_id._id].sections = {};
-        mem[item.inventory_item_id._id].areas[item.area_id._id].volume = 0;
+      if (!mem.items[item.inventory_item_id._id].areas[item.area_id._id]) {
+        mem.items[item.inventory_item_id._id].areas[item.area_id._id] = item.area_id;
+        mem.items[item.inventory_item_id._id].areas[item.area_id._id].sections = {};
+        mem.items[item.inventory_item_id._id].areas[item.area_id._id].volume = 0;
+        mem.items[item.inventory_item_id._id].areas[item.area_id._id].value = 0;
       }
-      if (!mem[item.inventory_item_id._id].areas[item.area_id._id].sections[item.section_id._id]) {
-        mem[item.inventory_item_id._id].areas[item.area_id._id].sections[item.section_id._id] = item.section_id; //eslint-disable-line
-        mem[item.inventory_item_id._id].areas[item.area_id._id].sections[item.section_id._id].volume = 0; //eslint-disable-line
+      if (!mem.items[item.inventory_item_id._id]
+            .areas[item.area_id._id]
+            .sections[item.section_id._id]) {
+        // Section
+        mem.items[item.inventory_item_id._id]
+          .areas[item.area_id._id]
+          .sections[item.section_id._id] = item.section_id;
+
+        // Volume
+        mem.items[item.inventory_item_id._id]
+          .areas[item.area_id._id]
+          .sections[item.section_id._id].volume = 0;
+
+        // Value
+        mem.items[item.inventory_item_id._id]
+          .areas[item.area_id._id]
+          .sections[item.section_id._id].value = 0;
       }
 
-      mem[item.inventory_item_id._id].volume += item.volume;
-      mem[item.inventory_item_id._id].areas[item.area_id._id].volume += item.volume;
-      mem[item.inventory_item_id._id].areas[item.area_id._id].sections[item.section_id._id].volume += item.volume; //eslint-disable-line
+      mem.items[item.inventory_item_id._id].volume += item.volume;
+      mem.items[item.inventory_item_id._id].value += item.volume * item.inventory_item_id.cost_price; //eslint-disable-line
+      mem.items[item.inventory_item_id._id].areas[item.area_id._id].volume += item.volume;
+      mem.items[item.inventory_item_id._id].areas[item.area_id._id].value += item.volume * item.inventory_item_id.cost_price; //eslint-disable-line
+      mem.items[item.inventory_item_id._id].areas[item.area_id._id].sections[item.section_id._id].volume += item.volume; //eslint-disable-line
+      mem.items[item.inventory_item_id._id].areas[item.area_id._id].sections[item.section_id._id].value += item.volume * item.inventory_item_id.cost_price; // eslint-disable-line
+
+      if (!mem.stats.types[item.inventory_item_id.product_id.type]) {
+        mem.stats.types[item.inventory_item_id.product_id.type] = {
+          value: 0,
+          categories: {}
+        };
+      }
+
+      if (!mem.stats.types[item.inventory_item_id.product_id.type].categories[item.inventory_item_id.product_id.category]) { //eslint-disable-line
+        mem.stats.types[item.inventory_item_id.product_id.type].categories[item.inventory_item_id.product_id.category] = { //eslint-disable-line
+          value: 0,
+          sub_categories: {}
+        };
+      }
+      if (!mem.stats.types[item.inventory_item_id.product_id.type].categories[item.inventory_item_id.product_id.category].sub_categories[item.inventory_item_id.product_id.sub_category]) { //eslint-disable-line
+        mem.stats.types[item.inventory_item_id.product_id.type].categories[item.inventory_item_id.product_id.category].sub_categories[item.inventory_item_id.product_id.sub_category] = { value: 0 }; //eslint-disable-line
+      }
+
+      mem.stats.total_value += mem.items[item.inventory_item_id._id].value; //eslint-disable-line
+      mem.stats.types[item.inventory_item_id.product_id.type].value += mem.items[item.inventory_item_id._id].value; //eslint-disable-line
+      mem.stats.types[item.inventory_item_id.product_id.type].categories[item.inventory_item_id.product_id.category].value += mem.items[item.inventory_item_id._id].value; //eslint-disable-line
+      mem.stats.types[item.inventory_item_id.product_id.type].categories[item.inventory_item_id.product_id.category].sub_categories[item.inventory_item_id.product_id.sub_category].value += mem.items[item.inventory_item_id._id].value; //eslint-disable-line
       return mem;
-    }, {})
+    }, { items: [], stats: { types: {}, total: 0 } })
   )
   .then(results =>
     Inventory.find(filters).populate({
       path: 'product_id supplier_id',
       select: '-__v -updated_at -created_at'
-    }).execAsync().then(inventories =>
-      inventories.filter(item => item.product_id).reduce((mem, item) => {
-        item = item.toObject();
-        if (!mem[item._id]) {
-          mem[item._id] = Object.assign({}, item, {
-            areas: {},
-            volume: 0
-          });
-        }
-        return mem;
-      }, results)
-    )
-  )
+    }).execAsync().then(inventories => (
+      {
+        items: inventories.filter(item => item.product_id).reduce((mem, item) => {
+          item = item.toObject();
+          if (!mem[item._id]) {
+            mem[item._id] = Object.assign({}, item, {
+              areas: {},
+              volume: 0
+            });
+          }
+          return mem;
+        }, results.items),
+        stats: results.stats
+      })
+  ))
   .then((results) => {
-    const report = Object.keys(results).map((itemId) => {
+    const report = Object.keys(results.items).map((itemId) => {
       // calculating how much to order based on par_level, volume and count_as_full
-      results[itemId].order = 0;
-      let fullBottles = results[itemId].volume - (results[itemId].volume % 1);
-      if (results[itemId].volume % 1 > results[itemId].count_as_full) {
+      results.items[itemId].order = 0;
+      let fullBottles = results.items[itemId].volume - (results.items[itemId].volume % 1);
+      if (results.items[itemId].volume % 1 > results.items[itemId].count_as_full) {
         fullBottles++;
       }
-      const order = results[itemId].par_level - fullBottles;
-      if (results[itemId].par_level && order > 0) {
-        results[itemId].order = order;
+      const order = results.items[itemId].par_level - fullBottles;
+      if (results.items[itemId].par_level && order > 0) {
+        results.items[itemId].order = order;
       }
 
-      results[itemId].areas = Object.keys(results[itemId].areas).map((areaId) => {
-        results[itemId].areas[areaId].sections = Object.keys(results[itemId].areas[areaId].sections)
+      results.items[itemId].areas = Object.keys(results.items[itemId].areas).map((areaId) => {
+        results.items[itemId].areas[areaId].sections = Object.keys(results.items[itemId].areas[areaId].sections) //eslint-disable-line
         .map(sectionId =>
-          results[itemId].areas[areaId].sections[sectionId]
+          results.items[itemId].areas[areaId].sections[sectionId]
         );
-        return results[itemId].areas[areaId];
+        return results.items[itemId].areas[areaId];
       });
-      return results[itemId];
+      return results.items[itemId];
     });
-    return _.orderBy(report, ['product_id.category', 'product_id.sub_category', 'product_id.name']);
+    return {
+      data: _.orderBy(report, ['product_id.category', 'product_id.sub_category', 'product_id.name']),
+      stats: results.stats
+    };
   });
 }
 
@@ -335,13 +382,22 @@ function generateReportXLS(report, user, venue) {
  * @returns {Report}
  */
 function create(req, res, next) {
-  generateReport({ venue_id: req.body.venue_id }).then((reportData) => {
-    const report = new Report({
-      venue_id: req.body.venue_id,
-      data: reportData
-    });
-    return report;
-  })
+  User.get(req.user._id)
+  .then(user =>
+    generateReport({ venue_id: req.body.venue_id }).then((reportData) => {
+      const report = new Report({
+        venue_id: req.body.venue_id,
+        data: reportData.data,
+        stats: reportData.stats,
+        created_by: {
+          _id: user._id,
+          name: user.name,
+          email: user.email
+        }
+      });
+      return report;
+    })
+  )
   .then(report => report.saveAsync())
   .then(savedReport =>
     Placement.update({ venue_id: req.body.venue_id }, { volume: 0 }, { multi: true }).execAsync()

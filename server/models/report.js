@@ -8,13 +8,19 @@ import APIError from '../helpers/APIError';
  */
 const ReportSchema = new mongoose.Schema({
   data: {
-    type: Object,
+    type: Array,
     required: true
+  },
+  stats: {
+    type: Object
   },
   venue_id: {
     type: mongoose.Schema.Types.ObjectId,
     index: true,
     ref: 'Venue'
+  },
+  created_by: {
+    type: Object
   },
   created_at: {
     type: Date,
@@ -30,9 +36,9 @@ const ReportSchema = new mongoose.Schema({
  *  Set updated_at before model gets saved.
 */
 ReportSchema.pre('save', function ReportModelPreSave(next) {
-  const supplier = this;
+  const report = this;
 
-  supplier.updated_at = new Date();
+  report.updated_at = new Date();
 
   return next();
 });
@@ -54,28 +60,28 @@ ReportSchema.methods.toJSON = function ReportModelRemoveHash() {
  */
 ReportSchema.statics = {
   /**
-   * Get supplier
-   * @param {ObjectId} id - The objectId of supplier.
+   * Get report
+   * @param {ObjectId} id - The objectId of report.
    * @returns {Promise<Report, APIError>}
    */
   get(id) {
     return this.findById(id)
-      .execAsync().then((supplier) => {
-        if (supplier) {
-          return supplier;
+      .execAsync().then((report) => {
+        if (report) {
+          return report;
         }
-        const err = new APIError('No such supplier exists!', httpStatus.NOT_FOUND);
+        const err = new APIError('No such report exists!', httpStatus.NOT_FOUND);
         return Promise.reject(err);
       });
   },
 
   /**
-   * List suppliers associated with the current user, in ascending order of "order" attribute.
+   * List reports associated with the current user, in ascending order of "order" attribute.
    * @returns {Promise<Report[]>}
    */
   list(filters, whiteList) {
     return this.find(whiteList)
-    .select('created_at venue_id')
+    .select('created_at venue_id created_by stats')
     .where(filters)
     .sort({ created_at: -1 })
     .execAsync();

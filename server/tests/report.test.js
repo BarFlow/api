@@ -207,7 +207,7 @@ describe('## Reports APIs', () => {
         .set(headers)
         .expect(httpStatus.OK)
         .then((res) => {
-          expect(res.body[0].volume).to.equal(placement.volume);
+          expect(res.body.data[0].volume).to.equal(placement.volume);
           done();
         })
         .catch(done);
@@ -221,7 +221,7 @@ describe('## Reports APIs', () => {
         .set(headers)
         .expect(httpStatus.OK)
         .then((res) => {
-          expect(res.body[0].volume).to.equal(placement.volume);
+          expect(res.body.data[0].volume).to.equal(placement.volume);
           done();
         })
         .catch(done);

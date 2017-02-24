@@ -21,7 +21,6 @@ const OrderSchema = new mongoose.Schema({
   },
   created_by: {
     type: mongoose.Schema.Types.ObjectId,
-    index: true,
     ref: 'User'
   },
   invoice_id: String,
