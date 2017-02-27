@@ -50,6 +50,7 @@ function generateReport(filters) {
       select: '-__v -updated_at -created_at',
     },
   })
+  .lean()
   .execAsync()
   .then(results =>
     results.filter(item =>
@@ -58,8 +59,6 @@ function generateReport(filters) {
       && item.area_id
       && item.section_id)
     .reduce((mem, item) => {
-      item = item.toObject();
-
       if (!mem.items[item.inventory_item_id._id]) {
         mem.items[item.inventory_item_id._id] = item.inventory_item_id;
         mem.items[item.inventory_item_id._id].areas = {};
@@ -130,13 +129,14 @@ function generateReport(filters) {
     }, { items: [], stats: { types: {}, total_value: 0 } })
   )
   .then(results =>
-    Inventory.find(filters).populate({
+    Inventory.find(filters)
+    .populate({
       path: 'product_id supplier_id',
       select: '-__v -updated_at -created_at'
-    }).execAsync().then(inventories => (
+    }).lean().execAsync()
+    .then(inventories => (
       {
         items: inventories.filter(item => item.product_id).reduce((mem, item) => {
-          item = item.toObject();
           if (!mem[item._id]) {
             mem[item._id] = Object.assign({}, item, {
               areas: {},
