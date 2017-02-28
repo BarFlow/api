@@ -179,36 +179,25 @@ function generateReport(filters) {
 }
 
 function getExport(req, res) {
-  Venue.findById(req.report.venue_id).execAsync().then(venue =>
-    User.findById(req.user._id).execAsync().then((user) => {
-      const xls = generateReportXLS(req.report.data, user, venue);
-      return xls.write(`${new Date(req.report.created_at)
-        .toString()
-        .split(' ')
-        .splice(0, 5)
-        .join(' ')}.xlsx`, res);
-    })
-  );
+  return Venue.get(req.report.venue_id).then((venue) => {
+    const xls = generateReportXLS(req.report, venue);
+    return xls.write(`${new Date(req.report.created_at)
+      .toString()
+      .split(' ')
+      .splice(0, 5)
+      .join(' ')}.xlsx`, res);
+  });
 }
 
-function addProductSheetToWorkBook(wb, products, user, venue, supplier) {
-  // Add Worksheets to the workbook
-  const ws = wb.addWorksheet(supplier.name || 'Other');
-
-  // Calculate longest product name's length
-  let productNameMaxLength = 10;
-  products.forEach((item) => {
-    if (item.name.length > productNameMaxLength) {
-      productNameMaxLength = item.name.length;
-    }
+function generateReportXLS(report, {
+  profile: {
+    name: venueName = ''
+  }
+}) {
+  // Create a new instance of  a Workbook class
+  const wb = new xl.Workbook({
+    dateFormat: 'dd.mm.yyyy;@'
   });
-
-  // Set column widths
-  ws.column(1).setWidth(12);
-  ws.column(2).setWidth(productNameMaxLength);
-  ws.column(7).setWidth(24);
-  ws.column(8).setWidth(18);
-
 
   // Styles
   const header = wb.createStyle({
@@ -233,7 +222,7 @@ function addProductSheetToWorkBook(wb, products, user, venue, supplier) {
     }
   });
 
-  const supplierName = wb.createStyle({
+  const darkBgWhiteBoldCenterText = wb.createStyle({
     fill: {
       type: 'pattern',
       patternType: 'solid',
@@ -264,7 +253,13 @@ function addProductSheetToWorkBook(wb, products, user, venue, supplier) {
   });
 
   const currencyStyle = wb.createStyle({
-    numberFormat: '£#,##0.00; (£#,##0.00); -'
+    numberFormat: '£#,##0.00; (£#,##0.00); 0'
+  });
+
+  const alignLeft = wb.createStyle({
+    alignment: {
+      horizontal: 'left'
+    }
   });
 
   const alignRight = wb.createStyle({
@@ -279,106 +274,79 @@ function addProductSheetToWorkBook(wb, products, user, venue, supplier) {
     }
   });
 
-  // Top header has 4 rows
-  const skipRows = 5;
-  const currentDate = new Date();
+  // Add Worksheets to the workbook
+  const ws = wb.addWorksheet('Stock Report');
+
+  // Calculate longest item name's length
+  const descriptionMaxLength = report.data.reduce((mem, item) => {
+    const name = item.product_id.name;
+    if (name.length > mem) {
+      mem = name.length;
+    }
+    return mem;
+  }, 10);
+
+  // Set column widths
+  ws.column(1).setWidth(18);
+  ws.column(2).setWidth(descriptionMaxLength);
 
   // Top header
-  ws.cell(1, 1, 1, 8, true).string(supplier.name || 'Other').style(supplierName);
-  ws.cell(2, 1, 5, 8).style(yellowBg);
-  ws.cell(2, 1).string('Name:').style(header);
-  ws.cell(2, 2).string(venue.profile.name || '');
-  ws.cell(2, 7).string('Date:').style(header);
-  ws.cell(2, 8).date(currentDate);
-  ws.cell(3, 1).string('Account:').style(header);
-  ws.cell(3, 2).string(supplier.account_number || '');
-  ws.cell(3, 7).string('Contact:').style(header);
-  ws.cell(3, 8).string(venue.profile.tel || '').style(alignRight);
-  ws.cell(4, 1).string('Address:').style(header);
-  ws.cell(4, 2).string(venue.profile.address || '');
-  ws.cell(4, 7).string('Order Placed By:').style(header);
-  ws.cell(4, 8).string(user.name || '').style(alignRight);
-  ws.cell(5, 1).string('Email:').style(header);
-  ws.cell(5, 2).string(venue.profile.email || '');
-  ws.cell(5, 7).string('Requested Delivery Date:').style(header);
-  ws.cell(5, 8).date(currentDate);
+  ws.cell(1, 1, 1, 6, true).string('Stock Report').style(darkBgWhiteBoldCenterText);
+  ws.cell(2, 1, 4, 6).style(yellowBg);
+  ws.cell(2, 1).string('Venue:').style(header);
+  ws.cell(2, 2).string(venueName);
+  ws.cell(3, 1).string('Date:').style(header);
+  ws.cell(3, 2).date(report.created_at).style(alignLeft);
+  ws.cell(4, 1).string('Created by:').style(header);
+  ws.cell(4, 2).string(`${report.created_by.name} <${report.created_by.email}>`).style(alignLeft);
 
-  // Columns definition
-  const columns = [
-    { key: 'sku', title: 'SKU', type: 'string' }, // A
-    { key: 'name', title: 'Description', type: 'string' }, // B
-    { key: 'cost_price', title: 'Net Price', type: 'number' }, // C
-    { key: 'inc_vat', title: 'Inc VAT', type: 'number' }, // D
-    { key: 'par_level', title: 'Par Level', type: 'number' }, // E
-    { key: 'stock_level', title: 'Stock Level', type: 'number' }, // F
-    { key: 'order', title: 'Order Quantity (Bottles)', type: 'number' }, // G
-    { key: 'value', title: 'Value (Inc VAT)', type: 'number' } // H
-  ];
+  // setting currentRow
+  let currentRow = 4;
 
-  // Freeze Header BUG: https://github.com/amekkawi/excel4node/issues/107
-  // ws.row(5).freeze();
+  // Columns definitions
+  ++currentRow;
+  ws.cell(currentRow, 1, currentRow, 6).style(header2);
+  ws.cell(currentRow, 1).string('Category'); // A
+  ws.cell(currentRow, 2).string('Description'); // B
+  ws.cell(currentRow, 3).string('Net Price'); // C
+  ws.cell(currentRow, 4).string('Par Level'); // D
+  ws.cell(currentRow, 5).string('Stock Level'); // E
+  ws.cell(currentRow, 6).string('Value'); // F
 
-  // List products
-  for (let i = 0; i < products.length; i++) {
-    if (i === 0) {
-      for (let k = 0; k < columns.length; k++) {
-        ws.cell(i + 1 + skipRows, k + 1).string(columns[k].title).style(header2);
+  // List items
+  report.data.forEach(({
+      cost_price: price = 0,
+      par_level: parLevel = 0,
+      volume: stockLevel = 0,
+      value = 0,
+      product_id: product = {
+        name: 'other',
+        sub_category: 'other'
       }
-    }
-    for (let j = 0; j < columns.length; j++) {
-      const row = i + 2 + skipRows;
-      if (columns[j].key === 'inc_vat') {
-        ws.cell(row, j + 1).formula(`C${row}*1.2`).style(currencyStyle);
-      } else if (columns[j].key === 'value') {
-        ws.cell(row, j + 1).formula(`G${row}*D${row}`).style(currencyStyle);
-      } else {
-        ws.cell(row, j + 1)[columns[j].type](products[i][columns[j].key]);
-        if (columns[j].key === 'cost_price') {
-          ws.cell(row, j + 1).style(currencyStyle);
-        }
-      }
-    }
-  }
+    }) => {
+    ++currentRow;
+    ws.cell(currentRow, 1).string(`${product.category} / ${product.sub_category}`);
+    ws.cell(currentRow, 2).string(product.name);
+    ws.cell(currentRow, 3).number(price).style(currencyStyle);
+    ws.cell(currentRow, 4).number(parLevel);
+    ws.cell(currentRow, 5).number(Math.round(stockLevel * 100) / 100);
+    ws.cell(currentRow, 6).number(value).style(currencyStyle);
+  });
 
-  // Claculate total cost for the order
-  const lastRow = products.length + skipRows + 2;
-  ws.cell(lastRow, 1, lastRow, 8).style(header2).style(alignRight);
-  ws.cell(lastRow, 7).string('Total (Inc VAT)');
-  ws.cell(lastRow, 8).formula(`SUM(H6:H${(lastRow - 1)})`).style(currencyStyle);
+  // Claculate total value
+  ++currentRow;
+  ws.cell(currentRow, 1, currentRow, 6).style(header2).style(alignRight);
+  ws.cell(currentRow, 5).string('Total');
+  ws.cell(currentRow, 6).formula(`SUM(F6:F${(currentRow - 1)})`).style(currencyStyle);
+
 
   // Barflow branding
-  ws.cell(lastRow + 1, 1, lastRow + 1, 8, true).string('Generated by BarFlow').style(alignCenter);
-  ws.cell(lastRow + 2, 1, lastRow + 2, 8, true).link('http://barflow.io').style(alignCenter);
-
-  // Return the workbook with the new sheet
-  return wb;
-}
-
-function generateReportXLS(report, user, venue) {
-  // Create a new instance of  a Workbook class
-  let wb = new xl.Workbook({
-    dateFormat: 'dd.mm.yyyy;@'
-  });
-
-  const productsBySuppliers = _.groupBy(report, 'supplier_id._id');
-
-  Object.keys(productsBySuppliers).forEach((supplierId) => {
-    const products = productsBySuppliers[supplierId].map(item => (
-      {
-        name: item.product_id.name,
-        sku: item.supplier_product_code || '',
-        par_level: item.par_level || 0,
-        cost_price: item.cost_price || 0,
-        supplier: item.supplier || {},
-        stock_level: parseFloat(item.volume.toFixed(1)) || 0,
-        order: item.order || 0
-      }
-    ));
-
-    const supplier = productsBySuppliers[supplierId][0].supplier_id || {};
-
-    wb = addProductSheetToWorkBook(wb, products, user, venue, supplier);
-  });
+  ++currentRow;
+  ws.cell(currentRow, 1, currentRow, 5, true);
+  ++currentRow;
+  ws.cell(currentRow, 1, currentRow, 5, true).string('Powered by BarFlow').style(alignCenter);
+  ++currentRow;
+  ws.cell(currentRow, 1, currentRow, 5, true).link('http://barflow.io').style(alignCenter);
 
   return wb;
 }
