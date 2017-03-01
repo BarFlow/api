@@ -112,4 +112,70 @@ describe('## Auth APIs', () => {
         .catch(done);
     });
   });
+
+  describe('# GET /auth/me', () => {
+    it('should return the current user', (done) => {
+      request(app)
+        .get('/auth/me')
+        .set(headers)
+        .expect(httpStatus.OK)
+        .then((res) => {
+          expect(res.body.name).to.be.a('string');
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+  describe('# PUT /auth/me', () => {
+    it('should update user profile', (done) => {
+      request(app)
+        .put('/auth/me')
+        .set(headers)
+        .send({
+          name: 'new name',
+          email: 'new@email.com',
+          password: 'newpass',
+          old_password: user.password,
+        })
+        .expect(httpStatus.OK)
+        .then((res) => {
+          expect(res.body.name).to.equal('new name');
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+  describe('# POST /auth/login', () => {
+    it('should login with the updated password', (done) => {
+      request(app)
+        .post('/auth/login')
+        .set(headers)
+        .send({
+          name: 'new name',
+          email: 'new@email.com',
+          password: 'newpass',
+        })
+        .expect(httpStatus.OK)
+        .then((res) => {
+          expect(res.body.token).to.be.a('string');
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+  describe('# DELETE /auth/me', () => {
+    it('should delete the current user', (done) => {
+      request(app)
+        .delete('/auth/me')
+        .set(headers)
+        .expect(httpStatus.OK)
+        .then(() => {
+          done();
+        })
+        .catch(done);
+    });
+  });
 });

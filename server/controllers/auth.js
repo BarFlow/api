@@ -140,4 +140,48 @@ function refreshToken(req, res, next) {
     .catch(e => next(e));
 }
 
-export default { login, signup, refreshToken };
+function getSelf(req, res, next) {
+  User.findById(req.user._id).execAsync()
+    .then((user) => {
+      delete user.password;
+      return res.json(user);
+    })
+    .catch(e => next(e));
+}
+
+function updateSelf(req, res, next) {
+  User.findById(req.user._id).execAsync()
+    .then((user) => {
+      if (req.body.name) {
+        user.name = req.body.name;
+      }
+      if (req.body.email) {
+        user.email = req.body.email;
+      }
+      if (req.body.password && req.body.old_password) {
+        return user.comparePassword(req.body.old_password)
+          .then((match) => {
+            if (!match) {
+              return Promise.reject(new APIError('Old password not match.', httpStatus.BAD_REQUEST));
+            }
+            user.password = req.body.password;
+            return user.save();
+          });
+      }
+
+      return user.save();
+    })
+    .then(user => res.json(user))
+    .catch(e => next(e));
+}
+
+function deleteSelf(req, res, next) {
+  User.findByIdAndRemove(req.user._id).execAsync()
+    .then(() => {
+      res.json(req.user);
+      next();
+    })
+    .catch(e => next(e));
+}
+
+export default { login, signup, refreshToken, getSelf, updateSelf, deleteSelf };

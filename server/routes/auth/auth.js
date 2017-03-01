@@ -18,4 +18,10 @@ router.route('/login')
 router.route('/refreshToken')
   .get(auth.authenticate, authCtrl.refreshToken);
 
+/** POST /auth/refreshToken - Returns new token */
+router.route('/me')
+  .get(auth.authenticate, authCtrl.getSelf)
+  .put(validate(paramValidation.update), auth.authenticate, authCtrl.updateSelf)
+  .delete(auth.authenticate, authCtrl.deleteSelf);
+
 export default router;
