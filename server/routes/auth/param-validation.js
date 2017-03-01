@@ -23,7 +23,8 @@ export default {
     body: {
       name: Joi.string().trim(),
       email: Joi.string().regex(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/).trim(), // eslint-disable-line
-      password: Joi.string().min(3).max(30)
+      password: Joi.string().min(3).max(30),
+      current_password: Joi.string().min(3).max(30).required(),
     }
   },
 };

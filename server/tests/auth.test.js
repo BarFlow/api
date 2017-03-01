@@ -136,7 +136,7 @@ describe('## Auth APIs', () => {
           name: 'new name',
           email: 'new@email.com',
           password: 'newpass',
-          old_password: user.password,
+          current_password: user.password,
         })
         .expect(httpStatus.OK)
         .then((res) => {

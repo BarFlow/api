@@ -151,26 +151,26 @@ function getSelf(req, res, next) {
 
 function updateSelf(req, res, next) {
   User.findById(req.user._id).execAsync()
-    .then((user) => {
+    .then(user => user.comparePassword(req.body.current_password)
+    .then((match) => {
+      // Wrong password is given
+      if (!match) {
+        return Promise.reject(new APIError('Invalid current password.', httpStatus.BAD_REQUEST, true));
+      }
+
+      // All is well update user data
       if (req.body.name) {
         user.name = req.body.name;
       }
       if (req.body.email) {
         user.email = req.body.email;
       }
-      if (req.body.password && req.body.old_password) {
-        return user.comparePassword(req.body.old_password)
-          .then((match) => {
-            if (!match) {
-              return Promise.reject(new APIError('Old password not match.', httpStatus.BAD_REQUEST));
-            }
-            user.password = req.body.password;
-            return user.save();
-          });
+      if (req.body.password) {
+        user.password = req.body.password;
       }
 
       return user.save();
-    })
+    }))
     .then(user => res.json(user))
     .catch(e => next(e));
 }
