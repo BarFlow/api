@@ -376,10 +376,7 @@ function create(req, res, next) {
   )
   .then(report => report.saveAsync())
   .then(savedReport =>
-    Placement.update({ venue_id: req.body.venue_id }, { volume: 0 }, { multi: true }).execAsync()
-    .then(() =>
-      res.status(httpStatus.CREATED).json(savedReport)
-    )
+    res.status(httpStatus.CREATED).json(savedReport)
   )
   .error(e => next(e));
 }

@@ -168,4 +168,13 @@ function remove(req, res, next) {
     .error(e => next(e));
 }
 
-export default { load, get, create, update, bulkUpdate, list, remove };
+
+function resetPlacementVolumes(req, res, next) {
+  Placement.update({ venue_id: req.body.venue_id }, { volume: 0 }, { multi: true }).execAsync()
+  .then(count =>
+    res.json({ updated_count: count })
+  )
+  .error(e => next(e));
+}
+
+export default { load, get, create, update, bulkUpdate, list, remove, resetPlacementVolumes };

@@ -364,6 +364,37 @@ describe('## Placement APIs', () => {
     });
   });
 
+  describe('# DELETE /placements', () => {
+    it('should reset placement volumes', (done) => {
+      request(app)
+        .delete('/placements')
+        .set(headers)
+        .send({
+          venue_id: venue._id
+        })
+        .expect(httpStatus.OK)
+        .then(() => {
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+  describe('# GET /placements', () => {
+    it('should get list of placements with volume 0', (done) => {
+      request(app)
+        .get('/placements')
+        .set(headers)
+        .send()
+        .expect(httpStatus.OK)
+        .then((res) => {
+          expect(res.body[1].volume).to.equal(0);
+          done();
+        })
+        .catch(done);
+    });
+  });
+
   describe('# DELETE /placement/:placement_id', () => {
     it('should remove the placement', (done) => {
       request(app)

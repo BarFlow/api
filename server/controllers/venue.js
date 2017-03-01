@@ -139,4 +139,14 @@ function removeMember(req, res, next) {
     .error(e => next(e));
 }
 
-export default { load, get, create, update, list, remove, addMember, updateMember, removeMember };
+export default {
+  load,
+  get,
+  create,
+  update,
+  list,
+  remove,
+  addMember,
+  updateMember,
+  removeMember
+};

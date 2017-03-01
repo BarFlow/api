@@ -46,30 +46,30 @@ const authorize = role =>
     // Endpoint is only for admins
     if (role === 'admin' && !req.user.admin) return next(err);
 
-    // Sote all venue ids
+    // Sore venue ids that needs to be validated against user token
     const venueIds = [];
 
-    // Creating new resource
-    if (req.method === 'POST') {
-      if (Array.isArray(req.body)) {
-        req.body.forEach((obj) => {
-          if (obj.venue_id) {
-            venueIds.push(obj.venue_id);
-          }
-        });
-      } else {
-        venueIds.push(req.venueId || req.body.venue_id);
-      }
-
-    // Batch update resources
-    } else if ((req.method === 'PUT' || req.method === 'PATCH') && Array.isArray(req.body)) {
+    // Get all possible venue ids from a request
+    // venue_id from Request body
+    if (Array.isArray(req.body)) {
       req.body.forEach((obj) => {
         if (obj.venue_id) {
           venueIds.push(obj.venue_id);
         }
       });
-    // Update or Remove resource
-    } else {
+    } else if (req.body.venue_id) {
+      venueIds.push(req.body.venue_id);
+    }
+    // venue_id from url param
+    if (req.params.venue_id) {
+      venueIds.push(req.params.venue_id);
+    }
+    // venue_id from query string
+    if (req.query.venue_id) {
+      venueIds.push(req.query.venue_id);
+    }
+    // venue_id from loaded resource is
+    if (req.venueId) {
       venueIds.push(req.venueId);
     }
 

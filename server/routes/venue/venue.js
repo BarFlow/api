@@ -3,6 +3,8 @@ import validate from 'express-validation';
 import auth from '../../helpers/auth';
 import paramValidation from './param-validation';
 import venueCtrl from '../../controllers/venue';
+import placementCtrl from '../../controllers/placement';
+import reportCtrl from '../../controllers/report';
 
 const router = express.Router();  // eslint-disable-line new-cap
 
@@ -30,6 +32,20 @@ router.route('/:venue_id/members')
 router.route('/:venue_id/members/:member_id')
   .put(validate(paramValidation.updateMember), auth.authorize('owner'), venueCtrl.updateMember)
   .delete(auth.authorize('owner'), venueCtrl.removeMember);
+
+/** POST /venues.reports - Saves stock report for venue */
+router.route('/:venue_id/reports')
+  .post(auth.authorize('manager'), (req, res, next) => {
+    req.body.venue_id = req.venueId;
+    next();
+  }, reportCtrl.create);
+
+/** POST /venues/reports/reset - Resets placement volumes to 0 */
+router.route('/:venue_id/reports/reset')
+  .post(auth.authorize('manager'), (req, res, next) => {
+    req.body.venue_id = req.venueId;
+    next();
+  }, placementCtrl.resetPlacementVolumes);
 
 // ensure access role for resource
 router.param('venue_id', venueCtrl.load);

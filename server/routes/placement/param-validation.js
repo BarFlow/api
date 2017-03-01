@@ -36,5 +36,11 @@ export default {
       venue_id: Joi.string().trim().required(),
       updated_at: Joi.date().required()
     }))
-  }
+  },
+  // PUT /:area_id
+  reset: {
+    body: {
+      venue_id: Joi.string().trim().required()
+    }
+  },
 };

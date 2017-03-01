@@ -15,7 +15,9 @@ router.route('/')
   /** POST /placements - Creates a new placement */
   .post(validate(paramValidation.create), auth.authorize('manager'), placementCtrl.create)
   /** PUT /placements - Batch update placements */
-  .put(validate(paramValidation.bulkUpdate), auth.authorize('staff'), placementCtrl.bulkUpdate);
+  .put(validate(paramValidation.bulkUpdate), auth.authorize('staff'), placementCtrl.bulkUpdate)
+  /** DELETE /venues/reports/reset - Resets placement volumes to 0 */
+  .delete(validate(paramValidation.reset), auth.authorize('manager'), placementCtrl.resetPlacementVolumes);
 
 router.route('/:placement_id')
   /** GET /placements/:placement_id - Returns an placement */

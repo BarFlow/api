@@ -246,20 +246,6 @@ describe('## Reports APIs', () => {
     });
   });
 
-  describe('# GET /placements', () => {
-    it('should return placements with volume set to 0', (done) => {
-      request(app)
-        .get('/placements')
-        .set(headers)
-        .expect(httpStatus.OK)
-        .then((res) => {
-          expect(res.body[0].volume).to.equal(0);
-          done();
-        })
-        .catch(done);
-    });
-  });
-
   describe('# GET /reports', () => {
     it('should get list of reports', (done) => {
       request(app)
