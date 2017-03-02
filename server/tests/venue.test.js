@@ -10,6 +10,12 @@ describe('## Venue APIs', () => {
     password: 'barflow'
   };
 
+  const user2 = {
+    name: 'BarFlow User',
+    email: `${new Date().getTime()}-staff-user@barflow.com`,
+    password: 'barflow'
+  };
+
   const venue = {
     profile: {
       name: 'Demo Bar',
@@ -17,9 +23,6 @@ describe('## Venue APIs', () => {
     }
   };
 
-  const member = {
-    user_id: '57da7c33f2a141513087faed'
-  };
 
   const headers = {};
 
@@ -38,6 +41,19 @@ describe('## Venue APIs', () => {
     });
   });
 
+  describe('# POST /auth/signup', () => {
+    it('should register a user2 and return a jwt token', (done) => {
+      request(app)
+        .post('/auth/signup')
+        .send(user2)
+        .expect(httpStatus.CREATED)
+        .then(() => {
+          done();
+        })
+        .catch(done);
+    });
+  });
+
   describe('# POST /venues', () => {
     it('should create a venue', (done) => {
       request(app)
@@ -49,7 +65,7 @@ describe('## Venue APIs', () => {
           venue._id = res.body._id;
           expect(res.body.profile.name).to.equal('Demo Bar');
           expect(res.body.profile.email).to.equal('demo@barflow.com');
-          expect(res.body.members[0].user_id).to.equal(user._id);
+          expect(res.body.members[0].user).to.equal(user._id);
           done();
         })
         .catch(done);
@@ -80,7 +96,7 @@ describe('## Venue APIs', () => {
         .then((res) => {
           expect(res.body.profile.name).to.equal('Demo Bar');
           expect(res.body.profile.email).to.equal('demo@barflow.com');
-          expect(res.body.members[0].user_id).to.equal(user._id);
+          expect(res.body.members[0].user._id).to.equal(user._id);
           done();
         })
         .catch(done);
@@ -101,7 +117,7 @@ describe('## Venue APIs', () => {
         .then((res) => {
           expect(res.body.profile.name).to.equal('Demo Bar 2');
           expect(res.body.profile.email).to.equal('demo@barflow.com');
-          expect(res.body.members[0].user_id).to.equal(user._id);
+          expect(res.body.members[0].user._id).to.equal(user._id);
           done();
         })
         .catch(done);
@@ -113,11 +129,11 @@ describe('## Venue APIs', () => {
       request(app)
         .post(`/venues/${venue._id}/members`)
         .set(headers)
-        .send(member)
+        .send(user2)
         .expect(httpStatus.OK)
         .then((res) => {
-          member._id = res.body.members[1]._id;
-          expect(res.body.members[1].user_id).to.equal(member.user_id);
+          user2._id = res.body.members[1]._id;
+          expect(res.body.members[1].user.email).to.equal(user2.email);
           expect(res.body.members[1].role).to.equal('staff');
           done();
         })
@@ -128,7 +144,7 @@ describe('## Venue APIs', () => {
   describe('# PUT /venues/:venue_id/members/:member_id', () => {
     it('should update a member', (done) => {
       request(app)
-        .put(`/venues/${venue._id}/members/${member._id}`)
+        .put(`/venues/${venue._id}/members/${user2._id}`)
         .set(headers)
         .send({
           role: 'manager'
@@ -145,7 +161,7 @@ describe('## Venue APIs', () => {
   describe('# DELETE /venues/:venue_id/members/:member_id', () => {
     it('delete a member', (done) => {
       request(app)
-        .delete(`/venues/${venue._id}/members/${member._id}`)
+        .delete(`/venues/${venue._id}/members/${user2._id}`)
         .set(headers)
         .send()
         .expect(httpStatus.OK)

@@ -50,7 +50,6 @@ describe('## Area APIs', () => {
           area.venue_id = res.body._id;
           expect(res.body.profile.name).to.equal('Demo Bar');
           expect(res.body.profile.email).to.equal('demo@barflow.com');
-          expect(res.body.members[0].user_id).to.equal(user._id);
           done();
         })
         .catch(done);

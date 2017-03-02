@@ -30,11 +30,32 @@ const VenueSchema = new mongoose.Schema({
   },
   members: [
     {
-      user_id: {
+      user: {
         type: mongoose.Schema.Types.ObjectId,
         index: { unique: true },
         required: true,
         ref: 'User'
+      },
+      role: {
+        type: String,
+        default: 'staff'
+      },
+      created_at: {
+        type: Date,
+        default: Date.now
+      },
+      updated_at: {
+        type: Date,
+        default: Date.now
+      }
+    }
+  ],
+  invited: [
+    {
+      email: {
+        type: String,
+        index: { unique: true },
+        required: true,
       },
       role: {
         type: String,
@@ -78,7 +99,7 @@ VenueSchema.pre('save', function VenueModelPreSave(next) {
  // Check user relationship with the venue
 VenueSchema.methods.getRole = function VenueModelGetRole(userId) {
   const venue = this;
-  const me = venue.members.find(m => m.user_id.toString() === userId.toString());
+  const me = venue.members.find(m => m.user._id.toString() === userId.toString());
   return !me ? false : me.role;
 };
 
@@ -89,7 +110,8 @@ VenueSchema.methods.toJSON = function VenueModelRemoveHash() {
     _id: obj._id,
     active: obj.active,
     profile: obj.profile,
-    members: obj.members
+    members: obj.members,
+    invited: obj.invited
   };
 };
 
@@ -103,7 +125,7 @@ VenueSchema.statics = {
    * @returns {Promise<Venue, APIError>}
    */
   get(id) {
-    return this.findById(id)
+    return this.findById(id).populate('members.user', '_id name email')
       .execAsync().then((venue) => {
         if (venue) {
           return venue;
@@ -120,7 +142,8 @@ VenueSchema.statics = {
    * @returns {Promise<Venue[]>}
    */
   list(userId) {
-    return this.find({ 'members.user_id': userId })
+    return this.find({ 'members.user': userId })
+      .populate('members.user', '_id name email')
       .sort({ created_at: -1 })
       .execAsync()
       .then(venues => venues.map((venue) => {

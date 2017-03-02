@@ -27,7 +27,7 @@ export default {
   },
   addMember: {
     body: {
-      user_id: Joi.string().trim().required(),
+      email: Joi.string().trim().required(),
       role: Joi.string().trim().valid('staff', 'manager', 'owner')
     }
   },

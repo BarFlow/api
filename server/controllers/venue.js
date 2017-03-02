@@ -1,5 +1,6 @@
 import httpStatus from 'http-status';
 import Venue from '../models/venue';
+import User from '../models/user';
 import patchModel from '../helpers/patchModel';
 
 /**
@@ -33,7 +34,7 @@ function create(req, res, next) {
   const venue = new Venue({
     profile: req.body.profile,
     members: [{
-      user_id: req.user._id,
+      user: req.user._id,
       role: 'owner'
     }]
   });
@@ -91,19 +92,34 @@ function remove(req, res, next) {
 
 /**
  * Add new member to venue
- * @property {string} req.body.user_id
+ * @property {string} req.body.email
  * @property {string} req.body.role
  * @returns {Venue}
  */
 function addMember(req, res, next) {
   const venue = req.venue;
 
-  delete req.body.created_at; // eslint-disable-line
-  venue.members.push(req.body);
-
-  venue.saveAsync()
-    .then(savedVenue => res.json(savedVenue))
-    .error(e => next(e));
+  User.findOne({ email: req.body.email })
+   .then((user) => {
+     if (user) {
+       if (!venue.members.find(item => item.user.email === user.email)) {
+         venue.members.push({
+           user: user._id,
+           role: req.body.role
+         });
+       }
+     } else if (!venue.invited.find(item => item.email === req.body.email)) {
+       venue.invited.push({
+         role: req.body.role,
+         email: req.body.email
+       });
+       // Send email
+     }
+     return venue.saveAsync();
+   })
+   .then(savedVenue => savedVenue.populateAsync('members.user', 'name email _id'))
+   .then(populatedVenue => res.json(populatedVenue))
+   .catch(e => next(e));
 }
 
 /**
