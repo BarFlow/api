@@ -40,6 +40,7 @@ function create(req, res, next) {
   });
 
   venue.saveAsync()
+    .then(savedVenue => savedVenue.populateAsync('members.user', 'name email _id'))
     .then(savedVenue => res.status(httpStatus.CREATED).json(savedVenue))
     .error(e => next(e));
 }
@@ -74,7 +75,12 @@ function update(req, res, next) {
  * @returns {Venue[]}
  */
 function list(req, res, next) {
-  Venue.list(req.user._id).then(venues => res.json(venues))
+  Venue.list(req.user._id).then(venues =>
+    res.json(venues.map((venueModel) => {
+      const venue = venueModel.toJSON();
+      venue.role = venueModel.getRole(req.user._id);
+      return venue;
+    })))
     .error(e => next(e));
 }
 

@@ -111,7 +111,8 @@ VenueSchema.methods.toJSON = function VenueModelRemoveHash() {
     active: obj.active,
     profile: obj.profile,
     members: obj.members,
-    invited: obj.invited
+    invited: obj.invited,
+    role: obj.role
   };
 };
 

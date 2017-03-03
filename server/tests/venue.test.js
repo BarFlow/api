@@ -65,7 +65,7 @@ describe('## Venue APIs', () => {
           venue._id = res.body._id;
           expect(res.body.profile.name).to.equal('Demo Bar');
           expect(res.body.profile.email).to.equal('demo@barflow.com');
-          expect(res.body.members[0].user).to.equal(user._id);
+          expect(res.body.members[0].user._id).to.equal(user._id);
           done();
         })
         .catch(done);
