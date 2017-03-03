@@ -20,13 +20,13 @@ const UserSchema = new mongoose.Schema({
     index: { unique: true },
     match: [/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/, 'The value of path {PATH} ({VALUE}) is not a valid email address.'] // eslint-disable-line
   },
+  confirmed: {
+    type: Boolean,
+    default: false
+  },
   password: {
     type: String,
     required: true
-  },
-  verified: {
-    type: Boolean,
-    default: false
   },
   admin: {
     type: Boolean,
@@ -88,7 +88,8 @@ UserSchema.methods.toJSON = function UserModelRemoveHash() {
   return {
     _id: obj._id,
     name: obj.name,
-    email: obj.email
+    email: obj.email,
+    confirmed: obj.confirmed
   };
 };
 

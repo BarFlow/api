@@ -16,7 +16,7 @@ const config = require('../../config/env');
  * @returns {*}
  */
 function login(req, res, next) {
-  const err = new APIError('Authentication error', httpStatus.UNAUTHORIZED);
+  const err = new APIError('Authentication error: wrong email address or password.', httpStatus.UNAUTHORIZED, true);
   // Find user by email adderss
   User.findOne({ email: req.body.email })
     .then((user) => {
@@ -50,6 +50,7 @@ function login(req, res, next) {
           return jwt.sign({
             _id: user._id,
             admin: user.admin,
+            confirmed: user.confirmed,
             roles: roles || {}
           }, config.jwtSecret, { expiresIn: '7d' });
         })
@@ -79,15 +80,36 @@ function signup(req, res, next) {
     password: req.body.password
   });
 
+  const roles = {};
+
   // Save user to database
   user.saveAsync()
+    .then(savedUser =>
+      Venue.find({ invited: { $elemMatch: { email: user.email } } })
+        .then(venues =>
+          Promise.all(venues.map((venue) => {
+            // Add invited user to members
+            const invited = venue.invited.find(item => item.email === user.email).toObject();
+            invited.user = savedUser._id;
+            invited.updated_at = new Date();
+            venue.members.push(invited);
+            roles[venue._id] = invited.role;
+            // Removing user from array
+            venue.invited = venue.invited.filter(item => item.email !== user.email);
+
+            return venue.saveAsync();
+          }))
+        )
+        .then(() => savedUser)
+    )
     .then((savedUser) => {
       // Succesfully saved, creating token
       const token = jwt.sign({
         _id: user._id,
         email: user.email,
         admin: user.admin,
-        roles: {}
+        confirmed: user.confirmed,
+        roles
       }, config.jwtSecret, { expiresIn: '7d' });
 
       // Composing response object
@@ -99,7 +121,12 @@ function signup(req, res, next) {
     // Sending response back to client
     .then(savedUser => res.status(httpStatus.CREATED).json(savedUser))
     // If any error happens forward it to middleware
-    .error(e => next(e));
+    .error((e) => {
+      if (e.code === 11000) {
+        return next(new APIError('The e-mail address you entered is already registered.', httpStatus.BAD_REQUEST, true));
+      }
+      next(e);
+    });
 }
 
 /**
@@ -124,6 +151,7 @@ function refreshToken(req, res, next) {
       payload = {
         _id: user._id,
         admin: user.admin,
+        confirmed: user.confirmed,
         roles: roles || {}
       };
 
