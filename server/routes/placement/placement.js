@@ -11,7 +11,7 @@ const router = express.Router();  // eslint-disable-line new-cap
 
 router.route('/')
   /** GET /placements - Returns placements associated with the user */
-  .get(placementCtrl.list)
+  .get(auth.authorize('staff'), placementCtrl.list)
   /** POST /placements - Creates a new placement */
   .post(validate(paramValidation.create), auth.authorize('manager'), placementCtrl.create)
   /** PUT /placements - Batch update placements */

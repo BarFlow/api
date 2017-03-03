@@ -14,7 +14,7 @@ router.route('/')
 
 router.route('/:product_id')
   /** GET /products/:product_id - Returns an product */
-  .get(productCtrl.get)
+  .get(auth.authorize('staff'), productCtrl.get)
   /** PUT /products/:product_id - Updates an product */
   .put(validate(paramValidation.update), auth.authorize('manager'), productCtrl.update)
   /** DELETE /products/:product_id - Removes an product */

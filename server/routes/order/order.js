@@ -8,13 +8,13 @@ const router = express.Router();  // eslint-disable-line new-cap
 
 router.route('/')
   /** GET /orders - Returns all orders */
-  .get(orderCtrl.list)
+  .get(auth.authorize('staff'), orderCtrl.list)
   /** POST /orders - Creates a new order */
   .post(validate(paramValidation.create), auth.authorize('manager'), orderCtrl.create);
 
 router.route('/:order_id')
   /** GET /orders/:order_id - Returns an order */
-  .get(orderCtrl.get)
+  .get(auth.authorize('staff'), orderCtrl.get)
   /** PUT /orders/:order_id - Updates an order */
   .put(validate(paramValidation.update), auth.authorize('manager'), orderCtrl.update)
   /** DELETE /orders/:order_id - Removes an order */
@@ -22,7 +22,7 @@ router.route('/:order_id')
 
 router.route('/:order_id/export')
   /** GET /orders/:order_id - Returns an order */
-  .get(orderCtrl.getExport);
+  .get(auth.authorize('staff'), orderCtrl.getExport);
 
 // Load resource to req object -> req.order
 router.param('order_id', orderCtrl.load);

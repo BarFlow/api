@@ -8,13 +8,13 @@ const router = express.Router();  // eslint-disable-line new-cap
 
 router.route('/')
   /** GET /suppliers - Returns all suppliers */
-  .get(supplierCtrl.list)
+  .get(auth.authorize('staff'), supplierCtrl.list)
   /** POST /suppliers - Creates a new supplier */
   .post(validate(paramValidation.create), auth.authorize('manager'), supplierCtrl.create);
 
 router.route('/:supplier_id')
   /** GET /suppliers/:supplier_id - Returns an supplier */
-  .get(supplierCtrl.get)
+  .get(auth.authorize('staff'), supplierCtrl.get)
   /** PUT /suppliers/:supplier_id - Updates an supplier */
   .put(validate(paramValidation.update), auth.authorize('manager'), supplierCtrl.update)
   /** DELETE /suppliers/:supplier_id - Removes an supplier */

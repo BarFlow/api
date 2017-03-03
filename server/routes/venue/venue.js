@@ -14,7 +14,7 @@ router.route('/')
 
 /** GET /venues - Returns associated venues for the user */
 router.route('/')
-  .get(venueCtrl.list);
+  .get(auth.authorize('staff'), venueCtrl.list);
 
 router.route('/:venue_id')
   /** GET /venues/:venue_id - Returns a venue */

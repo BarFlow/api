@@ -1,4 +1,5 @@
 import httpStatus from 'http-status';
+import APIError from '../helpers/APIError';
 import Product from '../models/product';
 import patchModel from '../helpers/patchModel';
 
@@ -94,6 +95,13 @@ function list(req, res, next) {
  */
 function remove(req, res, next) {
   const product = req.product;
+  const err = new APIError(
+    `Method: ${req.method} is forbidden for this resource`,
+    httpStatus.FORBIDDEN, true);
+
+  if (product.approved && !req.user.admin) {
+    return next(err);
+  }
 
   product.removeAsync()
     .then(deletedProduct => res.json(deletedProduct))

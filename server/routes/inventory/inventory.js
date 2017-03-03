@@ -11,7 +11,7 @@ const router = express.Router();  // eslint-disable-line new-cap
 
 router.route('/')
   /** GET /inventory - Returns inventory items associated with the user */
-  .get(inventoryCtrl.list)
+  .get(auth.authorize('staff'), inventoryCtrl.list)
   /** POST /inventory - Creates a new inventory */
   .post(validate(paramValidation.create), auth.authorize('manager'), inventoryCtrl.create)
   /** PUT /inventory - Batch update inventory */

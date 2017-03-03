@@ -11,7 +11,7 @@ const router = express.Router();  // eslint-disable-line new-cap
 
 router.route('/')
   /** GET /sections - Returns sections associated with the user */
-  .get(sectionCtrl.list)
+  .get(auth.authorize('staff'), sectionCtrl.list)
   /** POST /sections - Creates a new section */
   .post(validate(paramValidation.create), auth.authorize('manager'), sectionCtrl.create)
   /** PUT /sections - Batch update sections */

@@ -11,7 +11,7 @@ const router = express.Router();  // eslint-disable-line new-cap
 
 router.route('/')
   /** GET /areas - Returns areas associated with the user */
-  .get(areaCtrl.list)
+  .get(auth.authorize('staff'), areaCtrl.list)
   /** POST /areas - Creates a new area */
   .post(validate(paramValidation.create), auth.authorize('manager'), areaCtrl.create)
   /** PUT /areas - Batch update areas */
