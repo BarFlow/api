@@ -5,6 +5,7 @@ import APIError from '../helpers/APIError';
 import User from '../models/user';
 import Venue from '../models/venue';
 import Lead from '../models/lead';
+import sendEmail from '../helpers/email';
 
 const config = require('../../config/env');
 
@@ -111,6 +112,8 @@ function signup(req, res, next) {
         confirmed: user.confirmed,
         roles
       }, config.jwtSecret, { expiresIn: '7d' });
+
+      sendEmail(user.email, 'Welcome to BarFlow!', 'user-register', { name: user.name.split(' ')[0] });
 
       // Composing response object
       return {

@@ -46,7 +46,9 @@
     "express-jwt": "3.4.0",
     "express-validation": "1.0.0",
     "express-winston": "^1.2.0",
+    "handlebars": "^4.0.6",
     "helmet": "2.1.1",
+    "html-to-text": "^3.2.0",
     "http-status": "^0.2.0",
     "joi": "^9.2.0",
     "jsonwebtoken": "7.1.9",
@@ -56,6 +58,7 @@
     "morgan": "1.7.0",
     "multer": "^1.2.0",
     "s3-uploader": "^2.0.2",
+    "sendgrid": "^4.7.1",
     "uuid": "^2.0.3",
     "winston": "^2.1.1"
   },

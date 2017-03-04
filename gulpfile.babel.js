@@ -56,11 +56,14 @@ gulp.task('lint', () =>
 );
 
 // Copy non-js files to dist
-gulp.task('copy', () =>
+gulp.task('copy', () => {
   gulp.src(paths.nonJs)
     .pipe(plugins.newer('dist'))
-    .pipe(gulp.dest('dist'))
-);
+    .pipe(gulp.dest('dist'));
+  gulp.src('./server/templates/**')
+    .pipe(plugins.newer('dist/server/templates'))
+    .pipe(gulp.dest('dist/server/templates'));
+});
 
 // Compile ES6 to ES5 and copy to dist
 gulp.task('babel', () =>

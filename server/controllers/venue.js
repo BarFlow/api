@@ -2,6 +2,7 @@ import httpStatus from 'http-status';
 import Venue from '../models/venue';
 import User from '../models/user';
 import patchModel from '../helpers/patchModel';
+import sendEmail from '../helpers/email';
 
 /**
  * Load venue and append to req.
@@ -108,11 +109,23 @@ function addMember(req, res, next) {
   User.findOne({ email: req.body.email })
    .then((user) => {
      if (user) {
-       if (!venue.members.find(item => item.user.email === user.email)) {
+       const addedUser = venue.members.find(member => member.user.email === user.email);
+       if (!addedUser) {
          venue.members.push({
            user: user._id,
            role: req.body.role
          });
+         User.get(req.user._id).then(currentUser =>
+           sendEmail(
+             user.email,
+             'You have been added to a new venue',
+             'user-added-to-venue',
+             {
+               addedUser: user.name.split(' ')[0],
+               adderUser: currentUser.name,
+               venue: venue.profile.name
+             })
+         );
        }
      } else if (!venue.invited.find(item => item.email === req.body.email)) {
        venue.invited.push({

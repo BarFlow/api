@@ -20,7 +20,7 @@ router.route('/:venue_id')
   /** GET /venues/:venue_id - Returns a venue */
   .get(auth.authorize('staff'), venueCtrl.get)
   /** PUT /venues/:venue_id - Updates a venue */
-  .put(validate(paramValidation.update), auth.authorize('manager'), venueCtrl.update)
+  .put(validate(paramValidation.update), auth.authorize('owner'), venueCtrl.update)
   /** DELETE /venues/:venue_id - Removes a venue */
   .delete(auth.authorize('owner'), venueCtrl.remove);
 
