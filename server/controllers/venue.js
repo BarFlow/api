@@ -43,7 +43,17 @@ function create(req, res, next) {
 
   venue.saveAsync()
     .then(savedVenue => savedVenue.populateAsync('members.user', 'name email _id'))
-    .then(savedVenue => res.status(httpStatus.CREATED).json(savedVenue))
+    .then((savedVenue) => {
+      res.status(httpStatus.CREATED).json(savedVenue);
+      return savedVenue;
+    })
+    .then(savedVenue => sendEmail(
+      'support@barflow.io',
+      'A new venue has been created',
+      'admin-venue-created',
+      {
+        venue: savedVenue
+      }))
     .error(e => next(e));
 }
 

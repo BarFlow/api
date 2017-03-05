@@ -32,7 +32,6 @@ const VenueSchema = new mongoose.Schema({
     {
       user: {
         type: mongoose.Schema.Types.ObjectId,
-        index: { unique: true },
         required: true,
         ref: 'User'
       },
@@ -54,7 +53,6 @@ const VenueSchema = new mongoose.Schema({
     {
       email: {
         type: String,
-        index: { unique: true },
         required: true,
       },
       role: {

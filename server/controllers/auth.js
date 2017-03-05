@@ -113,7 +113,18 @@ function signup(req, res, next) {
         roles
       }, config.jwtSecret, { expiresIn: '7d' });
 
+      // User confirm email
       sendEmail(user.email, 'Welcome to BarFlow!', 'user-signup', { name: user.name.split(' ')[0] });
+
+      // Admin notif
+      sendEmail(
+        'sales@barflow.io',
+        'New user registration',
+        'admin-user-signup',
+        {
+          user,
+          invited: Object.keys(roles).length ? 'true' : 'false'
+        });
 
       // Composing response object
       return {
