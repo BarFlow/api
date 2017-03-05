@@ -107,38 +107,49 @@ function addMember(req, res, next) {
   const venue = req.venue;
 
   User.findOne({ email: req.body.email })
-   .then((user) => {
-     if (user) {
-       const addedUser = venue.members.find(member => member.user.email === user.email);
-       if (!addedUser) {
-         venue.members.push({
-           user: user._id,
-           role: req.body.role
-         });
-         User.get(req.user._id).then(currentUser =>
-           sendEmail(
-             user.email,
-             'You have been added to a new venue',
-             'user-added-to-venue',
-             {
-               addedUser: user.name.split(' ')[0],
-               adderUser: currentUser.name,
-               venue: venue.profile.name
-             })
-         );
-       }
-     } else if (!venue.invited.find(item => item.email === req.body.email)) {
-       venue.invited.push({
-         role: req.body.role,
-         email: req.body.email
-       });
-       // Send email
-     }
-     return venue.saveAsync();
-   })
-   .then(savedVenue => savedVenue.populateAsync('members.user', 'name email _id'))
-   .then(populatedVenue => res.json(populatedVenue))
-   .catch(e => next(e));
+  .then((user) => {
+    if (user) {
+      const addedUser = venue.members.find(member => member.user.email === user.email);
+      if (!addedUser) {
+        venue.members.push({
+          user: user._id,
+          role: req.body.role
+        });
+        // Email user who has been added
+        User.get(req.user._id).then(currentUser =>
+          sendEmail(
+            user.email,
+            'You have been added to a new venue',
+            'user-added-to-venue',
+            {
+              addedUser: user.name.split(' ')[0],
+              adderUser: currentUser.name,
+              venue: venue.profile.name
+            })
+        );
+      }
+    } else if (!venue.invited.find(item => item.email === req.body.email)) {
+      venue.invited.push({
+        role: req.body.role,
+        email: req.body.email
+      });
+      //  Email user who has been invited
+      User.get(req.user._id).then(currentUser =>
+        sendEmail(
+          req.body.email,
+          `${currentUser.name} invited you to join BarFlow`,
+          'user-invited-to-venue',
+          {
+            adderUser: currentUser.name,
+            venue: venue.profile.name
+          })
+      );
+    }
+    return venue.saveAsync();
+  })
+  .then(savedVenue => savedVenue.populateAsync('members.user', 'name email _id'))
+  .then(populatedVenue => res.json(populatedVenue))
+  .catch(e => next(e));
 }
 
 /**
