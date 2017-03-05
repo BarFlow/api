@@ -76,7 +76,8 @@ const VenueSchema = new mongoose.Schema({
   updated_at: {
     type: Date,
     default: Date.now
-  }
+  },
+  role: String
 });
 
 /**

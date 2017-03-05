@@ -14,6 +14,7 @@ function load(req, res, next, id) {
 
   Venue.get(id).then((venue) => {
     req.venue = venue; // eslint-disable-line no-param-reassign
+    req.venue.role = req.venue.getRole(req.user._id);
     return next();
   }).error(e => next(e));
 }
@@ -23,7 +24,7 @@ function load(req, res, next, id) {
  * @returns {Venue}
  */
 function get(req, res) {
-  return res.json(Object.assign({}, req.venue.toJSON(), { role: req.venue.getRole(req.user._id) }));
+  return res.json(req.venue);
 }
 
 /**
