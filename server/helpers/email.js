@@ -2,6 +2,7 @@ import htmlToText from 'html-to-text';
 import sendgrid from 'sendgrid';
 import Handlebars from 'handlebars';
 import fs from 'fs';
+import config from '../../config/env';
 
 const sg = sendgrid(process.env.SENDGRID_API_KEY);
 
@@ -41,7 +42,10 @@ const send = ((to, subject, templateName, data) => {
     const hbs = fs.readFileSync(`${__dirname}/../templates/${templateName}.hbs`, 'utf-8');
     const template = Handlebars.compile(hbs);
     const message = template(data);
-    return sg.API(request(to, subject, message)); // eslint-disable-line
+    if (config.env === 'production') {
+      return sg.API(request(to, subject, message)); // eslint-disable-line
+    }
+    return Promise.resolve();
   } catch (e) {
     return Promise.reject(e);
   }
