@@ -1,4 +1,5 @@
 import httpStatus from 'http-status';
+import APIError from '../helpers/APIError';
 import Venue from '../models/venue';
 import User from '../models/user';
 import patchModel from '../helpers/patchModel';
@@ -120,7 +121,7 @@ function addMember(req, res, next) {
           sendEmail(
             user.email,
             'You have been added to a new venue',
-            'user-added-to-venue',
+            'venue-member-added',
             {
               addedUser: user.name.split(' ')[0],
               adderUser: currentUser.name,
@@ -138,7 +139,7 @@ function addMember(req, res, next) {
         sendEmail(
           req.body.email,
           `${currentUser.name} invited you to join BarFlow`,
-          'user-invited-to-venue',
+          'venue-user-invited',
           {
             adderUser: currentUser.name,
             venue: venue.profile.name
@@ -160,7 +161,30 @@ function addMember(req, res, next) {
 function updateMember(req, res, next) {
   const venue = req.venue;
 
+  const owners = venue.members.filter(user => user.role === 'owner');
   const member = venue.members.id(req.params.member_id);
+
+  if (member.role === 'owner' && req.body.role !== 'owner' && owners.length === 1) {
+    const err = new APIError('A venue must have at least one owner level user.', httpStatus.BAD_REQUEST, true);
+    return next(err);
+  }
+
+  //  Email user who has been updated
+  if (member.user._id !== req.user._id && member.role !== req.body.role) {
+    User.get(req.user._id).then(currentUser =>
+      sendEmail(
+        member.user.email,
+        `${currentUser.name} updated your access level to: ${req.body.role}`,
+        'venue-member-updated',
+        {
+          memberName: member.user.name,
+          actor: currentUser.name,
+          newRole: req.body.role,
+          venue: venue.profile.name
+        })
+    );
+  }
+
   member.role = req.body.role; // eslint-disable-line
   member.updated_at = new Date(); // eslint-disable-line
 
@@ -178,7 +202,30 @@ function updateMember(req, res, next) {
 function removeMember(req, res, next) {
   const venue = req.venue;
 
-  venue.members.id(req.params.member_id).remove();
+  const owners = venue.members.filter(user => user.role === 'owner');
+  const member = venue.members.id(req.params.member_id);
+
+  if (member.role === 'owner' && owners.length === 1) {
+    const err = new APIError('A venue must have at least one owner level user.', httpStatus.BAD_REQUEST, true);
+    return next(err);
+  }
+
+  //  Email user who has been removed
+  if (member.user._id !== req.user._id) {
+    User.get(req.user._id).then(currentUser =>
+      sendEmail(
+        member.user.email,
+        `${currentUser.name} removed you from ${venue.profile.name}`,
+        'venue-member-removed',
+        {
+          memberName: member.user.name,
+          actor: currentUser.name,
+          venue: venue.profile.name
+        })
+    );
+  }
+
+  member.remove();
 
   venue.saveAsync()
     .then(savedVenue => res.json(savedVenue))

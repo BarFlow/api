@@ -113,7 +113,7 @@ function signup(req, res, next) {
         roles
       }, config.jwtSecret, { expiresIn: '7d' });
 
-      sendEmail(user.email, 'Welcome to BarFlow!', 'user-register', { name: user.name.split(' ')[0] });
+      sendEmail(user.email, 'Welcome to BarFlow!', 'user-signup', { name: user.name.split(' ')[0] });
 
       // Composing response object
       return {
