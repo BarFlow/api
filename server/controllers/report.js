@@ -59,74 +59,64 @@ function generateReport(filters) {
       && item.area_id
       && item.section_id)
     .reduce((mem, item) => {
-      if (!mem.items[item.inventory_item_id._id]) {
-        mem.items[item.inventory_item_id._id] = item.inventory_item_id;
-        mem.items[item.inventory_item_id._id].areas = {};
-        mem.items[item.inventory_item_id._id].volume = 0;
-        mem.items[item.inventory_item_id._id].value = 0;
-      }
-      if (!mem.items[item.inventory_item_id._id].areas[item.area_id._id]) {
-        mem.items[item.inventory_item_id._id].areas[item.area_id._id] = item.area_id;
-        mem.items[item.inventory_item_id._id].areas[item.area_id._id].sections = {};
-        mem.items[item.inventory_item_id._id].areas[item.area_id._id].volume = 0;
-        mem.items[item.inventory_item_id._id].areas[item.area_id._id].value = 0;
-      }
-      if (!mem.items[item.inventory_item_id._id]
-            .areas[item.area_id._id]
-            .sections[item.section_id._id]) {
-        // Section
-        mem.items[item.inventory_item_id._id]
-          .areas[item.area_id._id]
-          .sections[item.section_id._id] = item.section_id;
+      const memItem = mem.items[item.inventory_item_id._id] =
+        mem.items[item.inventory_item_id._id] || Object.assign({}, item.inventory_item_id, {
+          areas: {},
+          volume: 0,
+          value: 0
+        });
 
-        // Volume
-        mem.items[item.inventory_item_id._id]
-          .areas[item.area_id._id]
-          .sections[item.section_id._id].volume = 0;
+      const memItemArea = memItem.areas[item.area_id._id] =
+        memItem.areas[item.area_id._id] || Object.assign({}, item.area_id, {
+          sections: {},
+          volume: 0,
+          value: 0
+        });
 
-        // Value
-        mem.items[item.inventory_item_id._id]
-          .areas[item.area_id._id]
-          .sections[item.section_id._id].value = 0;
-      }
+      const memItemSection = memItemArea.sections[item.section_id._id] =
+        memItemArea.sections[item.section_id._id] || Object.assign({}, item.section_id, {
+          volume: 0,
+          value: 0
+        });
 
-      const itemValue = item.volume * (item.inventory_item_id.cost_price || 0 ); //eslint-disable-line
-      mem.items[item.inventory_item_id._id].volume += item.volume;
-      mem.items[item.inventory_item_id._id].value =
-        Math.round((mem.items[item.inventory_item_id._id].value + itemValue) * 100) / 100; //eslint-disable-line
-      mem.items[item.inventory_item_id._id].areas[item.area_id._id].volume += item.volume;
-      mem.items[item.inventory_item_id._id].areas[item.area_id._id].value =
-        Math.round((mem.items[item.inventory_item_id._id].areas[item.area_id._id].value + itemValue) * 100) / 100; //eslint-disable-line
-      mem.items[item.inventory_item_id._id].areas[item.area_id._id].sections[item.section_id._id].volume += item.volume; //eslint-disable-line
-      mem.items[item.inventory_item_id._id].areas[item.area_id._id].sections[item.section_id._id].value = //eslint-disable-line
-        Math.round((mem.items[item.inventory_item_id._id].areas[item.area_id._id].sections[item.section_id._id].value + itemValue) * 100) / 100; // eslint-disable-line
-
-      if (!mem.stats.types[item.inventory_item_id.product_id.type]) {
-        mem.stats.types[item.inventory_item_id.product_id.type] = {
+      const memStatType = mem.stats.types[memItem.product_id.type] =
+        mem.stats.types[memItem.product_id.type] || {
           value: 0,
           categories: {}
         };
-      }
 
-      if (!mem.stats.types[item.inventory_item_id.product_id.type].categories[item.inventory_item_id.product_id.category]) { //eslint-disable-line
-        mem.stats.types[item.inventory_item_id.product_id.type].categories[item.inventory_item_id.product_id.category] = { //eslint-disable-line
+      const memStatCategory = memStatType.categories[memItem.product_id.category] =
+        memStatType.categories[memItem.product_id.category] || {
           value: 0,
           sub_categories: {}
         };
-      }
-      if (!mem.stats.types[item.inventory_item_id.product_id.type].categories[item.inventory_item_id.product_id.category].sub_categories[item.inventory_item_id.product_id.sub_category]) { //eslint-disable-line
-        mem.stats.types[item.inventory_item_id.product_id.type].categories[item.inventory_item_id.product_id.category].sub_categories[item.inventory_item_id.product_id.sub_category] = { value: 0 }; //eslint-disable-line
-      }
 
-      mem.stats.total_value = Math.round((mem.stats.total_value + itemValue) * 100) / 100; //eslint-disable-line
-      mem.stats.types[item.inventory_item_id.product_id.type].value =
-        Math.round((mem.stats.types[item.inventory_item_id.product_id.type].value + itemValue) * 100) / 100; //eslint-disable-line
-      mem.stats.types[item.inventory_item_id.product_id.type].categories[item.inventory_item_id.product_id.category].value = //eslint-disable-line
-        Math.round((mem.stats.types[item.inventory_item_id.product_id.type].categories[item.inventory_item_id.product_id.category].value + itemValue) * 100) / 100; //eslint-disable-line
-      mem.stats.types[item.inventory_item_id.product_id.type].categories[item.inventory_item_id.product_id.category].sub_categories[item.inventory_item_id.product_id.sub_category].value = //eslint-disable-line
-        Math.round((mem.stats.types[item.inventory_item_id.product_id.type].categories[item.inventory_item_id.product_id.category].sub_categories[item.inventory_item_id.product_id.sub_category].value + itemValue) * 100) / 100; //eslint-disable-line
+      const memStatSubCategory = memStatCategory.sub_categories[memItem.product_id.sub_category] =
+        memStatCategory.sub_categories[memItem.product_id.sub_category] || {
+          value: 0
+        };
+
+      const itemValue = item.volume * (memItem.cost_price || 0 ); //eslint-disable-line
+
+      const roundToDecimal = value =>
+        Math.round((value) * 100) / 100;
+
+      // Inventory item sums
+      memItem.volume += item.volume;
+      memItem.value = roundToDecimal(memItem.value + itemValue); //eslint-disable-line
+      memItemArea.volume += item.volume;
+      memItemArea.value = roundToDecimal(memItemArea.value + itemValue); //eslint-disable-line
+      memItemSection.volume += item.volume; //eslint-disable-line
+      memItemSection.value = roundToDecimal(memItemSection.value + itemValue); // eslint-disable-line
+
+      // Stat sums
+      mem.stats.total_value = roundToDecimal(mem.stats.total_value + itemValue); //eslint-disable-line
+      memStatType.value = roundToDecimal(memStatType.value + itemValue); //eslint-disable-line
+      memStatCategory.value = roundToDecimal(memStatCategory.value + itemValue); //eslint-disable-line
+      memStatSubCategory.value = roundToDecimal(memStatSubCategory.value + itemValue); //eslint-disable-line
+
       return mem;
-    }, { items: [], stats: { types: {}, total_value: 0 } })
+    }, { items: {}, stats: { types: {}, total_value: 0 } })
   )
   .then(results =>
     Inventory.find(filters)
