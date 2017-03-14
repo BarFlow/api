@@ -5,13 +5,14 @@ RUN groupadd -r app && useradd -r -g app app
 
 # Create a directory where the application code should live and set it as the
 # current working directory
-RUN mkdir -p /usr/src/app
+RUN mkdir -p /usr/src/app/tmp
 WORKDIR /usr/src/app
 
 # Only copy the package.json which specifies package dependencies. This is will
 # ensure that packages are only re-installed if they are changed.
 COPY package.json /usr/src/app/
 RUN npm install --production
+RUN chown -R app:app /usr/src/app/node_modules
 
 # Copy the application source code and run the optional build step.
 COPY ./dist /usr/src/app

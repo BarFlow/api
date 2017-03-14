@@ -28,7 +28,8 @@ const OrderSchema = new mongoose.Schema({
   other_items: [],
   total_invoice_value: Number,
   status: {
-    type: String,
+    type: Object,
+    default: 'draft',
     enum: ['draft', 'sent', 'confirmed', 'delivered']
   },
   venue_name: String,
@@ -41,6 +42,7 @@ const OrderSchema = new mongoose.Schema({
     default: Date.now
   },
   delivery_note: String,
+  history: Array,
   created_at: {
     type: Date,
     default: Date.now

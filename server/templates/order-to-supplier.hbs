@@ -1,0 +1,20 @@
+<p>Dear {{order.supplier_id.name}},<br />
+A new order has been created by {{order.placed_by}} for {{order.venue_name}} at {{order.created_at}}.
+</p>
+<p>
+  Order Summary:<br />
+  <ul>
+    <li>Venue: {{order.venue_name}}</li>
+    <li>Account Number: {{order.supplier_id.account_number}}</li>
+    <li>Requested delivery date: {{order.req_delivery_date}}</li>
+    <li>Delivery address: {{order.delivery_address}}</li>
+    <li>Contact person: {{order.placed_by}}</li>
+    <li>Contact tel.: {{order.contact_tel}}</li>
+    <li>Contact e-mail: {{order.contact_email}}</li>
+  </ul>
+</p>
+<p>Delivery Note: {{order.delivery_note}}</p>
+<p><storng>Please notify us immediately if you are unable to ship as specified.</strong></p>
+<p>Please kindly find attached the generated order sheet.</p>
+<p>Best Regards</p>
+<p>Powered by: <a href='http://barflow.io'>BarFlow</a></p>

@@ -1,6 +1,7 @@
 import httpStatus from 'http-status';
 import xl from 'excel4node';
-// import _ from 'lodash';
+import fs from 'fs';
+import sendEmail from '../helpers/email';
 import Order from '../models/order';
 import patchModel from '../helpers/patchModel';
 
@@ -37,6 +38,24 @@ function create(req, res, next) {
 
   Promise.all(req.body.map(order =>
     saveModel(order, req.user._id, req.query.populate === 'true')
+    .then(savedOrder => savedOrder.populateAsync('supplier_id'))
+    .then((populatedOrder) => {
+      if (order.send && populatedOrder.supplier_id && populatedOrder.supplier_id.email) {
+        return emailOrderToSupplier(populatedOrder)
+          .then(() => {
+            populatedOrder.status = 'sent';
+            populatedOrder.history.push({
+              status: 'sent',
+              date: new Date(),
+              meta: {
+                to: populatedOrder.supplier_id.email
+              }
+            });
+            return populatedOrder.saveAsync();
+          });
+      }
+      return populatedOrder;
+    })
   ))
     .then((savedOrders) => {
       // If only one item is saved return an object insted of an array
@@ -63,6 +82,42 @@ function saveModel(model, createdBy, populate) {
 
       return savedOrder;
     });
+}
+
+function emailOrderToSupplier(order) {
+  const filename = `${order._id}.xlsx`;
+  const filepath = `./tmp/${filename}`;
+  return new Promise((resolve, reject) => {
+    generateOrderSheet(order).write(filepath, (err) => {
+      if (err) return reject(err);
+      const file = new Buffer(fs.readFileSync(filepath)).toString('base64');
+      resolve(file);
+    });
+  })
+  .then(file =>
+    sendEmail(
+      order.supplier_id.email,
+      `New Order - ${order.venue_name}`,
+      'order-to-supplier',
+      {
+        order,
+        attachments: [
+          {
+            filename: `${order.venue_name}-${new Date()}.xlsx`,
+            content: file
+          }
+        ],
+        replyTo: {
+          name: order.placed_by,
+          email: order.contact_email
+        }
+      }
+    )
+  )
+  .then((response) => {
+    fs.unlinkSync(filepath);
+    return response;
+  });
 }
 
 /**
