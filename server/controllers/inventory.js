@@ -31,6 +31,7 @@ function get(req, res) {
 function create(req, res, next) {
   // Balcklisted params
   delete req.body._id; // eslint-disable-line
+  delete req.body.history; // eslint-disable-line
 
   req.body.history = [{
     date: new Date(),
@@ -64,6 +65,7 @@ function update(req, res, next) {
   delete req.body._id; // eslint-disable-line
   delete req.body.venue_id; // eslint-disable-line
   delete req.body.created_at; // eslint-disable-line
+  delete req.body.history; // eslint-disable-line
 
   inventoryItem.history.push({
     date: new Date(),
