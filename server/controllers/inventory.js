@@ -1,6 +1,7 @@
 import httpStatus from 'http-status';
 import Inventory from '../models/inventory';
 import patchModel from '../helpers/patchModel';
+import APIError from '../helpers/APIError';
 
 /**
  * Load inventoryItem and append to req.
@@ -11,7 +12,7 @@ function load(req, res, next, id) {
     req.venueId = inventoryItem.venue_id; // eslint-disable-line no-param-reassign
     req.inventoryItem = inventoryItem; // eslint-disable-line no-param-reassign
     return next();
-  }).error(e => next(e));
+  }).catch(e => next(e));
 }
 
 /**
@@ -28,6 +29,14 @@ function get(req, res) {
  * @returns {Inventory}
  */
 function create(req, res, next) {
+  // Balcklisted params
+  delete req.body._id; // eslint-disable-line
+
+  req.body.history = [{
+    date: new Date(),
+    payload: Object.assign({}, req.body),
+    user_id: req.user._id
+  }];
   Inventory.create(req.body)
     .then((savedInventory) => {
       // Populate models if query string is true and the request type is get
@@ -38,7 +47,7 @@ function create(req, res, next) {
       return savedInventory;
     })
     .then(savedInventory => res.status(httpStatus.CREATED).json(savedInventory))
-    .error((e) => {
+    .catch((e) => {
       next(e);
     });
 }
@@ -56,11 +65,26 @@ function update(req, res, next) {
   delete req.body.venue_id; // eslint-disable-line
   delete req.body.created_at; // eslint-disable-line
 
+  inventoryItem.history.push({
+    date: new Date(),
+    payload: req.body,
+    user_id: req.user._id
+  });
+
   patchModel(inventoryItem, Inventory, req.body);
 
   inventoryItem.saveAsync().then(() => Inventory.get(inventoryItem._id))
     .then(savedInventory => res.json(savedInventory))
-    .error(e => next(e));
+    .catch((e) => {
+      if (e.code === 11000 &&
+        e.errmsg.search(req.body.supplier_product_code) > -1) {
+        // If the provided SKU number has been used
+        // for and outher product already send back error
+        const err = new APIError('The SKU number is already being used for another product.', httpStatus.BAD_REQUEST, true);
+        return next(err);
+      }
+      next(e);
+    });
 }
 
 /**
@@ -77,7 +101,7 @@ function bulkUpdate(req, res, next) {
     return inventoryItem;
   });
   Inventory.bulkUpdate(inventoryItems).then(() => res.status(httpStatus.ACCEPTED).send())
-    .error(e => next(e));
+    .catch(e => next(e));
 }
 
 /**
@@ -96,7 +120,7 @@ function list(req, res, next) {
     .then(results =>
       res.header('X-Total-Count', results.count).json(results.items)
     )
-    .error(e => next(e));
+    .catch(e => next(e));
 }
 
 /**
@@ -108,7 +132,7 @@ function remove(req, res, next) {
 
   inventoryItem.removeAsync()
     .then(deletedInventory => res.json(deletedInventory))
-    .error(e => next(e));
+    .catch(e => next(e));
 }
 
 export default { load, get, create, update, bulkUpdate, list, remove };

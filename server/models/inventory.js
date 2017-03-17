@@ -25,7 +25,8 @@ const InventorySchema = new mongoose.Schema({
     ref: 'Supplier'
   },
   supplier_product_code: {
-    type: String
+    type: String,
+    index: true
   },
   par_level: {
     type: Number,
@@ -49,6 +50,7 @@ const InventorySchema = new mongoose.Schema({
   measurable: {
     type: Boolean
   },
+  history: Array,
   created_at: {
     type: Date,
     default: Date.now
@@ -59,7 +61,15 @@ const InventorySchema = new mongoose.Schema({
   }
 });
 
-InventorySchema.index({ venue_id: 1, product_id: 1 }, { unique: true });
+InventorySchema.index(
+  { venue_id: 1, product_id: 1 },
+  { unique: true }
+);
+
+InventorySchema.index(
+  { venue_id: 1, supplier_product_code: 1 },
+  { unique: true, partialFilterExpression: { supplier_product_code: { $exists: true } } }
+);
 
 /**
  *  Set updated_at before model gets saved.
@@ -115,16 +125,23 @@ InventorySchema.statics = {
         .error((e) => {
           // If the product has been added to the venue already, ignore the request and
           // send back the original model
-          if (e.code === 11000) {
+          if (
+            e.code === 11000 &&
+            e.errmsg.search(data.product_id) > -1) {
             return this.findOne({
               venue_id: data.venue_id,
               product_id: data.product_id
             })
             .execAsync()
             .then(inventory => resolve(inventory));
+          } else if (e.code === 11000 &&
+            data.supplier_product_code && e.errmsg.search(data.supplier_product_code) > -1) {
+            // If the provided SKU number has been used
+            // for and outher product already send back error
+            const err = new APIError('The SKU number is already being used for another product.', httpStatus.BAD_REQUEST, true);
+            return reject(err);
           }
 
-          // If any other error occurs forward it
           reject(e);
         });
     });

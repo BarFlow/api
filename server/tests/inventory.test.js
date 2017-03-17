@@ -121,7 +121,7 @@ describe('## Inventory APIs', () => {
   });
 
   describe('# POST /inventory', () => {
-    it('should create an inventory', (done) => {
+    it('should not create a new inventory but return existing one', (done) => {
       request(app)
         .post('/inventory')
         .set(headers)
