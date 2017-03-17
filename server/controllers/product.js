@@ -42,7 +42,8 @@ function create(req, res, next) {
     capacity: req.body.capacity,
     measure_unit: req.body.measure_unit,
     venue_id: req.body.venue_id,
-    parent_id: req.body.parent_id
+    parent_id: req.body.parent_id,
+    approved: req.user.admin
   });
 
   product.saveAsync()

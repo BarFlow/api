@@ -10,7 +10,12 @@ router.route('/')
   /** GET /products - Returns all products */
   .get(productCtrl.list)
   /** POST /products - Creates a new product */
-  .post(validate(paramValidation.create), auth.authorize('manager'), productCtrl.create);
+  .post((req, res, next) => {
+    if (req.user.admin) {
+      return validate(paramValidation.createAdmin)(req, res, next);
+    }
+    return validate(paramValidation.create)(req, res, next);
+  }, auth.authorize('manager'), productCtrl.create);
 
 router.route('/:product_id')
   /** GET /products/:product_id - Returns an product */
