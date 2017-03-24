@@ -11,6 +11,9 @@ const LeadSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  company: {
+    type: String
+  },
   created_at: {
     type: Date,
     default: Date.now

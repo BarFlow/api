@@ -11,6 +11,7 @@ import sectionRoutes from './section/section';
 import placementRoutes from './placement/placement';
 import reportRoutes from './report/report';
 import orderRoutes from './order/order';
+import leadRoutes from './lead/lead';
 import { upload, s3upload } from '../controllers/imageUpload';
 
 const router = express.Router();  // eslint-disable-line new-cap
@@ -41,6 +42,8 @@ router.use('/placements', auth.authenticate, placementRoutes);
 router.use('/reports', auth.authenticate, reportRoutes);
 
 router.use('/orders', auth.authenticate, orderRoutes);
+
+router.use('/leads', leadRoutes);
 
 router.post('/uploads', auth.authenticate, upload, s3upload);
 
