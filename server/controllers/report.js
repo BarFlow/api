@@ -172,7 +172,7 @@ function generateReport(filters) {
 function getExport(req, res) {
   return Venue.get(req.report.venue_id).then((venue) => {
     const xls = generateReportXLS(req.report, venue);
-    const fileName = `${req.report.profile.name} Stock Report ${moment(req.report.created_at).format('DD-MM-YYYY')}.xlsx`;
+    const fileName = `${venue.profile.name} Stock Report ${moment(req.report.created_at).format('DD-MM-YYYY')}.xlsx`;
     return xls.write(fileName, res);
   });
 }

@@ -107,7 +107,6 @@ function signup(req, res, next) {
       // Succesfully saved, creating token
       const token = jwt.sign({
         _id: user._id,
-        email: user.email,
         admin: user.admin,
         confirmed: user.confirmed,
         roles
@@ -151,27 +150,29 @@ function signup(req, res, next) {
  * @returns {*}
  */
 function refreshToken(req, res, next) {
-  const user = req.user;
   let payload = {};
   // Get list of venues for user
-  Venue.list(user._id)
-    .then((venues) => {
-      // Pluck venue data
-      const roles = venues.reduce((normalized, venue)  => { // eslint-disable-line
-        normalized[venue.id] = venue.role; // eslint-disable-line
-        return normalized;
-      }, {});
+  User.findById(req.user._id).execAsync()
+  .then(user =>
+    Venue.list(user._id)
+      .then((venues) => {
+        // Pluck venue data
+        const roles = venues.reduce((normalized, venue)  => { // eslint-disable-line
+          normalized[venue.id] = venue.role; // eslint-disable-line
+          return normalized;
+        }, {});
 
-      payload = {
-        _id: user._id,
-        admin: user.admin,
-        confirmed: user.confirmed,
-        roles: roles || {}
-      };
+        payload = {
+          _id: user._id,
+          admin: user.admin,
+          confirmed: user.confirmed,
+          roles: roles || {}
+        };
 
-      // Create JWT
-      return jwt.sign(payload, config.jwtSecret, { expiresIn: '7d' });
-    })
+        // Create JWT
+        return jwt.sign(payload, config.jwtSecret, { expiresIn: '7d' });
+      })
+    )
     .then((token) => {
       // Successful login, sending response back to client
       res.json({
