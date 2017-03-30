@@ -68,16 +68,18 @@ OrderSchema.pre('save', function OrderModelPreSave(next) {
       this.delivery_address = this.delivery_address || venue.profile.address;
 
       const itemsSubtotal = this.items.reduce((mem, item) => {
-        mem += item.inventory_item.cost_price * item.ammount;
+        const vat = item.inventory_item.vat || 20;
+        mem += item.inventory_item.cost_price * item.ammount * ((100 + vat) / 100);
         return mem;
       }, 0);
 
       const otherItemsSubtotal = this.other_items.reduce((mem, item) => {
-        mem += item.price * item.ammount;
+        const vat = item.vat || 20;
+        mem += item.price * item.ammount * ((100 + vat) / 100);
         return mem;
       }, 0);
 
-      this.total_invoice_value = (itemsSubtotal + otherItemsSubtotal) * 1.2;
+      this.total_invoice_value = (itemsSubtotal + otherItemsSubtotal);
       return next();
     })
     .catch(e => next(e));

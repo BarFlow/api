@@ -29,7 +29,7 @@ describe('## Order APIs', () => {
   let inventoryItem = {
     par_level: 15,
     cost_price: 1,
-    sale_unit_size: 10,
+    vat: 10,
     sale_price: 20
   };
 
@@ -149,7 +149,7 @@ describe('## Order APIs', () => {
         .expect(httpStatus.CREATED)
         .then((res) => {
           expect(res.body.placed_by).to.equal(user.name);
-          expect(res.body.total_invoice_value).to.equal(2.4);
+          expect(res.body.total_invoice_value).to.equal(2.3);
           done();
         })
         .catch(done);

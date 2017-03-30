@@ -47,6 +47,10 @@ const InventorySchema = new mongoose.Schema({
     type: Number,
     default: 0.5
   },
+  vat: {
+    type: Number,
+    default: 20
+  },
   measurable: {
     type: Boolean
   },

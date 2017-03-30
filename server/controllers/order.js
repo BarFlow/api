@@ -294,28 +294,28 @@ function generateOrderSheet({
   // Set column widths
   ws.column(1).setWidth(12);
   ws.column(2).setWidth(descriptionMaxLength);
-  ws.column(4).setWidth(24);
-  ws.column(5).setWidth(18);
+  ws.column(5).setWidth(24);
+  ws.column(6).setWidth(18);
 
   // Top header
-  ws.cell(1, 1, 1, 5, true).string(supplierName).style(darkBgWhiteBoldCenterText);
-  ws.cell(2, 1, 5, 5).style(yellowBg);
+  ws.cell(1, 1, 1, 6, true).string(supplierName).style(darkBgWhiteBoldCenterText);
+  ws.cell(2, 1, 5, 6).style(yellowBg);
   ws.cell(2, 1).string('Name:').style(header);
   ws.cell(2, 2).string(venueName);
-  ws.cell(2, 4).string('Date:').style(header);
-  ws.cell(2, 5).string(moment(createdAt).format('DD/MM/YYYY HH:mm')).style(alignRight);
+  ws.cell(2, 5).string('Date:').style(header);
+  ws.cell(2, 6).string(moment(createdAt).format('DD/MM/YYYY HH:mm')).style(alignRight);
   ws.cell(3, 1).string('Account:').style(header);
   ws.cell(3, 2).string(accountNumber);
-  ws.cell(3, 4).string('Contact:').style(header);
-  ws.cell(3, 5).string(contactTel).style(alignRight);
+  ws.cell(3, 5).string('Contact:').style(header);
+  ws.cell(3, 6).string(contactTel).style(alignRight);
   ws.cell(4, 1).string('Address:').style(header);
   ws.cell(4, 2).string(deliveryAddress);
-  ws.cell(4, 4).string('Order Placed By:').style(header);
-  ws.cell(4, 5).string(placedBy).style(alignRight);
+  ws.cell(4, 5).string('Order Placed By:').style(header);
+  ws.cell(4, 6).string(placedBy).style(alignRight);
   ws.cell(5, 1).string('Email:').style(header);
   ws.cell(5, 2).string(contactEmail);
-  ws.cell(5, 4).string('Requested Delivery Date:').style(header);
-  ws.cell(5, 5).string(moment(reqDeliveryDate).format('DD/MM/YYYY')).style(alignRight);
+  ws.cell(5, 5).string('Requested Delivery Date:').style(header);
+  ws.cell(5, 6).string(moment(reqDeliveryDate).format('DD/MM/YYYY')).style(alignRight);
 
   // Top header has 5 rows
   const skipRows = 5;
@@ -325,29 +325,42 @@ function generateOrderSheet({
 
   // Columns definition
   let currentRow = skipRows + 1;
-  ws.cell(currentRow, 1, currentRow, 5).style(header2);
+  ws.cell(currentRow, 1, currentRow, 6).style(header2);
   ws.cell(currentRow, 1).string('SKU'); // A
   ws.cell(currentRow, 2).string('Description'); // B
   ws.cell(currentRow, 3).string('Net Price'); // C
-  ws.cell(currentRow, 4).string('Quantity (Bottles)'); // D
-  ws.cell(currentRow, 5).string('Total'); // E
+  ws.cell(currentRow, 4).string('QTY'); // D
+  ws.cell(currentRow, 5).string('Unit'); // E
+  ws.cell(currentRow, 6).string('Total'); // F
+
+  let subTotal = 0;
+  let vatTotal = 0;
 
   // List items
   items.forEach((item) => {
     ++currentRow;
     const {
       supplier_product_code: sku = '',
+      count_by: countBy = 'bottle',
       cost_price: price = 0,
+      vat = 20,
       product_id: product = {
         name: ''
       } } = item.inventory_item;
     const ammount = item.ammount;
 
+    const itemValue = ammount * price;
+    const itemVat = itemValue * (vat / 100);
+
+    subTotal += itemValue;
+    vatTotal += itemVat;
+
     ws.cell(currentRow, 1).string(sku);
     ws.cell(currentRow, 2).string(product.name);
     ws.cell(currentRow, 3).number(price).style(currencyStyle);
     ws.cell(currentRow, 4).number(ammount);
-    ws.cell(currentRow, 5).formula(`C${currentRow}*D${currentRow}`).style(currencyStyle);
+    ws.cell(currentRow, 5).string(countBy);
+    ws.cell(currentRow, 6).number(itemValue).style(currencyStyle);
   });
 
   // Other items list
@@ -356,42 +369,51 @@ function generateOrderSheet({
     const {
       description,
       price = 0,
-      ammount = 0,
+      ammount = 1,
+      vat = 20,
+      countBy = '',
       sku = ''
     } = item;
+
+    const itemValue = ammount * price;
+    const itemVat = itemValue * (vat / 100);
+
+    subTotal += itemValue;
+    vatTotal += itemVat;
 
     ws.cell(currentRow, 1).string(sku);
     ws.cell(currentRow, 2).string(description);
     ws.cell(currentRow, 3).number(price).style(currencyStyle);
     ws.cell(currentRow, 4).number(ammount);
-    ws.cell(currentRow, 5).formula(`C${currentRow}*D${currentRow}`).style(currencyStyle);
+    ws.cell(currentRow, 5).string(countBy);
+    ws.cell(currentRow, 6).number(itemValue).style(currencyStyle);
   });
 
   // Claculate total cost for the order
   ++currentRow;
-  ws.cell(currentRow, 1, currentRow, 5).style(header2).style(alignRight);
-  ws.cell(currentRow, 4).string('Subtotal');
-  ws.cell(currentRow, 5).formula(`SUM(E6:E${(currentRow - 1)})`).style(currencyStyle);
+  ws.cell(currentRow, 1, currentRow, 6).style(header2).style(alignRight);
+  ws.cell(currentRow, 5).string('Subtotal');
+  ws.cell(currentRow, 6).number(subTotal).style(currencyStyle);
   ++currentRow;
-  ws.cell(currentRow, 4, currentRow, 5).style(header2).style(alignRight);
-  ws.cell(currentRow, 4).string('VAT');
-  ws.cell(currentRow, 5).formula(`E${currentRow - 1} * 0.2`).style(currencyStyle);
+  ws.cell(currentRow, 5, currentRow, 6).style(header2).style(alignRight);
+  ws.cell(currentRow, 5).string('VAT');
+  ws.cell(currentRow, 6).number(vatTotal).style(currencyStyle);
   ++currentRow;
-  ws.cell(currentRow, 4, currentRow, 5).style(header2).style(alignRight);
-  ws.cell(currentRow, 4).string('Grand Total');
-  ws.cell(currentRow, 5).formula(`E${currentRow - 1} +  E${currentRow - 2}`).style(currencyStyle);
+  ws.cell(currentRow, 5, currentRow, 6).style(header2).style(alignRight);
+  ws.cell(currentRow, 5).string('Grand Total');
+  ws.cell(currentRow, 6).number(subTotal + vatTotal).style(currencyStyle);
 
   // Warning
   currentRow += 2;
-  ws.cell(currentRow, 1, currentRow, 5, true).string('Please notify us immediately if you are unable to ship as specified.').style(alignCenter);
+  ws.cell(currentRow, 1, currentRow, 6, true).string('Please notify us immediately if you are unable to ship as specified.').style(alignCenter);
 
   // Barflow branding
   ++currentRow;
-  ws.cell(currentRow, 1, currentRow, 5, true);
+  ws.cell(currentRow, 1, currentRow, 6, true);
   ++currentRow;
-  ws.cell(currentRow, 1, currentRow, 5, true).string('Powered by BarFlow').style(alignCenter);
+  ws.cell(currentRow, 1, currentRow, 6, true).string('Powered by BarFlow').style(alignCenter);
   ++currentRow;
-  ws.cell(currentRow, 1, currentRow, 5, true).link('http://barflow.io').style(alignCenter);
+  ws.cell(currentRow, 1, currentRow, 6, true).link('http://barflow.io').style(alignCenter);
 
   return wb;
 }
