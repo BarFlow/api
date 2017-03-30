@@ -54,6 +54,7 @@
     "jsonwebtoken": "7.1.9",
     "lodash": "^4.17.2",
     "method-override": "^2.3.5",
+    "moment": "^2.18.1",
     "mongoose": "^4.3.7",
     "morgan": "1.7.0",
     "multer": "^1.2.0",

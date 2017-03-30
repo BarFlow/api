@@ -6,7 +6,10 @@ import config from '../../config/env';
 
 const sg = sendgrid(process.env.SENDGRID_API_KEY);
 
-const request = ((to, subject, message, attachments, replyTo) => sg.emptyRequest({
+const request = ((from = {
+  name: 'BarFlow',
+  email: 'noreply@barflow.io',
+}, to, subject, message, attachments, replyTo) => sg.emptyRequest({
   method: 'POST',
   path: '/v3/mail/send',
   body: {
@@ -21,10 +24,7 @@ const request = ((to, subject, message, attachments, replyTo) => sg.emptyRequest
       },
     ],
     reply_to: replyTo,
-    from: {
-      name: 'BarFlow',
-      email: 'noreply@barflow.io',
-    },
+    from,
     content: [
       {
         type: 'text/plain',
@@ -45,7 +45,7 @@ const send = ((to, subject, templateName, data) => {
     const template = Handlebars.compile(hbs);
     const message = template(data);
     if (config.env === 'production') {
-      return sg.API(request(to, subject, message, data.attachments, data.replyTo)); // eslint-disable-line
+      return sg.API(request(data.from, to, subject, message, data.attachments, data.replyTo)); // eslint-disable-line
     }
     return Promise.resolve();
   } catch (e) {

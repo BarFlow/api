@@ -1,5 +1,6 @@
 import httpStatus from 'http-status';
 import xl from 'excel4node';
+import moment from 'moment';
 import fs from 'fs';
 import sendEmail from '../helpers/email';
 import Order from '../models/order';
@@ -87,6 +88,7 @@ function saveModel(model, createdBy, populate) {
 function emailOrderToSupplier(order) {
   const filename = `${order._id}.xlsx`;
   const filepath = `./tmp/${filename}`;
+  const formattedOrderDate = moment(order.created_at).format('DD/MM/YYYY HH:mm');
   return new Promise((resolve, reject) => {
     generateOrderSheet(order).write(filepath, (err) => {
       if (err) return reject(err);
@@ -97,20 +99,27 @@ function emailOrderToSupplier(order) {
   .then(file =>
     sendEmail(
       order.supplier_id.email,
-      `New Order - ${order.venue_name}`,
+      `${order.venue_name} Order ${formattedOrderDate}`,
       'order-to-supplier',
       {
-        order,
-        attachments: [
-          {
-            filename: `${order.venue_name}-${new Date()}.xlsx`,
-            content: file
-          }
-        ],
+        from: {
+          name: 'BarFlow',
+          email: 'orders@barflow.io',
+        },
         replyTo: {
           name: order.placed_by,
           email: order.contact_email
-        }
+        },
+        order: Object.assign({}, order.toObject(), {
+          req_delivery_date: moment(order.req_delivery_date).format('DD/MM/YYYY'),
+          created_at: formattedOrderDate
+        }),
+        attachments: [
+          {
+            filename: `${order.venue_name}-${formattedOrderDate}.xlsx`,
+            content: file
+          }
+        ]
       }
     )
   )
@@ -169,12 +178,10 @@ function remove(req, res, next) {
 }
 
 function getExport(req, res) {
+  const { name: supplierName = 'Supplier not set' } = req.order.supplier_id || {};
+  const fileName = `${supplierName} ${moment(req.order.created_at).format('DD-MM-YYYY')}.xlsx`;
   const xls = generateOrderSheet(req.order);
-  xls.write(`${new Date(req.order.created_at)
-    .toString()
-    .split(' ')
-    .splice(0, 5)
-    .join(' ')}.xlsx`, res);
+  xls.write(fileName, res);
 }
 
 function generateOrderSheet({
@@ -296,7 +303,7 @@ function generateOrderSheet({
   ws.cell(2, 1).string('Name:').style(header);
   ws.cell(2, 2).string(venueName);
   ws.cell(2, 4).string('Date:').style(header);
-  ws.cell(2, 5).date(createdAt);
+  ws.cell(2, 5).string(moment(createdAt).format('DD/MM/YYYY HH:mm')).style(alignRight);
   ws.cell(3, 1).string('Account:').style(header);
   ws.cell(3, 2).string(accountNumber);
   ws.cell(3, 4).string('Contact:').style(header);
@@ -308,7 +315,7 @@ function generateOrderSheet({
   ws.cell(5, 1).string('Email:').style(header);
   ws.cell(5, 2).string(contactEmail);
   ws.cell(5, 4).string('Requested Delivery Date:').style(header);
-  ws.cell(5, 5).date(reqDeliveryDate);
+  ws.cell(5, 5).string(moment(reqDeliveryDate).format('DD/MM/YYYY')).style(alignRight);
 
   // Top header has 5 rows
   const skipRows = 5;

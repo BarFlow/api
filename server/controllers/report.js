@@ -1,6 +1,7 @@
 import httpStatus from 'http-status';
 import xl from 'excel4node';
 import _ from 'lodash';
+import moment from 'moment';
 import Report from '../models/report';
 import Placement from '../models/placement';
 import Venue from '../models/venue';
@@ -171,11 +172,8 @@ function generateReport(filters) {
 function getExport(req, res) {
   return Venue.get(req.report.venue_id).then((venue) => {
     const xls = generateReportXLS(req.report, venue);
-    return xls.write(`${new Date(req.report.created_at)
-      .toString()
-      .split(' ')
-      .splice(0, 5)
-      .join(' ')}.xlsx`, res);
+    const fileName = `${req.report.profile.name} Stock Report ${moment(req.report.created_at).format('DD-MM-YYYY')}.xlsx`;
+    return xls.write(fileName, res);
   });
 }
 
@@ -286,7 +284,7 @@ function generateReportXLS(report, {
   ws.cell(2, 1).string('Venue:').style(header);
   ws.cell(2, 2).string(venueName);
   ws.cell(3, 1).string('Date:').style(header);
-  ws.cell(3, 2).date(report.created_at).style(alignLeft);
+  ws.cell(3, 2).string(moment(report.created_at).format('DD/MM/YYYY HH:mm')).style(alignLeft);
   ws.cell(4, 1).string('Created by:').style(header);
   ws.cell(4, 2).string(`${report.created_by.name} <${report.created_by.email}>`).style(alignLeft);
 
