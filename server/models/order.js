@@ -24,13 +24,14 @@ const OrderSchema = new mongoose.Schema({
     ref: 'User'
   },
   invoice_id: String,
+  order_id: String,
   items: [],
   other_items: [],
   total_invoice_value: Number,
   status: {
-    type: Object,
+    type: String,
     default: 'draft',
-    enum: ['draft', 'sent', 'confirmed', 'delivered']
+    enum: ['draft', 'sent', 'confirmed', 'delivered', 'paid']
   },
   venue_name: String,
   placed_by: String,
@@ -68,13 +69,15 @@ OrderSchema.pre('save', function OrderModelPreSave(next) {
       this.delivery_address = this.delivery_address || venue.profile.address;
 
       const itemsSubtotal = this.items.reduce((mem, item) => {
-        const vat = item.inventory_item.vat || 20;
+        let vat = item.inventory_item.vat;
+        vat = (isNaN(parseFloat(vat)) && !isFinite(vat)) || vat < 0 ? 20 : vat;
         mem += item.inventory_item.cost_price * item.ammount * ((100 + vat) / 100);
         return mem;
       }, 0);
 
       const otherItemsSubtotal = this.other_items.reduce((mem, item) => {
-        const vat = item.vat || 20;
+        let vat = item.vat;
+        vat = (isNaN(parseFloat(vat)) && !isFinite(vat)) || vat < 0 ? 20 : vat;
         mem += item.price * item.ammount * ((100 + vat) / 100);
         return mem;
       }, 0);
