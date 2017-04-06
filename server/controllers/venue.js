@@ -45,6 +45,7 @@ function create(req, res, next) {
   venue.saveAsync()
     .then(savedVenue => savedVenue.populateAsync('members.user', 'name email _id'))
     .then((savedVenue) => {
+      savedVenue.role = 'owner';
       res.status(httpStatus.CREATED).json(savedVenue);
       return savedVenue;
     })
