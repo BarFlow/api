@@ -29,7 +29,7 @@ const createBody = {
       count_as_full: Joi.number().empty(''),
       sale_unit_size: Joi.number().empty(''),
       cost_price: Joi.number().required(), // we need for orders
-      sale_price: Joi.number().empty('')
+      vat: Joi.number().empty('')
     })
   })),
   other_items: Joi.array().items(Joi.object({
@@ -81,7 +81,7 @@ export default {
           count_as_full: Joi.number().empty(''),
           sale_unit_size: Joi.number().empty(''),
           cost_price: Joi.number().required(), // we need for orders
-          sale_price: Joi.number().empty('')
+          vat: Joi.number().empty('')
         })
       })),
       other_items: Joi.array().items(Joi.object({

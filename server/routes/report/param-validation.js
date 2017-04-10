@@ -7,6 +7,12 @@ export default {
       venue_id: Joi.objectId().trim().required()
     }
   },
+  usage: {
+    query: {
+      open: Joi.objectId().trim().required(),
+      close: Joi.objectId().trim().required()
+    }
+  }
   // PUT /:id
   // update: {
   //   body: {

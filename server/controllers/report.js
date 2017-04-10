@@ -7,6 +7,7 @@ import Placement from '../models/placement';
 import Venue from '../models/venue';
 import User from '../models/user';
 import Inventory from '../models/inventory';
+import Order from '../models/order';
 import patchModel from '../helpers/patchModel';
 
 /**
@@ -45,7 +46,7 @@ function generateReport(filters) {
   })
   .populate({
     path: 'inventory_item_id',
-    select: '-__v -updated_at -created_at',
+    select: '-__v -updated_at -created_at -history',
     populate: {
       path: 'product_id supplier_id',
       select: '-__v -updated_at -created_at',
@@ -420,4 +421,69 @@ function remove(req, res, next) {
     .error(e => next(e));
 }
 
-export default { load, get, create, update, list, remove, getExport };
+function getUsage(req, res, next) {
+  const openingId = req.query.open;
+  const closingId = req.query.close;
+
+  Promise.all([
+    Report.get(openingId),
+    Report.get(closingId)
+  ])
+  .then(([openingStock, closingStock]) =>
+    Order.find({
+      status: { $in: ['delivered', 'paid'] },
+      req_delivery_date: {
+        $gte: openingStock.created_at,
+        $lt: closingStock.created_at
+      }
+    })
+    .execAsync()
+    .then((purchases) => {
+      const items = {};
+      purchases.forEach((purchase) => {
+        purchase.items.forEach((item) => {
+          if (!items[item.inventory_item._id]) {
+            items[item.inventory_item._id] = parseFloat(item.ammount);
+          } else {
+            items[item.inventory_item._id] += parseFloat(item.ammount);
+          }
+        });
+      });
+      return {
+        openingStock: openingStock.toObject(),
+        closingStock: closingStock.toObject(),
+        purchases: items
+      };
+    })
+  )
+  .then(({ openingStock, purchases, closingStock }) => {
+    const items = openingStock.data.reduce((mem, item) => {
+      mem[item._id] = Object.assign(item, {
+        open: item.volume
+      });
+      return mem;
+    }, {});
+
+    return closingStock.data.reduce((mem, item) => {
+      if (!mem[item._id]) {
+        mem[item._id] = Object.assign(item, {
+          open: 0
+        });
+      }
+      mem[item._id].close = item.volume;
+      mem[item._id].purchases = purchases[item._id] || 0;
+      return mem;
+    }, items);
+  })
+  .then((items) => {
+    const usage = Object.keys(items).reduce((mem, item) => {
+      mem.push(items[item]);
+      return mem;
+    }, []);
+
+    res.send(usage);
+  })
+  .catch(e => next(e));
+}
+
+export default { load, get, create, update, list, remove, getExport, getUsage };

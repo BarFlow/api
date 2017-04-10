@@ -95,6 +95,7 @@ InventorySchema.methods.toJSON = function InventoryModelRemoveHash() {
   delete obj.created_at;
   delete obj.updated_at;
   delete obj.__v;
+  delete obj.history;
 
   return obj;
 };
@@ -111,7 +112,7 @@ InventorySchema.statics = {
   get(id) {
     return this.findById(id)
       .populate('product_id',
-      '-__v -updated_at -created_at')
+      '-__v -updated_at -created_at -history')
       .execAsync().then((inventoryItem) => {
         if (inventoryItem) {
           return inventoryItem;
@@ -182,7 +183,7 @@ InventorySchema.statics = {
       }
       return query.populate({
         path: 'product_id',
-        select: '-__v -updated_at -created_at',
+        select: '-__v -updated_at -created_at -history',
         match: product
       })
       .execAsync()

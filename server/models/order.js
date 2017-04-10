@@ -95,6 +95,7 @@ OrderSchema.pre('save', function OrderModelPreSave(next) {
 OrderSchema.methods.toJSON = function OrderModelRemoveHash() {
   const obj = this.toObject();
   delete obj.__v;
+  delete obj.history;
 
   return obj;
 };

@@ -12,6 +12,10 @@ router.route('/')
   /** POST /reports - Creates a new report */
   .post(validate(paramValidation.create), auth.authorize('manager'), reportCtrl.create);
 
+router.route('/usage')
+  /** GET /reports/:report_id - Returns an report */
+  .get(validate(paramValidation.usage), auth.authorize('manager'), reportCtrl.getUsage);
+
 router.route('/:report_id')
   /** GET /reports/:report_id - Returns an report */
   .get(auth.authorize('staff'), reportCtrl.get)
