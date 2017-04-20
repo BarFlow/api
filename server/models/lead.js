@@ -7,12 +7,30 @@ import APIError from '../helpers/APIError';
  * Lead Schema
  */
 const LeadSchema = new mongoose.Schema({
+  name: {
+    type: String
+  },
   email: {
     type: String,
-    required: true
+    required: true,
+    index: { unique: true }
   },
   company: {
     type: String
+  },
+  meta: {
+    type: Object
+  },
+  status: {
+    type: String // not contacted, pending, interested, not interested
+  },
+  source: String,
+  comment: String,
+  owner: String,
+  followup: Date,
+  hidden: {
+    type: Boolean,
+    default: false
   },
   created_at: {
     type: Date,
@@ -64,13 +82,36 @@ LeadSchema.statics = {
   list(filters) {
     const skip = parseInt(filters.skip, 10) || 0;
     delete filters.skip; // eslint-disable-line
-    const limit = parseInt(filters.limit, 10) || 0;
+    const limit = parseInt(filters.limit, 10) || 30;
     delete filters.limit; // eslint-disable-line
-    return this.find()
-    .where(filters)
-    .sort({ created_at: 1 })
+    filters.hidden = { $ne: !filters.hidden };
+
+    if (filters.due || filters.due !== undefined) {
+      filters.followup = { $lte: new Date() };
+      delete filters.due;
+    }
+
+    if (filters.name) {
+      filters.name = new RegExp(filters.name, 'i');
+    }
+
+    if (filters.email) {
+      filters.email = new RegExp(filters.email, 'i');
+    }
+
+    if (filters.company) {
+      filters.company = new RegExp(filters.company, 'i');
+    }
+
+    if (filters.comment) {
+      filters.comment = new RegExp(filters.comment, 'i');
+    }
+
+    return this.find(filters)
+    .sort({ created_at: -1 })
     .skip(skip)
     .limit(limit)
+    .lean()
     .execAsync();
   }
 

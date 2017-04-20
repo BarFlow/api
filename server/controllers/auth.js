@@ -33,7 +33,8 @@ function login(req, res, next) {
           // Save lead
           if (req.body.lead) {
             Lead.create({
-              email: req.body.lead
+              email: req.body.lead,
+              source: 'app'
             });
           }
 

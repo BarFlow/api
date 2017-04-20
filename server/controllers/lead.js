@@ -28,13 +28,12 @@ function get(req, res) {
  * @returns {Lead}
  */
 function create(req, res, next) {
-  const lead = new Lead({
-    email: req.body.email,
-    company: req.body.company
-  });
+  const lead = new Lead(req.body);
 
   // User confirm email
-  sendEmail('sales@barflow.io', 'New Lead', 'lead-created', req.body);
+  if (!req.body.silent) {
+    sendEmail('sales@barflow.io', 'New Lead', 'lead-created', req.body);
+  }
 
   lead.saveAsync()
     .then(savedLead => res.status(httpStatus.CREATED).json(savedLead))
