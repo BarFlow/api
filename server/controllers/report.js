@@ -25,6 +25,10 @@ function load(req, res, next, id) {
   }).error(e => next(e));
 }
 
+function roundToDecimal(num) {
+  return Math.round(num * 100) / 100;
+}
+
 /**
  * Get report
  * @returns {Report}
@@ -99,9 +103,6 @@ function generateReport(filters) {
         };
 
       const itemValue = item.volume * (memItem.cost_price || 0 ); //eslint-disable-line
-
-      const roundToDecimal = value =>
-        Math.round((value) * 100) / 100;
 
       // Inventory item sums
       memItem.volume += item.volume;
@@ -443,9 +444,15 @@ function getUsage(req, res, next) {
       purchases.forEach((purchase) => {
         purchase.items.forEach((item) => {
           if (!items[item.inventory_item._id]) {
-            items[item.inventory_item._id] = parseFloat(item.ammount);
+            items[item.inventory_item._id] = [{
+              ammount: parseFloat(item.ammount),
+              date: purchase.req_delivery_date
+            }];
           } else {
-            items[item.inventory_item._id] += parseFloat(item.ammount);
+            items[item.inventory_item._id].push({
+              ammount: parseFloat(item.ammount),
+              date: purchase.req_delivery_date
+            });
           }
         });
       });
@@ -457,31 +464,87 @@ function getUsage(req, res, next) {
     })
   )
   .then(({ openingStock, purchases, closingStock }) => {
-    const items = openingStock.data.reduce((mem, item) => {
+    let items = openingStock.data.reduce((mem, item) => {
       mem[item._id] = Object.assign(item, {
-        open: item.volume
+        open: item.volume,
+        areas: undefined
       });
       return mem;
     }, {});
 
-    return closingStock.data.reduce((mem, item) => {
+    items = closingStock.data.reduce((mem, item) => {
       if (!mem[item._id]) {
         mem[item._id] = Object.assign(item, {
-          open: 0
+          open: 0,
+          areas: undefined
         });
       }
       mem[item._id].close = item.volume;
-      mem[item._id].purchases = purchases[item._id] || 0;
+      mem[item._id].purchases = purchases[item._id] || [];
+      mem[item._id].usage =
+        (mem[item._id].open +
+        mem[item._id].purchases.reduce((acc, pItem) => {
+          acc += pItem.ammount;
+          return acc;
+        }, 0)) - mem[item._id].close;
       return mem;
     }, items);
+
+    return {
+      items,
+      open: Object.assign({}, openingStock, {
+        data: undefined,
+        stats: undefined
+      }),
+      close: Object.assign({}, closingStock, {
+        data: undefined,
+        stats: undefined
+      }),
+    };
   })
-  .then((items) => {
-    const usage = Object.keys(items).reduce((mem, item) => {
+  .then(({ items, open, close }) => {
+    const itemsArray = Object.keys(items).reduce((mem, item) => {
       mem.push(items[item]);
       return mem;
     }, []);
 
-    res.send(usage);
+    const summary = itemsArray.reduce((acc, item) => {
+      const type = item.product_id.type || 'beverage';
+      const category = item.product_id.category || 'other';
+      const subCategory = item.product_id.sub_category || 'other';
+
+      if (!acc.types[type]) {
+        acc.types[type] = {
+          value: 0,
+          categories: {}
+        };
+      }
+      const $type = acc.types[type];
+
+      if (!$type.categories[category]) {
+        $type.categories[category] = {
+          value: 0,
+          sub_categories: {}
+        };
+      }
+      const $category = $type.categories[category];
+
+      if (!$category.sub_categories[subCategory]) {
+        $category.sub_categories[subCategory] = {
+          value: 0,
+        };
+      }
+      const $subCategory = $category.sub_categories[subCategory];
+
+      const cogs = item.usage > 0 ? item.usage * item.cost_price : 0;
+      $type.value = roundToDecimal($type.value + cogs);
+      $category.value = roundToDecimal($category.value + cogs);
+      $subCategory.value = roundToDecimal($subCategory.value + cogs);
+
+      return acc;
+    }, { types: {} });
+
+    res.send({ data: itemsArray, summary, open, close });
   })
   .catch(e => next(e));
 }
