@@ -12,7 +12,7 @@ describe('## Misc', () => {
         .get('/health-check')
         .expect(httpStatus.OK)
         .then((res) => {
-          expect(res.text.split(' - ')[0]).to.equal('OK');
+          expect(res.text.split(' ')[0]).to.equal('OK');
           done();
         })
         .catch(done);

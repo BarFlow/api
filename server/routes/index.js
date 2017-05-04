@@ -27,7 +27,7 @@ router.get('/', (req, res) =>
 
 /** GET /health-check - Check service health */
 router.get('/health-check', (req, res) =>
-  res.send(`OK-${process.env.HOSTNAME || 'dev'}`)
+  res.send(`OK ${process.env.HOSTNAME || 'dev'}`)
 );
 
 router.use('/auth', authRoutes);
