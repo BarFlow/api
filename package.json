@@ -14,6 +14,7 @@
     "build": "gulp",
     "lint": "gulp lint",
     "test": "gulp mocha",
+    "deploy": "npm run build && docker build . -t barflow/api && docker push barflow/api:latest && ssh root@barflow.io 'bash -s' < docker-service-update.sh",
     "report-coverage": "coveralls < ./coverage/lcov.info"
   },
   "repository": {

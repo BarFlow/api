@@ -19,7 +19,10 @@ COPY ./dist /usr/src/app
 
 # Change the ownership of the application code and switch to the unprivileged
 # user.
-RUN chown -R app:app /usr/src/app
+RUN chown -R app:app /usr/src/app/server
+RUN chown -R app:app /usr/src/app/config
+RUN chown -R app:app /usr/src/app/tmp
+RUN chown -R app:app /usr/src/app/index.js
 USER app
 
 EXPOSE 3000

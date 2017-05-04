@@ -17,8 +17,17 @@ import { upload, s3upload } from '../controllers/imageUpload';
 const router = express.Router();  // eslint-disable-line new-cap
 
 /** GET /health-check - Check service health */
+router.get('/', (req, res) =>
+  res.send({
+    name: 'Barflow API',
+    version: '1.0',
+    build: '1986'
+  })
+);
+
+/** GET /health-check - Check service health */
 router.get('/health-check', (req, res) =>
-  res.send(`OK - ${process.env.HOSTNAME || 'development'}`)
+  res.send(`OK-${process.env.HOSTNAME || 'dev'}`)
 );
 
 router.use('/auth', authRoutes);
