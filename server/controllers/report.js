@@ -443,16 +443,16 @@ function getUsage(req, res, next) {
       const items = {};
       purchases.forEach((purchase) => {
         purchase.items.forEach((item) => {
+          const data = {
+            ammount: parseFloat(item.ammount),
+            cost: roundToDecimal(
+              parseFloat(item.inventory_item.cost_price) * parseFloat(item.ammount)),
+            date: purchase.req_delivery_date
+          };
           if (!items[item.inventory_item._id]) {
-            items[item.inventory_item._id] = [{
-              ammount: parseFloat(item.ammount),
-              date: purchase.req_delivery_date
-            }];
+            items[item.inventory_item._id] = [data];
           } else {
-            items[item.inventory_item._id].push({
-              ammount: parseFloat(item.ammount),
-              date: purchase.req_delivery_date
-            });
+            items[item.inventory_item._id].push(data);
           }
         });
       });
