@@ -467,6 +467,7 @@ function getUsage(req, res, next) {
     let items = openingStock.data.reduce((mem, item) => {
       mem[item._id] = Object.assign(item, {
         open: item.volume,
+        close: 0,
         areas: undefined
       });
       return mem;
@@ -481,12 +482,13 @@ function getUsage(req, res, next) {
       }
       mem[item._id].close = item.volume;
       mem[item._id].purchases = purchases[item._id] || [];
-      mem[item._id].usage =
+      const usage =
         (mem[item._id].open +
         mem[item._id].purchases.reduce((acc, pItem) => {
           acc += pItem.ammount;
           return acc;
         }, 0)) - mem[item._id].close;
+      mem[item._id].usage = usage > 0 ? usage : 0;
       return mem;
     }, items);
 
