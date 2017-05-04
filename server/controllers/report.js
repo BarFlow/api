@@ -508,7 +508,7 @@ function getUsage(req, res, next) {
       return mem;
     }, []);
 
-    const summary = itemsArray.reduce((acc, item) => {
+    const stats = itemsArray.reduce((acc, item) => {
       const type = item.product_id.type || 'beverage';
       const category = item.product_id.category || 'other';
       const subCategory = item.product_id.sub_category || 'other';
@@ -544,7 +544,7 @@ function getUsage(req, res, next) {
       return acc;
     }, { types: {} });
 
-    res.send({ data: itemsArray, summary, open, close });
+    res.send({ data: itemsArray, stats, open, close });
   })
   .catch(e => next(e));
 }
