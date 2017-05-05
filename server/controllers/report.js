@@ -481,14 +481,18 @@ function getUsage(req, res, next) {
         });
       }
       mem[item._id].close = item.volume;
-      mem[item._id].purchases = purchases[item._id] || [];
+      return mem;
+    }, items);
+
+    items = Object.keys(items).reduce((mem, itemId) => {
+      mem[itemId].purchases = purchases[items[itemId]._id] || [];
       const usage =
-        (mem[item._id].open +
-        mem[item._id].purchases.reduce((acc, pItem) => {
+        (items[itemId].open +
+        items[itemId].purchases.reduce((acc, pItem) => {
           acc += pItem.ammount;
           return acc;
-        }, 0)) - mem[item._id].close;
-      mem[item._id].usage = usage > 0 ? usage : 0;
+        }, 0)) - items[itemId].close;
+      items[itemId].usage = usage > 0 ? usage : 0;
       return mem;
     }, items);
 
