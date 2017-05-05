@@ -542,7 +542,7 @@ function getUsage(req, res, next) {
       }
       const $subCategory = $category.sub_categories[subCategory];
 
-      const cogs = item.usage > 0 ? item.usage * item.cost_price : 0;
+      const cogs = item.usage > 0 && item.cost_price ? item.usage * item.cost_price : 0;
       $type.value = roundToDecimal($type.value + cogs);
       $category.value = roundToDecimal($category.value + cogs);
       $subCategory.value = roundToDecimal($subCategory.value + cogs);
