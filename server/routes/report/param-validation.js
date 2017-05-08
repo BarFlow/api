@@ -9,6 +9,7 @@ export default {
   },
   usage: {
     query: {
+      venue_id: Joi.objectId().trim().required(),
       open: Joi.objectId().trim().required(),
       close: Joi.objectId().trim().required()
     }

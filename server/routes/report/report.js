@@ -16,6 +16,10 @@ router.route('/usage')
   /** GET /reports/:report_id - Returns an report */
   .get(validate(paramValidation.usage), auth.authorize('manager'), reportCtrl.getUsage);
 
+router.route('/usage/export')
+  /** GET /reports/:report_id - Returns an report */
+  .get(validate(paramValidation.usage), auth.authorize('manager'), reportCtrl.getUsageExport);
+
 router.route('/:report_id')
   /** GET /reports/:report_id - Returns an report */
   .get(auth.authorize('staff'), reportCtrl.get)

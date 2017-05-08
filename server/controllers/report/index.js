@@ -1,14 +1,16 @@
 import httpStatus from 'http-status';
-import xl from 'excel4node';
 import _ from 'lodash';
 import moment from 'moment';
-import Report from '../models/report';
-import Placement from '../models/placement';
-import Venue from '../models/venue';
-import User from '../models/user';
-import Inventory from '../models/inventory';
-import Order from '../models/order';
-import patchModel from '../helpers/patchModel';
+
+import Venue from '../../models/venue';
+import Report from '../../models/report';
+import Placement from '../../models/placement';
+import User from '../../models/user';
+import Inventory from '../../models/inventory';
+import Order from '../../models/order';
+import patchModel from '../../helpers/patchModel';
+
+import { reportToXLS, usageReportToXLS } from './export.js';
 
 /**
  * Load report and append to req.
@@ -171,176 +173,6 @@ function generateReport(filters) {
   });
 }
 
-function getExport(req, res) {
-  return Venue.get(req.report.venue_id).then((venue) => {
-    const xls = generateReportXLS(req.report, venue);
-    const fileName = `${venue.profile.name} Stock Report ${moment(req.report.created_at).format('DD-MM-YYYY')}.xlsx`;
-    return xls.write(fileName, res);
-  });
-}
-
-function generateReportXLS(report, {
-  profile: {
-    name: venueName = ''
-  }
-}) {
-  // Create a new instance of  a Workbook class
-  const wb = new xl.Workbook({
-    dateFormat: 'dd.mm.yyyy;@'
-  });
-
-  // Styles
-  const header = wb.createStyle({
-    font: {
-      bold: true,
-    },
-    alignment: {
-      horizontal: 'left'
-    },
-    fill: {
-      type: 'pattern',
-      patternType: 'solid',
-      fgColor: '#FFFF00'
-    }
-  });
-
-  const yellowBg = wb.createStyle({
-    fill: {
-      type: 'pattern',
-      patternType: 'solid',
-      fgColor: '#FFFF00'
-    }
-  });
-
-  const darkBgWhiteBoldCenterText = wb.createStyle({
-    fill: {
-      type: 'pattern',
-      patternType: 'solid',
-      fgColor: '#383838'
-    },
-    alignment: {
-      horizontal: 'center'
-    },
-    font: {
-      bold: true,
-      color: '#FFFFFF',
-      size: 14
-    }
-  });
-
-  const header2 = wb.createStyle({
-    font: {
-      bold: true,
-    },
-    alignment: {
-      horizontal: 'center'
-    },
-    fill: {
-      type: 'pattern',
-      patternType: 'solid',
-      fgColor: '#ececec'
-    }
-  });
-
-  const currencyStyle = wb.createStyle({
-    numberFormat: '£#,##0.00; (£#,##0.00); 0'
-  });
-
-  const alignLeft = wb.createStyle({
-    alignment: {
-      horizontal: 'left'
-    }
-  });
-
-  const alignRight = wb.createStyle({
-    alignment: {
-      horizontal: 'right'
-    }
-  });
-
-  const alignCenter = wb.createStyle({
-    alignment: {
-      horizontal: 'center'
-    }
-  });
-
-  // Add Worksheets to the workbook
-  const ws = wb.addWorksheet('Stock Report');
-
-  // Calculate longest item name's length
-  const descriptionMaxLength = report.data.reduce((mem, item) => {
-    const name = item.product_id.name;
-    if (name.length > mem) {
-      mem = name.length;
-    }
-    return mem;
-  }, 10);
-
-  // Set column widths
-  ws.column(1).setWidth(18);
-  ws.column(2).setWidth(descriptionMaxLength);
-
-  // Top header
-  ws.cell(1, 1, 1, 6, true).string('Stock Report').style(darkBgWhiteBoldCenterText);
-  ws.cell(2, 1, 4, 6).style(yellowBg);
-  ws.cell(2, 1).string('Venue:').style(header);
-  ws.cell(2, 2).string(venueName);
-  ws.cell(3, 1).string('Date:').style(header);
-  ws.cell(3, 2).string(moment(report.created_at).format('DD/MM/YYYY HH:mm')).style(alignLeft);
-  ws.cell(4, 1).string('Created by:').style(header);
-  ws.cell(4, 2).string(`${report.created_by.name} <${report.created_by.email}>`).style(alignLeft);
-
-  // setting currentRow
-  let currentRow = 4;
-
-  // Columns definitions
-  ++currentRow;
-  ws.cell(currentRow, 1, currentRow, 6).style(header2);
-  ws.cell(currentRow, 1).string('Category'); // A
-  ws.cell(currentRow, 2).string('Description'); // B
-  ws.cell(currentRow, 3).string('Net Price'); // C
-  ws.cell(currentRow, 4).string('Par Level'); // D
-  ws.cell(currentRow, 5).string('Stock Level'); // E
-  ws.cell(currentRow, 6).string('Value'); // F
-
-  // List items
-  report.data.forEach(({
-      cost_price: price = 0,
-      par_level: parLevel = 0,
-      volume: stockLevel = 0,
-      value = 0,
-      product_id: product = {
-        name: 'other',
-        sub_category: 'other'
-      }
-    }) => {
-    ++currentRow;
-    ws.cell(currentRow, 1).string(`${product.category} / ${product.sub_category}`);
-    ws.cell(currentRow, 2).string(product.name);
-    ws.cell(currentRow, 3).number(price).style(currencyStyle);
-    ws.cell(currentRow, 4).number(parLevel);
-    ws.cell(currentRow, 5).number(Math.round(stockLevel * 100) / 100);
-    ws.cell(currentRow, 6).number(value).style(currencyStyle);
-  });
-
-  // Claculate total value
-  ++currentRow;
-  ws.cell(currentRow, 1, currentRow, 6).style(header2).style(alignRight);
-  ws.cell(currentRow, 5).string('Total');
-  ws.cell(currentRow, 6).formula(`SUM(F6:F${(currentRow - 1)})`).style(currencyStyle);
-
-
-  // Barflow branding
-  ++currentRow;
-  ws.cell(currentRow, 1, currentRow, 5, true);
-  ++currentRow;
-  ws.cell(currentRow, 1, currentRow, 5, true).string('Powered by BarFlow').style(alignCenter);
-  ++currentRow;
-  ws.cell(currentRow, 1, currentRow, 5, true).link('http://barflow.io').style(alignCenter);
-
-  return wb;
-}
-
 /**
  * Create new report
  * @property {string} req.body.name - The name of report.
@@ -422,10 +254,14 @@ function remove(req, res, next) {
     .error(e => next(e));
 }
 
-function getUsage(req, res, next) {
-  const openingId = req.query.open;
-  const closingId = req.query.close;
+const getExport = (req, res) =>
+  Venue.get(req.report.venue_id).then((venue) => {
+    const xls = reportToXLS(req.report, venue);
+    const fileName = `${venue.profile.name} Stock Report ${moment(req.report.created_at).format('DD-MM-YYYY')}.xlsx`;
+    return xls.write(fileName, res);
+  });
 
+const generateUsageReport = (openingId, closingId) =>
   Promise.all([
     Report.get(openingId),
     Report.get(closingId)
@@ -543,16 +379,41 @@ function getUsage(req, res, next) {
       const $subCategory = $category.sub_categories[subCategory];
 
       const cogs = item.usage > 0 && item.cost_price ? item.usage * item.cost_price : 0;
+      acc.total_value += roundToDecimal(cogs);
       $type.value = roundToDecimal($type.value + cogs);
       $category.value = roundToDecimal($category.value + cogs);
       $subCategory.value = roundToDecimal($subCategory.value + cogs);
 
       return acc;
-    }, { types: {} });
+    }, { types: {}, total_value: 0 });
 
-    res.send({ data: itemsArray, stats, open, close });
-  })
+    return { data: itemsArray, stats, open, close };
+  });
+
+function getUsage(req, res, next) {
+  const openingId = req.query.open;
+  const closingId = req.query.close;
+
+  generateUsageReport(openingId, closingId)
+  .then(usageReport => res.send(usageReport))
   .catch(e => next(e));
 }
 
-export default { load, get, create, update, list, remove, getExport, getUsage };
+const getUsageExport = (req, res, next) => {
+  const openingId = req.query.open;
+  const closingId = req.query.close;
+  const venueId = req.query.venue_id;
+
+  Promise.all([
+    generateUsageReport(openingId, closingId),
+    Venue.get(venueId)
+  ])
+  .then(([usageReport, venue]) => {
+    const xls = usageReportToXLS(usageReport, venue);
+    const fileName = `${venue.profile.name} Stock Period Report ${moment(usageReport.open.created_at).format('DD-MM-YYYY')} - ${moment(usageReport.close.created_at).format('DD-MM-YYYY')}.xlsx`;
+    return xls.write(fileName, res);
+  })
+  .catch(e => next(e));
+};
+
+export default { load, get, create, update, list, remove, getExport, getUsage, getUsageExport };
