@@ -18,6 +18,9 @@ const LeadSchema = new mongoose.Schema({
   company: {
     type: String
   },
+  phone: {
+    type: String
+  },
   meta: {
     type: Object
   },

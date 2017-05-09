@@ -32,7 +32,7 @@ function create(req, res, next) {
 
   // User confirm email
   if (!req.body.silent) {
-    sendEmail('sales@barflow.io', 'New Lead', 'lead-created', req.body);
+    sendEmail('sales@barflow.io', `New Lead: ${req.body.email}`, 'lead-created', req.body);
   }
 
   lead.saveAsync()
