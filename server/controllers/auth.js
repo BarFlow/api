@@ -19,7 +19,7 @@ const config = require('../../config/env');
 function login(req, res, next) {
   const err = new APIError('Authentication error: wrong email address or password.', httpStatus.UNAUTHORIZED, true);
   // Find user by email adderss
-  User.findOne({ email: req.body.email })
+  User.findOne({ email: req.body.email.toLowerCase() })
     .then((user) => {
       // If user not found return error
       if (!user) return next(err);
@@ -78,7 +78,7 @@ function signup(req, res, next) {
   // Creating new model instance
   const user = new User({
     name: req.body.name,
-    email: req.body.email,
+    email: req.body.email.toLowerCase(),
     password: req.body.password
   });
 

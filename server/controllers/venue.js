@@ -144,7 +144,7 @@ function addMember(req, res, next) {
     } else if (!venue.invited.find(item => item.email === req.body.email)) {
       venue.invited.push({
         role: req.body.role,
-        email: req.body.email
+        email: req.body.email.toLowerCase()
       });
       //  Email user who has been invited
       User.get(req.user._id).then(currentUser =>

@@ -34,7 +34,7 @@ function create(req, res, next) {
     name: req.body.name,
     type: req.body.type,
     category: req.body.category,
-    sub_category: req.body.sub_category,
+    sub_category: req.body.sub_category || 'other',
     images: req.body.images,
     measurable: req.body.measurable,
     measurable_from: req.body.measurable_from,
@@ -67,6 +67,10 @@ function update(req, res, next) {
 
   // Let admins approve a product to make it available to all users
   if (!req.user.admin) delete req.body.approved; // eslint-disable-line
+
+  if (req.body.sub_category === '') {
+    req.body.sub_category = 'other';
+  }
 
   patchModel(product, Product, req.body);
 
